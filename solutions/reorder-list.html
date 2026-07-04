@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>algoHub | Reorder List</title>
+<link rel="icon" type="image/png" href="../favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' }</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f8fb; --panel: #ffffff; --panel-border: #e7e9f0; --ink: #14161f; --ink-soft: #6b7080; --rail: #eef0f5;
+    --accent: #4f6df5; --accent-soft: #eef1ff;
+    --good: #1ea672; --good-soft: #e8f8f1;
+    --warn: #c2780a; --warn-soft: #fdf1e0;
+    --bad: #d23c4f; --bad-soft: #fde9ec;
+    --trace-scan: #4f6df5; --trace-hit: #1ea672;
+    --sun: #f5a623; --moon: #94a3ff;
+  }
+  html.dark {
+    --bg: #07080d; --panel: #0e1018; --panel-border: #1d2030; --ink: #eef0f7; --ink-soft: #8e93a8; --rail: #11131d;
+    --accent: #7c93ff; --accent-soft: #161a30;
+    --good: #34d399; --good-soft: #0e2420;
+    --warn: #f5b35a; --warn-soft: #271d0d;
+    --bad: #fb7185; --bad-soft: #2a1419;
+    --trace-scan: #7c93ff; --trace-hit: #34d399;
+    --sun: #f5a623; --moon: #b9c3ff;
+  }
+  body { background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; transition: background .25s, color .25s; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .panel { background: var(--panel); border: 1px solid var(--panel-border); }
+  .rail-bg { background: var(--rail); }
+  .text-soft { color: var(--ink-soft); }
+  .accent-text { color: var(--accent); }
+  .border-soft { border-color: var(--panel-border); }
+
+  .cell {
+    width: 52px; height: 52px;
+    border: 1.5px solid var(--panel-border);
+    background: var(--panel);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 17px;
+    position: relative;
+    transition: all .3s cubic-bezier(.4,0,.2,1);
+  }
+  .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell.scan { border-color: var(--trace-scan); background: color-mix(in srgb, var(--trace-scan) 14%, var(--panel)); transform: translateY(-4px); box-shadow: 0 6px 16px -6px var(--trace-scan); }
+  .cell.hit { border-color: var(--trace-hit); background: color-mix(in srgb, var(--trace-hit) 18%, var(--panel)); transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px -6px var(--trace-hit); }
+  .cell.done { opacity: .45; }
+
+  .map-slot {
+    border: 1.5px dashed var(--panel-border); border-radius: 10px; padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft);
+    transition: all .3s; opacity: .35;
+  }
+  .map-slot.filled { border-style: solid; border-color: var(--accent); color: var(--ink); opacity: 1; background: var(--accent-soft); }
+
+  .tab-btn { color: var(--ink-soft); border-bottom: 2px solid transparent; }
+  .tab-btn.active { color: var(--accent); border-color: var(--accent); }
+
+  .code-block { background: var(--rail); border: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.65; }
+  .kw { color: #c678dd; } .fn { color: #61afef; } .num { color: #d19a66; } .str { color: #98c379; } .cm { color: var(--ink-soft); font-style: italic; }
+  html:not(.dark) .kw { color: #9333ea; } html:not(.dark) .fn { color: #2563eb; } html:not(.dark) .num { color: #c2410c; } html:not(.dark) .str { color: #15803d; }
+
+  .step-btn { background: var(--panel); border: 1px solid var(--panel-border); color: var(--ink); }
+  .step-btn:hover:not(:disabled) { background: var(--rail); }
+  .step-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  .quiz-opt { border: 1.5px solid var(--panel-border); background: var(--panel); cursor: pointer; transition: all .15s; }
+  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .quiz-opt.correct { border-color: var(--good) !important; background: var(--good-soft) !important; }
+  .quiz-opt.incorrect { border-color: var(--bad) !important; background: var(--bad-soft) !important; }
+
+  .theme-orb { width: 22px; height: 22px; border-radius: 50%; position: relative; transition: all .3s; }
+  .theme-orb.sun { background: radial-gradient(circle at 35% 30%, #ffe9b0, var(--sun) 70%); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--sun) 60%, transparent); }
+  .theme-orb.moon { background: radial-gradient(circle at 65% 35%, #d8def8, var(--moon) 75%); box-shadow: 0 0 12px 1px color-mix(in srgb, var(--moon) 50%, transparent); }
+  .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:8px; height:8px; border-radius:50%; background: var(--rail); opacity:.5; }
+  .theme-orb.moon::after { content:''; position:absolute; top:11px; left:11px; width:5px; height:5px; border-radius:50%; background: var(--rail); opacity:.4; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 10px; }
+
+  /* --- Reorder List specific: idea diagram + linked-list trace --- */
+  .idea-details summary { cursor: pointer; user-select: none; }
+  .idea-details summary::-webkit-details-marker { display: none; }
+  .flow-box rect { fill: var(--rail); stroke: var(--panel-border); }
+  .flow-box text { fill: var(--ink); }
+  .flow-arrow { stroke: var(--accent); }
+
+  .phase-pill { border: 1.5px solid var(--panel-border); background: var(--panel); color: var(--ink-soft); border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 700; transition: all .2s; }
+  .phase-pill.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+  #ll-stage { position: relative; width: 100%; max-width: 500px; height: 190px; margin: 0 auto; }
+  #ll-boxes, #ll-tags, #ll-arrows { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  #ll-arrows { pointer-events: none; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-indigo-500/30">
+
+  <header class="sticky top-0 z-50 panel border-b px-6 py-3 flex justify-between items-center w-full backdrop-blur-sm" style="background: color-mix(in srgb, var(--panel) 88%, transparent);">
+    <a href="../dashboard" class="flex items-center gap-3 hover:opacity-80 transition">
+      <img src="../favicon.png" alt="algoHub" class="w-8 h-8 rounded-lg shadow-sm">
+      <span class="text-xl font-extrabold tracking-tight">algoHub</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <button id="theme-toggle" class="p-2 rounded-lg hover:bg-[var(--rail)] transition cursor-pointer flex items-center justify-center" title="Toggle theme">
+        <span id="theme-orb" class="theme-orb sun"></span>
+      </button>
+      <div class="flex items-center gap-3 pl-3 border-l border-soft">
+        <img id="user-avatar" class="w-8 h-8 rounded-full border border-soft object-cover rail-bg" src="" alt="Profile">
+        <button id="btn-logout" class="text-xs font-semibold text-soft hover:text-red-500 transition cursor-pointer">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="w-full max-w-6xl mx-auto px-6 pb-16 flex-grow flex flex-col lg:flex-row gap-8 items-start">
+
+    <aside class="w-full lg:w-72 lg:sticky lg:top-24 flex-shrink-0 order-2 lg:order-1">
+      <div class="panel rounded-xl overflow-hidden">
+        <div class="px-4 py-3 border-b border-soft flex items-center justify-between">
+          <h3 class="text-sm font-bold">Linked List</h3>
+          <span id="sidebar-progress" class="text-xs mono text-soft">0/0</span>
+        </div>
+        <ul id="sidebar-list" class="max-h-[70vh] overflow-y-auto divide-y" style="border-color: var(--panel-border);"></ul>
+      </div>
+    </aside>
+
+    <main class="w-full flex-grow flex flex-col order-1 lg:order-2 pt-8">
+
+      <div id="breadcrumb" class="text-sm text-soft mb-3 flex items-center gap-2 mono">
+        <a href="../category?course=blind-75&type=Linked List" class="hover:accent-text transition">Linked List</a>
+        <span>/</span><span>#4</span>
+      </div>
+
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-4xl font-extrabold tracking-tight mb-3">Reorder List</h1>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold" style="background:var(--warn-soft); color:var(--warn)">Medium</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Linked List</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Two Pointers</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="https://leetcode.com/problems/reorder-list/" target="_blank" class="flex items-center gap-1.5 text-sm font-semibold accent-text hover:underline">
+            LeetCode ↗
+          </a>
+          <button id="btn-copy-page" class="flex items-center gap-2 panel hover:bg-[var(--rail)] border border-soft px-3 py-1.5 rounded-lg text-sm transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Copy link</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl p-6 mb-6">
+        <p class="leading-relaxed mb-4">
+          You are given the head of a singly linked list. The list can be represented as <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → L1 → … → Ln-1 → Ln</code>. Reorder it in place to the form <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …</code>
+        </p>
+        <p class="text-soft text-sm mb-5">You may not modify the values in the list's nodes — only the nodes themselves may be rearranged.</p>
+        <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
+          <p class="mb-1"><span class="text-soft">Input:</span> head = [1,2,3,4,5]</p>
+          <p><span class="text-soft">Output:</span> [1,5,2,4,3] <span class="cm">// weave front and back halves together</span></p>
+        </div>
+      </div>
+
+      <!-- IDEA + FLOWCHART -->
+      <div class="panel rounded-2xl p-6 mb-6">
+        <h3 class="text-base font-bold mb-3">Idea</h3>
+        <p class="leading-relaxed mb-3">Break this into three well-known sub-problems and chain them together. This decomposition is exactly what interviewers want to hear — it shows you can spot reusable patterns instead of inventing something ad-hoc.</p>
+        <ul class="list-disc list-inside space-y-2 text-soft leading-relaxed mb-3">
+          <li><strong class="accent-text">Step 1 — Find the middle.</strong> Use slow/fast pointers. When <code class="mono">fast</code> reaches the end, <code class="mono">slow</code> sits at the middle (for even length, it lands at the start of the second half).</li>
+          <li><strong class="accent-text">Step 2 — Reverse the second half.</strong> Split the list at <code class="mono">slow</code>, then reverse everything from there to the end. Now the first half is in original order and the second half is reversed.</li>
+          <li><strong class="accent-text">Step 3 — Merge the two halves alternately.</strong> Weave nodes one-by-one: first-half node, second-half node, repeat. The second half is one node shorter or equal, so it always runs out first — stop when it does.</li>
+        </ul>
+        <p class="text-soft text-sm mb-4">Why this works: reversing the second half turns "take from the end" into "take from the front of the reversed list" — O(1) per step instead of O(n) repeated traversals to find the last remaining node.</p>
+
+        <details class="idea-details">
+          <summary class="text-sm font-semibold accent-text mb-3">Show Diagram</summary>
+          <div class="mt-4 flex justify-center">
+            <svg viewBox="0 0 400 560" width="100%" style="max-width:380px" role="img" aria-label="Reorder list flowchart">
+              <defs>
+                <marker id="flow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0L10,5L0,10z" style="fill:var(--accent)" />
+                </marker>
+              </defs>
+
+              <g class="flow-box">
+                <rect x="40" y="10" width="320" height="60" rx="12" stroke-width="1.5"></rect>
+                <text x="200" y="45" text-anchor="middle" font-size="14" font-weight="600">Start: head</text>
+              </g>
+              <line x1="200" y1="70" x2="200" y2="118" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
+
+              <g class="flow-box">
+                <rect x="40" y="120" width="320" height="70" rx="12" stroke-width="1.5"></rect>
+                <text x="200" y="148" text-anchor="middle" font-size="14" font-weight="600">Find middle</text>
+                <text x="200" y="168" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">slow / fast pointers</text>
+              </g>
+              <line x1="200" y1="190" x2="200" y2="238" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
+
+              <g class="flow-box">
+                <rect x="40" y="240" width="320" height="70" rx="12" stroke-width="1.5"></rect>
+                <text x="200" y="268" text-anchor="middle" font-size="14" font-weight="600">Cut list &amp; reverse</text>
+                <text x="200" y="288" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">second half</text>
+              </g>
+              <line x1="200" y1="310" x2="200" y2="358" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
+
+              <g class="flow-box">
+                <rect x="40" y="360" width="320" height="70" rx="12" stroke-width="1.5"></rect>
+                <text x="200" y="388" text-anchor="middle" font-size="14" font-weight="600">Merge alternately</text>
+                <text x="200" y="408" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">first / second pointers</text>
+              </g>
+              <line x1="200" y1="430" x2="200" y2="478" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
+
+              <g class="flow-box">
+                <rect x="40" y="480" width="320" height="60" rx="12" stroke-width="1.5"></rect>
+                <text x="200" y="515" text-anchor="middle" font-size="14" font-weight="600">Return — reordered in place</text>
+              </g>
+            </svg>
+          </div>
+        </details>
+      </div>
+
+      <!-- EXECUTION TRACE -->
+      <div class="panel rounded-2xl p-6 mb-6">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div>
+            <h3 class="text-base font-bold">Execution Trace</h3>
+            <p class="text-xs text-soft mt-0.5">Step through the algorithm at your own pace — no autoplay, you're in control.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-prev" class="step-btn flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer" disabled>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              Prev
+            </button>
+            <span id="step-counter" class="text-xs mono text-soft px-2">Step 0 / 0</span>
+            <button id="btn-next" class="step-btn flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+              Next
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <button id="btn-reset" class="step-btn px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer" title="Reset">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-6 py-4">
+          <div class="flex items-center gap-2 flex-wrap justify-center">
+            <span id="p-middle" class="phase-pill">1 · Find Middle</span>
+            <span id="p-reverse" class="phase-pill">2 · Reverse Half</span>
+            <span id="p-merge" class="phase-pill">3 · Merge</span>
+          </div>
+
+          <div id="ll-stage">
+            <div id="ll-boxes"></div>
+            <svg id="ll-arrows" viewBox="0 0 500 190" preserveAspectRatio="xMidYMin meet"></svg>
+            <div id="ll-tags"></div>
+          </div>
+
+          <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center px-4">Click "Next" to begin.</p>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl p-6 mb-6">
+        <h3 class="text-base font-bold mb-1">Guess the Complexity</h3>
+        <p class="text-xs text-soft mb-5">Before peeking at the answer — what's the time and space complexity of the optimal solution?</p>
+
+        <div class="grid sm:grid-cols-2 gap-6 mb-5">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
+            <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
+            <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(1)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-check-quiz" class="px-4 py-2 rounded-lg text-sm font-bold text-white transition cursor-pointer" style="background:var(--accent)">Check my answer</button>
+
+        <div id="quiz-feedback" class="hidden mt-5 rounded-xl p-4 text-sm leading-relaxed"></div>
+
+        <div id="quiz-tricks" class="hidden mt-4 rounded-xl p-4 text-sm leading-relaxed" style="background:var(--rail)">
+          <p class="font-bold mb-2 flex items-center gap-1.5">💡 Secret tricks for spotting complexity fast</p>
+          <ul class="list-disc list-inside space-y-1.5 text-soft">
+            <li><strong class="accent-text">Three separate O(n) passes still add up to O(n).</strong> Finding the middle, reversing, and merging are each a single pass — O(n) + O(n) + O(n) simplifies to O(n), not O(3n²) or anything worse.</li>
+            <li><strong class="accent-text">In-place pointer rewiring costs O(1) space.</strong> No new nodes, arrays, or recursion stack are created — only a handful of pointer variables (slow, fast, prev, curr, first, second).</li>
+            <li><strong class="accent-text">Compare against the array trick.</strong> Dumping nodes into a list and using two indices also works, but costs O(n) space — a strong tell for why the pointer-only approach is preferred here.</li>
+            <li><strong class="accent-text">Reversal is the classic O(n) time / O(1) space pattern.</strong> Recognizing "in-place linked list reversal" as its own reusable building block is exactly what this problem is testing.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl overflow-hidden mb-6">
+        <div class="flex border-b border-soft px-2">
+          <button data-tab="approach" class="tab-btn active px-4 py-3 text-sm font-bold transition cursor-pointer">Approach</button>
+          <button data-tab="code" class="tab-btn px-4 py-3 text-sm font-bold transition cursor-pointer">Code</button>
+          <button data-tab="complexity" class="tab-btn px-4 py-3 text-sm font-bold transition cursor-pointer">Complexity</button>
+        </div>
+
+        <div id="tab-approach" class="p-6 text-sm leading-relaxed">
+          <p class="mb-3">A brute-force approach could dump every node into an array and rebuild the list with two indices, but the interview-standard fix stays entirely on pointers:</p>
+          <ol class="list-decimal list-inside space-y-2 text-soft">
+            <li>Use slow/fast pointers to find the middle of the list in one pass.</li>
+            <li>Cut the list at the middle, then reverse the second half in place.</li>
+            <li>Merge the first half and the reversed second half by alternating nodes.</li>
+            <li>Stop once the (shorter or equal) second half runs out — the first half's remaining tail terminates the list correctly.</li>
+          </ol>
+        </div>
+
+        <div id="tab-code" class="hidden p-6">
+          <div class="code-block rounded-xl p-5 overflow-x-auto relative">
+            <button id="btn-copy-code" class="absolute top-3 right-3 text-xs font-semibold text-soft hover:accent-text transition cursor-pointer">Copy</button>
+<pre><span class="cm"># Definition for singly-linked list.</span>
+<span class="cm"># class ListNode:</span>
+<span class="cm">#     def __init__(self, val=0, next=None):</span>
+<span class="cm">#         self.val = val</span>
+<span class="cm">#         self.next = next</span>
+<span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">reorderList</span>(<span class="kw">self</span>, head: Optional[ListNode]) -&gt; <span class="kw">None</span>:
+        <span class="str">"""
+        Do not return anything, modify head in-place instead.
+        """</span>
+        <span class="kw">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.next:
+            <span class="kw">return</span>
+
+        <span class="cm"># Step 1: find the middle (slow ends at start of second half)</span>
+        slow, fast = head, head
+        <span class="kw">while</span> fast.next <span class="kw">and</span> fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        <span class="cm"># Step 2: reverse the second half</span>
+        second = slow.next
+        slow.next = <span class="kw">None</span>  <span class="cm"># cut the list into two halves</span>
+        prev = <span class="kw">None</span>
+        <span class="kw">while</span> second:
+            nxt = second.next
+            second.next = prev
+            prev = second
+            second = nxt
+        second = prev  <span class="cm"># head of reversed second half</span>
+
+        <span class="cm"># Step 3: merge the two halves alternately</span>
+        first = head
+        <span class="kw">while</span> second:
+            first_next = first.next
+            second_next = second.next
+
+            first.next = second
+            second.next = first_next
+
+            first = first_next
+            second = second_next</pre>
+          </div>
+        </div>
+
+        <div id="tab-complexity" class="hidden p-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-xl p-4" style="background:var(--good-soft)">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
+              <p class="text-xs text-soft mt-1">Finding the middle, reversing, and merging are each a single O(n) pass.</p>
+            </div>
+            <div class="rounded-xl p-4" style="background:var(--good-soft)">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Space</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(1)</p>
+              <p class="text-xs text-soft mt-1">Only pointer variables are used — nodes are rewired in place.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mb-6">
+        <button id="btn-toggle-review" class="flex items-center gap-2 panel hover:bg-[var(--rail)] border border-soft px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer">
+          <svg class="w-4 h-4" style="color:var(--warn)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="text-review-status">Needs Review</span>
+        </button>
+        <button id="btn-toggle-solved" class="flex items-center gap-2 panel hover:bg-[var(--rail)] border border-soft px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer">
+          <svg id="icon-unsolved" class="w-4 h-4 text-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle></svg>
+          <svg id="icon-solved" class="w-4 h-4 hidden" style="color:var(--good)" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+          <span id="text-solved-status">Mark as Complete</span>
+        </button>
+      </div>
+
+      <div class="border-t border-soft pt-6 flex justify-between items-center">
+        <a id="link-prev" href="../solution?slug=linked-list-cycle" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          <span id="text-prev"># Linked List Cycle</span>
+        </a>
+        <a id="link-next" href="../solution?slug=reverse-linked-list" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+          <span># Remove Nth Node From End of List</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { SUPABASE_CONFIG } from '../config.js';
+    const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+
+    const targetSlug = 'reorder-list';
+    const currentDifficulty = 'Medium';
+    let currentUserId = null;
+    let currentStatus = null;
+    let solvedSlugSet = new Set();
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const orb = document.getElementById('theme-orb');
+
+    function applyTheme(isDark) {
+      document.documentElement.classList.toggle('dark', isDark);
+      orb.classList.toggle('sun', !isDark);
+      orb.classList.toggle('moon', isDark);
+    }
+    const storedTheme = localStorage.getItem('color-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(storedTheme === 'dark' || (!storedTheme && prefersDark));
+
+    themeToggleBtn.addEventListener('click', () => {
+      const goingDark = !document.documentElement.classList.contains('dark');
+      applyTheme(goingDark);
+      localStorage.setItem('color-theme', goingDark ? 'dark' : 'light');
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ['approach', 'code', 'complexity'].forEach(t => {
+          document.getElementById('tab-' + t).classList.toggle('hidden', t !== btn.dataset.tab);
+        });
+      });
+    });
+
+    let timeSelected = null, spaceSelected = null;
+    document.querySelectorAll('#quiz-time .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz-time .quiz-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        timeSelected = opt.dataset.val;
+      });
+    });
+    document.querySelectorAll('#quiz-space .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz-space .quiz-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        spaceSelected = opt.dataset.val;
+      });
+    });
+
+    document.getElementById('btn-check-quiz').onclick = () => {
+      if (!timeSelected || !spaceSelected) {
+        alert('Pick both a time and space complexity first!');
+        return;
+      }
+      const correctTime = document.getElementById('quiz-time').dataset.correct;
+      const correctSpace = document.getElementById('quiz-space').dataset.correct;
+
+      document.querySelectorAll('#quiz-time .quiz-opt').forEach(o => {
+        if (o.dataset.val === correctTime) o.classList.add('correct');
+        else if (o.dataset.val === timeSelected) o.classList.add('incorrect');
+      });
+      document.querySelectorAll('#quiz-space .quiz-opt').forEach(o => {
+        if (o.dataset.val === correctSpace) o.classList.add('correct');
+        else if (o.dataset.val === spaceSelected) o.classList.add('incorrect');
+      });
+
+      const timeRight = timeSelected === correctTime;
+      const spaceRight = spaceSelected === correctSpace;
+      const feedback = document.getElementById('quiz-feedback');
+      feedback.classList.remove('hidden');
+
+      if (timeRight && spaceRight) {
+        feedback.style.background = 'var(--good-soft)'; feedback.style.color = 'var(--good)';
+        feedback.innerHTML = `<strong>Nailed it 🎯</strong> — O(n) time and O(1) space is exactly the interview-optimal answer here. You're reasoning about in-place pointer rewiring correctly.`;
+      } else if (timeRight || spaceRight) {
+        feedback.style.background = 'var(--warn-soft)'; feedback.style.color = 'var(--warn)';
+        feedback.innerHTML = `<strong>Halfway there.</strong> You got the ${timeRight ? 'time' : 'space'} complexity right, but double-check the ${timeRight ? 'space' : 'time'} — see the breakdown in the Complexity tab below.`;
+      } else {
+        feedback.style.background = 'var(--bad-soft)'; feedback.style.color = 'var(--bad)';
+        feedback.innerHTML = `<strong>Not quite</strong> — but this is exactly the kind of thing that clicks fast once you see the pattern. Check the tricks below, then look at the Complexity tab.`;
+      }
+      document.getElementById('quiz-tricks').classList.remove('hidden');
+    };
+
+    const LINKED_LIST_PROBLEMS = [
+      { slug: "reverse-linked-list", title: "Reverse Linked List", implemented: true },
+      { slug: "merge-two-sorted-lists", title: "Merge Two Sorted Lists", implemented: false },
+      { slug: "linked-list-cycle", title: "Linked List Cycle", implemented: false },
+      { slug: "reorder-list", title: "Reorder List", implemented: true },
+      { slug: "remove-nth-node-from-end-of-list", title: "Remove Nth Node From End of List", implemented: false },
+      { slug: "copy-list-with-random-pointer", title: "Copy List with Random Pointer", implemented: false },
+      { slug: "add-two-numbers", title: "Add Two Numbers", implemented: false },
+      { slug: "reverse-nodes-in-k-group", title: "Reverse Nodes in k-Group", implemented: false },
+      { slug: "merge-k-sorted-lists", title: "Merge k Sorted Lists", implemented: false },
+      { slug: "odd-even-linked-list", title: "Odd Even Linked List", implemented: false }
+    ];
+
+    function urlFor(p) { return p.implemented ? `./${p.slug}` : `../solution?slug=${p.slug}`; }
+
+    async function init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) { window.location.href = '../'; return; }
+      currentUserId = session.user.id;
+      const avatar = document.getElementById('user-avatar');
+      if (avatar && session.user.user_metadata.avatar_url) avatar.src = session.user.user_metadata.avatar_url;
+
+      await fetchSolvedSet();
+      renderSidebar();
+      await fetchCloudState();
+      buildTrace();
+    }
+
+    async function fetchSolvedSet() {
+      const { data, error } = await supabaseClient
+        .from('user_progress').select('problem_slug').eq('user_id', currentUserId).eq('status', 'solved');
+      solvedSlugSet = (!error && data) ? new Set(data.map(d => d.problem_slug)) : new Set();
+    }
+
+    function renderSidebar() {
+      const solvedCount = LINKED_LIST_PROBLEMS.filter(p => solvedSlugSet.has(p.slug)).length;
+      document.getElementById('sidebar-progress').textContent = `${solvedCount}/${LINKED_LIST_PROBLEMS.length}`;
+      const list = document.getElementById('sidebar-list');
+      list.innerHTML = LINKED_LIST_PROBLEMS.map(p => {
+        const isSolved = solvedSlugSet.has(p.slug);
+        const isActive = p.slug === targetSlug;
+        const icon = isSolved
+          ? `<svg class="w-4 h-4 flex-shrink-0" style="color:var(--good)" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`
+          : `<div class="w-3.5 h-3.5 rounded-full border-2 flex-shrink-0" style="border-color:var(--panel-border)"></div>`;
+        return `<li>
+          <a href="${urlFor(p)}" class="flex items-center gap-3 px-4 py-3 text-sm transition-colors" style="border-left:2px solid ${isActive ? 'var(--accent)' : 'transparent'}; ${isActive ? 'background:var(--accent-soft)' : ''}">
+            ${icon}
+            <span class="truncate ${isActive ? 'font-bold accent-text' : ''}">${p.title}</span>
+          </a>
+        </li>`;
+      }).join('');
+    }
+
+    async function fetchCloudState() {
+      const { data } = await supabaseClient.from('user_progress').select('status')
+        .eq('user_id', currentUserId).eq('problem_slug', targetSlug).single();
+      currentStatus = data ? data.status : null;
+      updateStatusUI();
+    }
+
+    async function setCloudState(newStatus) {
+      const previousStatus = currentStatus;
+      currentStatus = currentStatus === newStatus ? null : newStatus;
+      updateStatusUI();
+
+      if (currentStatus) {
+        await supabaseClient.from('user_progress').upsert({
+          user_id: currentUserId, problem_slug: targetSlug, status: currentStatus, updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id, problem_slug' });
+
+        if (newStatus === 'solved' && previousStatus !== 'solved') {
+          solvedSlugSet.add(targetSlug);
+          awardXPAndStreak(currentDifficulty);
+        }
+      } else {
+        solvedSlugSet.delete(targetSlug);
+        await supabaseClient.from('user_progress').delete()
+          .eq('user_id', currentUserId).eq('problem_slug', targetSlug);
+      }
+      renderSidebar();
+    }
+
+    function updateStatusUI() {
+      const btnSolved = document.getElementById('btn-toggle-solved');
+      const textSolved = document.getElementById('text-solved-status');
+      const iconUnsolved = document.getElementById('icon-unsolved');
+      const iconSolved = document.getElementById('icon-solved');
+      const btnReview = document.getElementById('btn-toggle-review');
+      const textReview = document.getElementById('text-review-status');
+
+      iconUnsolved.classList.remove('hidden'); iconSolved.classList.add('hidden');
+      textSolved.textContent = 'Mark as Complete'; textReview.textContent = 'Needs Review';
+      btnSolved.style.background = ''; btnSolved.style.color = ''; btnSolved.style.borderColor = '';
+      btnReview.style.background = ''; btnReview.style.color = ''; btnReview.style.borderColor = '';
+
+      if (currentStatus === 'solved') {
+        iconUnsolved.classList.add('hidden'); iconSolved.classList.remove('hidden');
+        textSolved.textContent = 'Completed';
+        btnSolved.style.background = 'var(--good-soft)'; btnSolved.style.color = 'var(--good)'; btnSolved.style.borderColor = 'var(--good)';
+      } else if (currentStatus === 'review') {
+        textReview.textContent = 'Reviewing';
+        btnReview.style.background = 'var(--warn-soft)'; btnReview.style.color = 'var(--warn)'; btnReview.style.borderColor = 'var(--warn)';
+      }
+    }
+
+    async function awardXPAndStreak(difficulty) {
+      const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
+      const xpGain = XP_MAP[difficulty] || 10;
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      const { data: stats } = await supabaseClient.from('user_stats').select('*').eq('user_id', currentUserId).single();
+
+      let xp = xpGain, newStreak = 1, longestStreak = 1, streakExtended = true;
+      if (stats) {
+        xp = (stats.xp || 0) + xpGain;
+        longestStreak = stats.longest_streak || 1;
+        if (stats.last_active_date === todayStr) {
+          newStreak = stats.current_streak || 1; streakExtended = false;
+        } else {
+          const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+          const yStr = yesterday.toISOString().split('T')[0];
+          newStreak = (stats.last_active_date === yStr) ? (stats.current_streak || 0) + 1 : 1;
+        }
+        longestStreak = Math.max(longestStreak, newStreak);
+      }
+
+      await supabaseClient.from('user_stats').upsert({
+        user_id: currentUserId, xp, current_streak: newStreak, longest_streak: longestStreak,
+        last_active_date: todayStr, updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+      showRewardToast(xpGain, newStreak, streakExtended);
+    }
+
+    function showRewardToast(xpGain, streak, streakExtended) {
+      const toast = document.createElement('div');
+      toast.className = "fixed bottom-6 right-6 z-[100] panel shadow-2xl rounded-2xl px-5 py-4 flex items-center gap-3 translate-y-4 opacity-0 transition-all duration-300";
+      toast.innerHTML = `
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--good-soft)">
+          <svg class="w-5 h-5" style="color:var(--good)" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold">+${xpGain} XP earned</p>
+          <p class="text-xs text-soft flex items-center gap-1">
+            <span>🔥</span>${streakExtended ? `${streak} day streak${streak > 1 ? ' — keep it going!' : ' started!'}` : `Streak: ${streak} day${streak > 1 ? 's' : ''}`}
+          </p>
+        </div>`;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('translate-y-4', 'opacity-0'));
+      setTimeout(() => { toast.classList.add('translate-y-4', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3200);
+    }
+
+    /* ---------------- Execution Trace: Reorder List ---------------- */
+
+    const LIST_VALUES = [1, 2, 3, 4, 5];
+    let steps = [];
+    let stepIndex = -1;
+
+    function centerX(id) { return 46 + id * 95; }
+    const BOX_TOP = 50;
+    const BOX_BOTTOM = BOX_TOP + 52;
+
+    function freshNextMap() {
+      const m = {};
+      LIST_VALUES.forEach((_, i) => { m[i] = (i < LIST_VALUES.length - 1) ? i + 1 : null; });
+      return m;
+    }
+
+    function orderFromNext(nextMap) {
+      const order = [];
+      const seen = new Set();
+      let cur = 0;
+      while (cur !== null && cur !== undefined && !seen.has(cur)) {
+        order.push(LIST_VALUES[cur]);
+        seen.add(cur);
+        cur = nextMap[cur];
+      }
+      return order.join(' → ');
+    }
+
+    function computeSteps() {
+      steps = [];
+      const nodeNext = freshNextMap();
+      const snap = () => ({ ...nodeNext });
+
+      steps.push({ phase: 'start', next: snap(), hi: {}, edge: null,
+        caption: `Original list: ${LIST_VALUES.join(' → ')}` });
+
+      // Step 1: find the middle
+      let slow = 0, fast = 0;
+      steps.push({ phase: 'middle', next: snap(), hi: { slow, fast }, edge: null,
+        caption: `slow = ${LIST_VALUES[slow]}, fast = ${LIST_VALUES[fast]} (both start at head)` });
+
+      while (nodeNext[fast] !== null && nodeNext[nodeNext[fast]] !== null) {
+        slow = nodeNext[slow];
+        fast = nodeNext[nodeNext[fast]];
+        steps.push({ phase: 'middle', next: snap(), hi: { slow, fast }, edge: null,
+          caption: `slow = ${LIST_VALUES[slow]}, fast = ${LIST_VALUES[fast]}` });
+      }
+      steps.push({ phase: 'middle-done', next: snap(), hi: { slow }, edge: null,
+        caption: `fast can't advance two more steps — middle found at node ${LIST_VALUES[slow]}` });
+
+      // Step 2a: cut
+      const secondHeadId = nodeNext[slow];
+      nodeNext[slow] = null;
+      steps.push({ phase: 'cut', next: snap(), hi: { slow, second: secondHeadId }, edge: null,
+        caption: `Cut: ${LIST_VALUES[slow]}.next = None. First half ends at ${LIST_VALUES[slow]}, second half starts at ${LIST_VALUES[secondHeadId]}` });
+
+      // Step 2b: reverse second half
+      let prev = null, curr = secondHeadId;
+      while (curr !== null) {
+        const nxt = nodeNext[curr];
+        nodeNext[curr] = prev;
+        steps.push({ phase: 'reverse', next: snap(), hi: { prev, curr }, edge: curr,
+          caption: `Reverse: ${LIST_VALUES[curr]}.next = ${prev !== null ? LIST_VALUES[prev] : 'None'}` });
+        prev = curr;
+        curr = nxt;
+      }
+      const secondHead = prev;
+      steps.push({ phase: 'reverse-done', next: snap(), hi: { second: secondHead }, edge: null,
+        caption: `Second half fully reversed — new head is ${LIST_VALUES[secondHead]}` });
+
+      // Step 3: merge alternately
+      let first = 0, second = secondHead;
+      while (second !== null) {
+        const firstNext = nodeNext[first];
+        const secondNext = nodeNext[second];
+        nodeNext[first] = second;
+        nodeNext[second] = firstNext;
+        steps.push({ phase: 'merge', next: snap(), hi: { first, second }, edge: first,
+          caption: `Merge: ${LIST_VALUES[first]}.next = ${LIST_VALUES[second]}, then ${LIST_VALUES[second]}.next = ${firstNext !== null ? LIST_VALUES[firstNext] : 'None'}` });
+        first = firstNext;
+        second = secondNext;
+      }
+
+      steps.push({ phase: 'done', next: snap(), hi: {}, edge: null,
+        caption: `Done — final order: ${orderFromNext(snap())}` });
+    }
+
+    function drawFrame(step) {
+      const boxesEl = document.getElementById('ll-boxes');
+      const tagsEl = document.getElementById('ll-tags');
+      const svg = document.getElementById('ll-arrows');
+
+      boxesEl.innerHTML = LIST_VALUES.map((v, id) => {
+        return `<div class="cell" id="node-${id}" style="position:absolute; left:${20 + id * 95}px; top:${BOX_TOP}px;">${v}</div>`;
+      }).join('');
+
+      const hi = step.hi || {};
+      const tagDefs = [];
+      if (hi.slow !== undefined && hi.slow !== null) tagDefs.push({ id: hi.slow, label: 'slow', color: 'var(--accent)' });
+      if (hi.fast !== undefined && hi.fast !== null) tagDefs.push({ id: hi.fast, label: 'fast', color: 'var(--bad)' });
+      if (hi.prev !== undefined && hi.prev !== null) tagDefs.push({ id: hi.prev, label: 'prev', color: 'var(--warn)' });
+      if (hi.curr !== undefined && hi.curr !== null) tagDefs.push({ id: hi.curr, label: 'curr', color: 'var(--good)' });
+      if (hi.first !== undefined && hi.first !== null) tagDefs.push({ id: hi.first, label: 'first', color: 'var(--accent)' });
+      if (hi.second !== undefined && hi.second !== null) tagDefs.push({ id: hi.second, label: 'second', color: 'var(--good)' });
+
+      const byId = {};
+      tagDefs.forEach(t => { (byId[t.id] = byId[t.id] || []).push(t); });
+
+      tagsEl.innerHTML = Object.entries(byId).map(([id, tags]) => {
+        return tags.map((t, i) => `
+          <div style="position:absolute; left:${20 + Number(id) * 95}px; top:${BOX_TOP - 26 - i * 22}px; width:52px; text-align:center;">
+            <span class="mono" style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; background:${t.color}; color:#fff;">${t.label}</span>
+          </div>`).join('');
+      }).join('');
+
+      Object.keys(byId).forEach(id => {
+        const el = document.getElementById(`node-${id}`);
+        if (el) { el.style.borderColor = 'var(--accent)'; el.style.transform = 'translateY(-2px)'; }
+      });
+
+      let svgHtml = `<defs>
+        <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--ink-soft)"/></marker>
+        <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--accent)"/></marker>
+      </defs>`;
+
+      Object.entries(step.next).forEach(([from, to]) => {
+        if (to === null || to === undefined) return;
+        const fromId = Number(from), toId = Number(to);
+        const x1 = centerX(fromId), x2 = centerX(toId);
+        const dist = Math.abs(toId - fromId);
+        const depth = 16 + dist * 14;
+        const midX = (x1 + x2) / 2;
+        const y = BOX_BOTTOM + 2;
+        const active = step.edge !== null && step.edge !== undefined && Number(step.edge) === fromId;
+        const stroke = active ? 'var(--accent)' : 'var(--panel-border)';
+        const marker = active ? 'arrow-active' : 'arrow-muted';
+        const sw = active ? 2.5 : 1.5;
+        svgHtml += `<path d="M${x1},${y} Q${midX},${y + depth} ${x2},${y}" fill="none" stroke="${stroke}" stroke-width="${sw}" marker-end="url(#${marker})" />`;
+      });
+
+      svg.innerHTML = svgHtml;
+    }
+
+    function updatePhasePills(phase) {
+      const map = { middle: 'p-middle', 'middle-done': 'p-middle', cut: 'p-reverse', reverse: 'p-reverse', 'reverse-done': 'p-reverse', merge: 'p-merge', done: 'p-merge' };
+      document.querySelectorAll('.phase-pill').forEach(p => p.classList.remove('active'));
+      const activeId = map[phase];
+      if (activeId) { const el = document.getElementById(activeId); if (el) el.classList.add('active'); }
+    }
+
+    function buildTrace() {
+      computeSteps();
+      stepIndex = -1;
+      renderStep();
+    }
+
+    function renderStep() {
+      const caption = document.getElementById('trace-caption');
+
+      if (stepIndex < 0) {
+        caption.textContent = 'Click "Next" to begin.';
+        drawFrame({ next: freshNextMap(), hi: {}, edge: null });
+        updatePhasePills(null);
+        updateStepControls();
+        return;
+      }
+
+      const step = steps[stepIndex];
+      caption.textContent = step.caption;
+      drawFrame(step);
+      updatePhasePills(step.phase);
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+
+    document.getElementById('btn-next').onclick = () => {
+      if (stepIndex < steps.length - 1) { stepIndex++; renderStep(); }
+    };
+    document.getElementById('btn-prev').onclick = () => {
+      if (stepIndex >= 0) { stepIndex--; renderStep(); }
+    };
+    document.getElementById('btn-reset').onclick = () => { buildTrace(); };
+
+    document.getElementById('btn-copy-page').onclick = async (e) => {
+      await navigator.clipboard.writeText(window.location.href);
+      const span = e.currentTarget.querySelector('span');
+      const orig = span.textContent; span.textContent = 'Copied!';
+      setTimeout(() => span.textContent = orig, 2000);
+    };
+
+    document.getElementById('btn-copy-code').onclick = async (e) => {
+      const code = `# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reorderList(self, head: Optional[ListNode]) -> None:\n        """\n        Do not return anything, modify head in-place instead.\n        """\n        if not head or not head.next:\n            return\n\n        # Step 1: find the middle (slow ends at start of second half)\n        slow, fast = head, head\n        while fast.next and fast.next.next:\n            slow = slow.next\n            fast = fast.next.next\n\n        # Step 2: reverse the second half\n        second = slow.next\n        slow.next = None  # cut the list into two halves\n        prev = None\n        while second:\n            nxt = second.next\n            second.next = prev\n            prev = second\n            second = nxt\n        second = prev  # head of reversed second half\n\n        # Step 3: merge the two halves alternately\n        first = head\n        while second:\n            first_next = first.next\n            second_next = second.next\n\n            first.next = second\n            second.next = first_next\n\n            first = first_next\n            second = second_next`;
+      await navigator.clipboard.writeText(code);
+      const btn = e.currentTarget; const orig = btn.textContent;
+      btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
+    };
+
+    document.getElementById('btn-toggle-solved').onclick = () => setCloudState('solved');
+    document.getElementById('btn-toggle-review').onclick = () => setCloudState('review');
+    document.getElementById('btn-logout').onclick = async () => { await supabaseClient.auth.signOut(); window.location.href = '../'; };
+
+    init();
+  </script>
+</body>
+</html>
