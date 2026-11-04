@@ -148,9 +148,10 @@
     }
 
     function triggerGoogleLogin() {
+        const redirectTo = `${window.location.origin}/dashboard`;
         supabaseClient.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: 'https://songram-biswas.github.io/algohub/dashboard' }
+            options: { redirectTo }
         });
     }
 
