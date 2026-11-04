@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         __STATEMENT_HTML__
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
           __EXAMPLE_HTML__
@@ -273,7 +273,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = '__SLUG__';
     const currentDifficulty = '__DIFFICULTY__';

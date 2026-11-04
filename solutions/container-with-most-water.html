@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">You are given an integer array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">height</code> of length n. Two lines are drawn such that the two endpoints of line i are at <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">(i, 0)</code> and <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">(i, height[i])</code>. Find two lines that together with the x-axis form a container holding the most water.</p>
         <p class="text-soft text-sm mb-5">Return the maximum amount of water the container can store.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
@@ -306,7 +306,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'container-with-most-water';
     const currentDifficulty = 'Medium';

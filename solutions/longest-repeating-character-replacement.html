@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">Given a string <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s</code> and an integer <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">k</code>, you can replace up to <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">k</code> characters with any other character. Return the length of the longest substring containing the same letter after the replacements.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
           <p class="mb-1"><span class="text-soft">Input:</span> s = "AABABBA", k = 1</p><p><span class="text-soft">Output:</span> 4</p>
@@ -301,7 +301,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'longest-repeating-character-replacement';
     const currentDifficulty = 'Medium';

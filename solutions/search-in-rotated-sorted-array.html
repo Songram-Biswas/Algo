@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">You are given an integer array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code>, sorted in ascending order and rotated at an unknown pivot, and an integer <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">target</code>. Return the index of <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">target</code>, or <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">-1</code> if it isn't present.</p>
         <p class="text-soft text-sm mb-5">All values are unique. You must solve it in <span class="mono accent-text">O(log n)</span> time.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
@@ -310,7 +310,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'search-in-rotated-sorted-array';
     const currentDifficulty = 'Medium';

@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">A sorted array of unique elements was rotated at an unknown pivot. Given the rotated array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code>, return the minimum element.</p>
         <p class="text-soft text-sm mb-5">You must write an algorithm that runs in <span class="mono accent-text">O(log n)</span> time.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
@@ -302,7 +302,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'find-minimum-in-rotated-sorted-array';
     const currentDifficulty = 'Medium';

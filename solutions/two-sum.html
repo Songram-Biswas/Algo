@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">
           Given an array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code> and an integer <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">target</code>, return the indices of the two numbers that add up to <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">target</code>.
         </p>
@@ -309,7 +309,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'two-sum';
     const currentDifficulty = 'Easy';

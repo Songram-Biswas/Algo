@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">Given the <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">head</code> of a singly linked list, reverse the list and return the new head.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
           <p class="mb-1"><span class="text-soft">Input:</span> head = [1,2,3,4,5]</p><p><span class="text-soft">Output:</span> [5,4,3,2,1]</p>
@@ -299,7 +299,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'reverse-linked-list';
     const currentDifficulty = 'Easy';

@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">Given an array of strings <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">strs</code>, group the anagrams together. Two strings are anagrams if one can be rearranged to form the other.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
           <p class="mb-1"><span class="text-soft">Input:</span> strs = ["eat","tea","tan","ate","nat","bat"]</p><p><span class="text-soft">Output:</span> [["eat","tea","ate"],["tan","nat"],["bat"]]</p>
@@ -295,7 +295,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'group-anagrams';
     const currentDifficulty = 'Medium';

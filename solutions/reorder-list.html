@@ -158,7 +158,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">
           You are given the head of a singly linked list. The list can be represented as <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → L1 → … → Ln-1 → Ln</code>. Reorder it in place to the form <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …</code>
         </p>
@@ -413,7 +413,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'reorder-list';
     const currentDifficulty = 'Medium';

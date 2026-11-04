@@ -152,7 +152,7 @@
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
         <p class="leading-relaxed mb-4">Given an unsorted array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code>, return the length of the longest consecutive elements sequence.</p>
         <p class="text-soft text-sm mb-5">You must write an algorithm that runs in <span class="mono accent-text">O(n)</span> time.</p>
         <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
@@ -301,7 +301,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     const targetSlug = 'longest-consecutive-sequence';
     const currentDifficulty = 'Medium';

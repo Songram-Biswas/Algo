@@ -106,7 +106,9 @@
 
   <script type="module">
     import { SUPABASE_CONFIG } from './config.js';
+    import { initAITutor } from './ai-tutor.js';
     const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
 
     // Theme logic
         const themeToggleBtn = document.getElementById('theme-toggle');
