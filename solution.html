@@ -405,6 +405,16 @@
             updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' });
 
+        try {
+            localStorage.setItem('algohub_xp', String(xp));
+            localStorage.setItem('algohub_user_stats', JSON.stringify({
+                xp: xp,
+                current_streak: newStreak,
+                longest_streak: longestStreak,
+                last_active_date: todayStr
+            }));
+        } catch (e) {}
+
         showRewardToast(xpGain, newStreak, streakExtended);
     }
 

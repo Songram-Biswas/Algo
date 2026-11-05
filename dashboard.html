@@ -168,22 +168,38 @@
       <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">algo<span class="text-zinc-400 font-medium">Hub</span></span>
     </a>
 
-    <div class="flex items-center gap-4">
-      <div id="streak-badge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm">
+    <div class="flex items-center gap-2.5 sm:gap-3.5">
+      <div id="streak-badge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm" title="Daily streak">
         <span>🔥</span>
         <span id="streak-count" class="text-xs font-bold font-mono text-amber-500">0</span>
       </div>
 
-      <div id="xp-badge" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm">
+      <div id="xp-badge" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm" title="Current level and progress">
         <span class="text-xs font-bold font-mono text-emerald-500 dark:text-emerald-400" id="level-label">Lv 1</span>
-        <div class="w-16 bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+        <div class="w-14 sm:w-16 bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
           <div id="xp-bar" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Total XP Counter Badge with Info Tooltip -->
+      <div id="total-xp-badge" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all duration-200">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs text-amber-500">⚡</span>
+          <span id="total-xp-count" class="text-xs font-bold font-mono text-zinc-900 dark:text-zinc-100">0</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">XP</span>
+        </div>
+        <div class="relative group/xptip flex items-center">
+          <button type="button" aria-label="XP Information" class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold font-mono text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-zinc-200/80 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors cursor-help" title="Earn XP to level up, climb the global leaderboard, and unlock exclusive profile badges.">i</button>
+          <div class="pointer-events-none absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 hidden group-hover/xptip:flex flex-col items-center z-50 w-64 p-3 rounded-xl bg-zinc-900 dark:bg-[#141414] text-zinc-100 text-xs shadow-2xl border border-zinc-700/80 dark:border-zinc-700/80 leading-relaxed text-center opacity-0 group-hover/xptip:opacity-100 transition-opacity duration-200">
+            Earn XP to level up, climb the global leaderboard, and unlock exclusive profile badges.
+            <div class="absolute -top-1 right-2 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-2 h-2 bg-zinc-900 dark:bg-[#141414] border-t border-l border-zinc-700/80 dark:border-zinc-700/80 rotate-45"></div>
+          </div>
         </div>
       </div>
 
       <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/60 dark:bg-[#161616] hover:bg-zinc-200/60 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 cursor-pointer shadow-sm" title="Toggle theme"><span id="theme-orb" class="theme-orb sun"></span></button>
 
-      <div class="flex items-center gap-3 pl-4 border-l border-zinc-200 dark:border-zinc-800">
+      <div class="flex items-center gap-3 pl-3 sm:pl-4 border-l border-zinc-200 dark:border-zinc-800">
         <img id="user-avatar" class="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 object-cover" src="" alt="Profile">
         <button id="btn-logout" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Sign Out</button>
       </div>
@@ -198,25 +214,28 @@
     
     <!-- Gamification Section: Problem of the Day -->
     <div class="mb-8">
-      <div class="pod-card rounded-2xl p-7 text-white">
+      <div id="pod-card" class="pod-card rounded-2xl p-7 text-white cursor-pointer group transition-all duration-200 hover:border-zinc-700/80">
         <div class="pod-content">
           <div class="flex items-start justify-between mb-5">
             <div>
               <div class="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 mb-1">Daily Challenge</div>
-              <h3 class="text-2xl font-black tracking-tight text-white">Problem of the Day</h3>
+              <h3 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                Problem of the Day
+                <svg class="w-5 h-5 text-zinc-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              </h3>
             </div>
             <div id="pod-xp-badge" class="bg-zinc-900/90 text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 rounded-full backdrop-blur-sm">
               <span class="text-xs font-bold font-mono tracking-tight">🎯 +250 XP</span>
             </div>
           </div>
-          <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 mb-5">
+          <div class="bg-zinc-950/70 border border-zinc-800 group-hover:border-zinc-700/80 rounded-xl p-4 mb-5 transition-all duration-200">
             <p id="pod-title" class="text-lg font-bold text-white tracking-tight mb-1">Loading today's challenge...</p>
             <p id="pod-desc" class="text-sm text-zinc-400 font-medium">Solve this within 24 hours for a 2x XP multiplier!</p>
             <p id="pod-timer" class="text-xs text-zinc-500 font-mono mt-2">⏰ Resets in <span id="hours-until">—</span>h</p>
           </div>
           <div class="flex gap-3">
-            <button onclick="solvePOD()" class="bg-white text-zinc-950 hover:bg-zinc-200 font-semibold text-sm px-6 py-2.5 rounded-full hover:-translate-y-0.5 active:translate-y-0 shadow-sm transition-all duration-200 cursor-pointer">Start Challenge</button>
-            <button onclick="checkPODStatus()" class="bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 font-medium text-sm px-5 py-2.5 rounded-full hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">Check Status</button>
+            <a id="pod-start-link" href="./solutions/two-sum" class="inline-flex items-center justify-center bg-white text-zinc-950 hover:bg-zinc-200 font-semibold text-sm px-6 py-2.5 rounded-full hover:-translate-y-0.5 active:translate-y-0 shadow-sm transition-all duration-200 cursor-pointer">Start Challenge</a>
+            <button id="pod-status-btn" type="button" class="bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 font-medium text-sm px-5 py-2.5 rounded-full hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">Check Status</button>
           </div>
         </div>
       </div>
@@ -377,6 +396,8 @@
     let currentUserId = null;
     let currentPOD = null;
     let currentHeatmapData = null;
+    let userSolvedList = [];
+    let currentUserStats = { current_streak: 0, xp: 0 };
 
     const PROBLEM_REGISTRY = [
         { slug: "two-sum", id: 1, title: "Two Sum", difficulty: "Easy", course: "blind-75", category: "Array", implemented: true },
@@ -397,13 +418,70 @@
     ];
 
     const BADGES = {
-        "node-runner": { name: "Node Runner", desc: "Solve 10 Graph problems", icon: "🌐", category: "Graph", threshold: 10 },
-        "speed-demon": { name: "Speed Demon", desc: "Solve Hard in <20min", icon: "⚡", category: "Hard", threshold: 1 },
-        "string-master": { name: "String Master", desc: "100% String problems", icon: "📝", category: "String", threshold: 100 },
-        "array-ace": { name: "Array Ace", desc: "50+ Array problems", icon: "🎯", category: "Array", threshold: 50 },
-        "streak-champion": { name: "Streak Champion", desc: "10-day streak", icon: "🔥", category: "Streak", threshold: 10 },
-        "problem-solver": { name: "Problem Solver", desc: "First problem solved", icon: "🎓", category: "First", threshold: 1 },
-        "pod-devotee": { name: "PoD Devotee", desc: "7-day PoD streak", icon: "📅", category: "POD", threshold: 7 },
+        "problem-solver": {
+            name: "Problem Solver",
+            desc: "Solve your first problem",
+            icon: "🎓",
+            check: (solved, stats) => {
+                const count = (solved || []).length;
+                return { unlocked: count >= 1, progress: `${Math.min(count, 1)}/1` };
+            }
+        },
+        "array-ace": {
+            name: "Array Ace",
+            desc: "Solve 5 Array problems",
+            icon: "🎯",
+            check: (solved, stats) => {
+                const count = (solved || []).filter(s => {
+                    const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+                    return p && p.category === 'Array';
+                }).length;
+                return { unlocked: count >= 5, progress: `${Math.min(count, 5)}/5` };
+            }
+        },
+        "streak-champion": {
+            name: "Streak Champion",
+            desc: "Maintain a 3-day streak",
+            icon: "🔥",
+            check: (solved, stats) => {
+                const streak = (stats && stats.current_streak) ? stats.current_streak : 0;
+                return { unlocked: streak >= 3, progress: `${Math.min(streak, 3)}/3` };
+            }
+        },
+        "string-master": {
+            name: "String Master",
+            desc: "Solve 2 String problems",
+            icon: "📝",
+            check: (solved, stats) => {
+                const count = (solved || []).filter(s => {
+                    const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+                    return p && p.category === 'String';
+                }).length;
+                return { unlocked: count >= 2, progress: `${Math.min(count, 2)}/2` };
+            }
+        },
+        "speed-demon": {
+            name: "Speed Demon",
+            desc: "Solve 2 Medium problems",
+            icon: "⚡",
+            check: (solved, stats) => {
+                const count = (solved || []).filter(s => {
+                    const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+                    return p && p.difficulty === 'Medium';
+                }).length;
+                return { unlocked: count >= 2, progress: `${Math.min(count, 2)}/2` };
+            }
+        },
+        "pod-devotee": {
+            name: "PoD Devotee",
+            desc: "Solve today's Problem of the Day challenge",
+            icon: "📅",
+            check: (solved, stats, pod) => {
+                const podSlug = pod?.slug;
+                const solvedPod = podSlug ? (solved || []).some(s => s.problem_slug === podSlug) : false;
+                return { unlocked: solvedPod, progress: solvedPod ? '1/1' : '0/1' };
+            }
+        },
     };
 
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -429,64 +507,106 @@
     // PROBLEM OF THE DAY FUNCTIONS
     // ==========================================
 
+    function getPODUrl() {
+        const slug = (currentPOD && currentPOD.slug) ? currentPOD.slug : 'two-sum';
+        return (window.location.protocol === 'file:') ? `./solutions/${slug}.html` : `./solutions/${slug}`;
+    }
+
     async function initializePOD() {
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0];
         
         const podProblems = PROBLEM_REGISTRY.filter(p => p.implemented && p.category === "Array");
         const dayIndex = today.getDate();
-        const selectedPOD = podProblems[dayIndex % podProblems.length];
+        const selectedPOD = (podProblems.length > 0) ? podProblems[dayIndex % podProblems.length] : PROBLEM_REGISTRY[0];
         
         currentPOD = { ...selectedPOD, date: todayStr };
         
-        document.getElementById('pod-title').textContent = `#${selectedPOD.id} ${selectedPOD.title}`;
-        document.getElementById('pod-desc').textContent = `${selectedPOD.difficulty} • ${selectedPOD.category} • Solve within 24h for 2x XP!`;
+        const titleEl = document.getElementById('pod-title');
+        if (titleEl) titleEl.textContent = `#${selectedPOD.id} ${selectedPOD.title}`;
+        const descEl = document.getElementById('pod-desc');
+        if (descEl) descEl.textContent = `${selectedPOD.difficulty} • ${selectedPOD.category} • Solve within 24h for 2x XP!`;
         
         // Calculate hours until reset
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(0, 0, 0, 0);
-        const hoursUntil = Math.ceil((tomorrow - today) / (1000 * 60 * 60));
-        document.getElementById('hours-until').textContent = hoursUntil;
+        const hoursUntil = Math.max(1, Math.ceil((tomorrow - today) / (1000 * 60 * 60)));
+        const timerEl = document.getElementById('hours-until');
+        if (timerEl) timerEl.textContent = hoursUntil;
+
+        // Set direct URL on the Start Challenge anchor tag
+        const podLink = document.getElementById('pod-start-link');
+        if (podLink) {
+            podLink.href = getPODUrl();
+        }
         
         // Check if user has already solved today's PoD
         await checkPODStatus();
+        renderBadges();
     }
 
-    async function checkPODStatus() {
+    async function checkPODStatus(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
         if (!currentUserId || !currentPOD) return;
 
         const today = new Date().toISOString().split('T')[0];
         
-        const { data, error } = await supabaseClient
-            .from('daily_pod_attempts')
-            .select('*')
-            .eq('user_id', currentUserId)
-            .eq('pod_date', today)
-            .single();
+        try {
+            const { data, error } = await supabaseClient
+                .from('daily_pod_attempts')
+                .select('*')
+                .eq('user_id', currentUserId)
+                .eq('pod_date', today)
+                .single();
 
-        if (data) {
-            if (data.solved_at) {
-                showPODStatus('✅ You solved today\'s PoD! ' + (data.bonus_applied ? '(2x XP Bonus Applied!)' : ''), 'success');
-            } else {
-                showPODStatus('⏳ Challenge started but not yet solved...', 'info');
+            if (data) {
+                if (data.solved_at) {
+                    showPODStatus('✅ Solved today\'s PoD! ' + (data.bonus_applied ? '(2x XP Bonus Applied!)' : ''), 'success');
+                } else {
+                    showPODStatus('⏳ Challenge in progress...', 'info');
+                }
             }
+        } catch (err) {
+            console.warn('[dashboard] PoD check status error:', err);
         }
     }
 
     function showPODStatus(message, type) {
         const badge = document.getElementById('pod-xp-badge');
-        let color = 'bg-white/20';
-        if (type === 'success') color = 'bg-green-400/30';
-        if (type === 'info') color = 'bg-blue-400/30';
+        if (!badge) return;
+        let color = 'bg-zinc-900/90 text-zinc-300 border-zinc-700/50';
+        if (type === 'success') color = 'bg-emerald-950/80 text-emerald-400 border-emerald-500/30';
+        if (type === 'info') color = 'bg-cyan-950/80 text-cyan-400 border-cyan-500/30';
         
-        badge.className = `${color} backdrop-blur-sm px-4 py-2 rounded-lg`;
-        badge.innerHTML = `<span class="text-sm font-bold">${message}</span>`;
+        badge.className = `${color} backdrop-blur-sm px-3.5 py-1.5 rounded-full border`;
+        badge.innerHTML = `<span class="text-xs font-bold font-mono tracking-tight">${message}</span>`;
     }
 
-    function solvePOD() {
-        if (!currentPOD) return;
-        window.location.href = `./solutions/${currentPOD.slug}`;
+    function solvePOD(e) {
+        if (e && e.stopPropagation) {
+            // allow handling
+        }
+        window.location.href = getPODUrl();
+    }
+    window.solvePOD = solvePOD;
+    window.checkPODStatus = checkPODStatus;
+
+    // Attach click listeners to PoD elements
+    const podCardEl = document.getElementById('pod-card');
+    if (podCardEl) {
+        podCardEl.addEventListener('click', (e) => {
+            if (e.target.closest('#pod-status-btn') || e.target.closest('#pod-start-link')) return;
+            window.location.href = getPODUrl();
+        });
+    }
+
+    const podStatusBtnEl = document.getElementById('pod-status-btn');
+    if (podStatusBtnEl) {
+        podStatusBtnEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            checkPODStatus(e);
+        });
     }
 
     // ==========================================
@@ -663,13 +783,45 @@
     // BADGES RENDERING
     // ==========================================
 
-    function renderBadges() {
+    function renderBadges(solvedList = null, userStats = null) {
+        if (solvedList) userSolvedList = solvedList;
+        if (userStats) currentUserStats = userStats;
+
+        let solved = userSolvedList;
+        if (!solved || solved.length === 0) {
+            try {
+                const cached = localStorage.getItem('algohub_solved_cache');
+                if (cached) solved = JSON.parse(cached);
+            } catch (e) {}
+        }
+        
+        let stats = currentUserStats;
+        if (!stats || !stats.current_streak) {
+            try {
+                const cachedStats = localStorage.getItem('algohub_user_stats');
+                if (cachedStats) stats = JSON.parse(cachedStats);
+            } catch (e) {}
+        }
+
         const container = document.getElementById('badges-container');
+        if (!container) return;
+
         container.innerHTML = Object.entries(BADGES).map(([key, badge]) => {
+            const { unlocked, progress } = badge.check(solved, stats, currentPOD);
+            const titleTooltip = unlocked 
+                ? `🏆 ${badge.name}: Unlocked! (${badge.desc})` 
+                : `🔒 ${badge.name}: ${badge.desc} (Progress: ${progress})`;
+
+            const lockedClass = unlocked ? '' : 'badge-locked';
+            const statusStyle = unlocked 
+                ? 'border-emerald-500/40 dark:border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.12)]' 
+                : 'border-zinc-200 dark:border-zinc-800/80';
+
             return `
-                <div class="badge-slot ${Math.random() > 0.6 ? '' : 'badge-locked'} aspect-square rounded-lg flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#141414] border border-zinc-200 dark:border-zinc-800/80 p-2 text-center hover:border-zinc-400 dark:hover:border-zinc-600 hover:-translate-y-0.5 transition-all duration-200" title="${badge.name}">
+                <div class="badge-slot ${lockedClass} ${statusStyle} aspect-square rounded-xl flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#141414] border p-2 text-center hover:border-zinc-400 dark:hover:border-zinc-600 hover:-translate-y-0.5 transition-all duration-200 cursor-help" title="${titleTooltip}">
                     <span class="text-2xl mb-1">${badge.icon}</span>
-                    <span class="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300 line-clamp-2">${badge.name}</span>
+                    <span class="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300 line-clamp-1">${badge.name}</span>
+                    <span class="text-[9px] font-mono ${unlocked ? 'text-emerald-500 font-bold' : 'text-zinc-400 dark:text-zinc-500'} mt-0.5">${unlocked ? 'Unlocked' : progress}</span>
                 </div>
             `;
         }).join('');
@@ -679,29 +831,62 @@
     // SPRINT RENDERING
     // ==========================================
 
-    function renderSprintTasks() {
+    function renderSprintTasks(solvedList = null) {
+        if (solvedList) userSolvedList = solvedList;
+
+        let solved = userSolvedList;
+        if (!solved || solved.length === 0) {
+            try {
+                const cached = localStorage.getItem('algohub_solved_cache');
+                if (cached) solved = JSON.parse(cached);
+            } catch (e) {}
+        }
+
+        // Calculate solved counts per category from user's data
+        const arraySolved = (solved || []).filter(s => {
+            const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+            return p && p.category === 'Array';
+        }).length;
+
+        const stringSolved = (solved || []).filter(s => {
+            const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+            return p && p.category === 'String';
+        }).length;
+
+        const linkedListSolved = (solved || []).filter(s => {
+            const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+            return p && p.category === 'Linked List';
+        }).length;
+
         const tasks = [
-            { name: "3 Array Problems", icon: "📊", xp: 150, category: "Array", current: 1, target: 3 },
-            { name: "1 String Problem", icon: "📝", xp: 150, category: "String", current: 0, target: 1 },
-            { name: "2 Linked List", icon: "🔗", xp: 200, category: "Linked List", current: 0, target: 2 },
+            { name: "3 Array Problems", icon: "📊", xp: 150, category: "Array", current: arraySolved, target: 3, href: "./category.html?cat=Array" },
+            { name: "1 String Problem", icon: "📝", xp: 150, category: "String", current: stringSolved, target: 1, href: "./category.html?cat=String" },
+            { name: "1 Linked List Problem", icon: "🔗", xp: 200, category: "Linked List", current: linkedListSolved, target: 1, href: "./category.html?cat=Linked%20List" },
         ];
         
         const container = document.getElementById('sprint-list');
+        if (!container) return;
+
         container.innerHTML = tasks.map(task => {
-            const progress = Math.round((task.current / task.target) * 100);
+            const progress = Math.min(Math.round((task.current / task.target) * 100), 100);
+            const isCompleted = task.current >= task.target;
             return `
-                <div class="group p-3 bg-zinc-50 dark:bg-[#141414] rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-400 dark:hover:border-zinc-700 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+                <div onclick="window.location.href='${task.href}'" class="group p-3 bg-zinc-50 dark:bg-[#141414] rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-400 dark:hover:border-zinc-700 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                     <div class="flex items-start justify-between mb-2">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2.5">
                             <span class="text-lg">${task.icon}</span>
                             <div>
-                                <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${task.name}</p>
-                                <p class="text-xs text-zinc-500 dark:text-zinc-400">${task.current}/${task.target} • +${task.xp} XP</p>
+                                <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                                    ${task.name}
+                                    ${isCompleted ? '<span class="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full">Completed</span>' : ''}
+                                </p>
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400 font-mono">${task.current}/${task.target} • +${task.xp} XP</p>
                             </div>
                         </div>
+                        <span class="text-xs font-mono font-bold ${isCompleted ? 'text-emerald-500 dark:text-emerald-400' : 'text-zinc-500 dark:text-zinc-400'}">${progress}%</span>
                     </div>
                     <div class="w-full bg-zinc-200 dark:bg-zinc-800/80 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all" style="width: ${progress}%"></div>
+                        <div class="bg-gradient-to-r ${isCompleted ? 'from-emerald-400 to-emerald-500' : 'from-emerald-400 to-cyan-400'} h-1.5 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
                     </div>
                 </div>
             `;
@@ -712,7 +897,71 @@
     // USER STATS & DATA LOADING
     // ==========================================
 
+    function updateUserStatsUI(stats) {
+        let xp = 0;
+        let streak = 0;
+
+        if (stats && typeof stats.xp !== 'undefined') {
+            xp = Number(stats.xp) || 0;
+            streak = Number(stats.current_streak) || 0;
+        } else {
+            try {
+                const storedStats = JSON.parse(localStorage.getItem('algohub_user_stats') || '{}');
+                xp = Number(storedStats.xp) || Number(localStorage.getItem('algohub_xp')) || 0;
+                streak = Number(storedStats.current_streak) || 0;
+            } catch (e) {
+                xp = 0;
+                streak = 0;
+            }
+        }
+
+        // 1. Total XP Counter Badge
+        const totalXpCount = document.getElementById('total-xp-count');
+        const totalXpBadge = document.getElementById('total-xp-badge');
+        if (totalXpCount) totalXpCount.textContent = xp.toLocaleString();
+        if (totalXpBadge) {
+            totalXpBadge.classList.remove('hidden');
+            totalXpBadge.classList.add('flex');
+        }
+
+        // 2. Daily Streak Badge
+        const streakBadge = document.getElementById('streak-badge');
+        const streakCount = document.getElementById('streak-count');
+        if (streakCount) streakCount.textContent = streak;
+        if (streakBadge) {
+            streakBadge.classList.remove('hidden');
+            streakBadge.classList.add('flex');
+        }
+
+        // 3. Level & XP Progress to Next Level
+        const xpBadge = document.getElementById('xp-badge');
+        const levelLabel = document.getElementById('level-label');
+        const xpBar = document.getElementById('xp-bar');
+
+        const level = Math.floor(xp / 100) + 1;
+        const xpIntoLevel = xp % 100;
+
+        if (levelLabel) levelLabel.textContent = `Lv ${level}`;
+        if (xpBar) xpBar.style.width = `${xpIntoLevel}%`;
+        if (xpBadge) {
+            xpBadge.classList.remove('hidden');
+            xpBadge.classList.add('flex');
+        }
+    }
+
     async function checkAuth() {
+        // Pre-populate with cached data immediately to avoid static or empty flash
+        try {
+            const cachedSolved = localStorage.getItem('algohub_solved_cache');
+            if (cachedSolved) userSolvedList = JSON.parse(cachedSolved);
+            const cachedStats = localStorage.getItem('algohub_user_stats');
+            if (cachedStats) currentUserStats = JSON.parse(cachedStats);
+        } catch (e) {}
+
+        updateUserStatsUI(currentUserStats);
+        renderBadges();
+        renderSprintTasks();
+
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = './'; return; }
         
@@ -723,58 +972,67 @@
         
         // Initialize features
         await initializePOD();
-        renderBadges();
-        renderSprintTasks();
         await fetchUserStats(session.user.id);
         await fetchCloudData(session.user.id);
     }
 
     async function fetchUserStats(userId) {
-        const { data: stats, error } = await supabaseClient
-            .from('user_stats')
-            .select('current_streak, xp')
-            .eq('user_id', userId)
-            .single();
+        try {
+            const { data: stats, error } = await supabaseClient
+                .from('user_stats')
+                .select('current_streak, xp')
+                .eq('user_id', userId)
+                .single();
 
-        if (!stats) return;
+            if (stats) {
+                currentUserStats = stats;
+                try {
+                    localStorage.setItem('algohub_user_stats', JSON.stringify(stats));
+                    localStorage.setItem('algohub_xp', String(stats.xp || 0));
+                } catch (e) {}
 
-        const streakBadge = document.getElementById('streak-badge');
-        const streakCount = document.getElementById('streak-count');
-        if (stats.current_streak > 0) {
-            streakCount.textContent = stats.current_streak;
-            streakBadge.classList.remove('hidden');
-            streakBadge.classList.add('flex');
+                updateUserStatsUI(stats);
+                renderBadges(userSolvedList, currentUserStats);
+            }
+        } catch (err) {
+            console.warn('[dashboard] fetchUserStats error:', err);
         }
-
-        const xpBadge = document.getElementById('xp-badge');
-        const levelLabel = document.getElementById('level-label');
-        const xpBar = document.getElementById('xp-bar');
-
-        const xp = stats.xp || 0;
-        const level = Math.floor(xp / 100) + 1;
-        const xpIntoLevel = xp % 100;
-
-        levelLabel.textContent = `Lv ${level}`;
-        xpBar.style.width = `${xpIntoLevel}%`;
-        xpBadge.classList.remove('hidden');
-        xpBadge.classList.add('flex');
     }
 
     async function fetchCloudData(userId) {
-        const { data, error } = await supabaseClient
-            .from('user_progress')
-            .select('problem_slug, status, updated_at')
-            .eq('user_id', userId);
+        let solved = [];
+        let review = [];
+        try {
+            const { data, error } = await supabaseClient
+                .from('user_progress')
+                .select('problem_slug, status, updated_at')
+                .eq('user_id', userId);
 
-        if (error) return;
+            if (error) {
+                console.warn('[dashboard] Cloud data error:', error);
+                const cached = localStorage.getItem('algohub_solved_cache');
+                if (cached) solved = JSON.parse(cached);
+            } else if (data) {
+                solved = data.filter(d => d.status === 'solved');
+                review = data.filter(d => d.status === 'review');
+                try {
+                    localStorage.setItem('algohub_solved_cache', JSON.stringify(solved));
+                } catch (e) {}
+            }
+        } catch (err) {
+            console.warn('[dashboard] fetchCloudData failed, using local cache:', err);
+            const cached = localStorage.getItem('algohub_solved_cache');
+            if (cached) solved = JSON.parse(cached);
+        }
 
-        const solved = data.filter(d => d.status === 'solved');
-        const review = data.filter(d => d.status === 'review');
+        userSolvedList = solved;
 
         updateProgression(solved.length);
         renderContributionGrid(solved);
         renderReviewList(review);
         renderWeaknessMapper(solved);
+        renderSprintTasks(solved);
+        renderBadges(solved, currentUserStats);
     }
 
     function updateProgression(solvedCount) {

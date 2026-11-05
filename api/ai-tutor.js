@@ -33,6 +33,10 @@
  *                                 Same-origin requests from your Vercel site never need this.
  */
 
+try {
+  require('dotenv').config();
+} catch (e) {}
+
 const { GoogleGenAI } = require('@google/genai');
 
 // ---------------------------------------------------------------------------
@@ -272,19 +276,22 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error('[ai-tutor] GEMINI_API_KEY is not set.');
-    return sendJson(res, 500, { error: 'AI tutor is not configured on the server.' });
+    return sendJson(res, 500, { error: 'AI tutor is not configured on the server. Please set GEMINI_API_KEY.' });
   }
 
   // --- Auth -----------------------------------------------------------------
-  const requireAuth = process.env.REQUIRE_AUTH !== 'false';
+  const requireAuth = process.env.REQUIRE_AUTH === 'true';
   let user = null;
-  if (requireAuth) {
+  if (req.headers && req.headers.authorization) {
     user = await verifySupabaseUser(req);
-    if (!user) return sendJson(res, 401, { error: 'Please sign in to use the AI tutor.' });
+  }
+  if (requireAuth && !user) {
+    return sendJson(res, 401, { error: 'Please sign in to use the AI tutor.' });
   }
 
   // --- Rate limit -------------------------------------------------------------
-  if (isRateLimited(user ? `u:${user.id}` : `ip:${clientIp(req)}`)) {
+  const rateKey = user ? `u:${user.id}` : `ip:${clientIp(req)}`;
+  if (isRateLimited(rateKey)) {
     res.setHeader('Retry-After', String(Math.ceil(RATE_LIMIT.windowMs / 1000)));
     return sendJson(res, 429, { error: 'Too many requests. Please wait a minute and try again.' });
   }

@@ -409,9 +409,8 @@ function buildMarkup() {
 
 let instance = null;
 
-export function initAITutor({ supabaseClient, getProblem = defaultGetProblem, apiUrl = '/api/ai-tutor' } = {}) {
+export function initAITutor({ supabaseClient = null, getProblem = defaultGetProblem, apiUrl = '/api/ai-tutor' } = {}) {
   if (instance) return instance;
-  if (!supabaseClient) throw new Error('[ai-tutor] initAITutor requires { supabaseClient }.');
 
   // Inject styles once.
   const style = document.createElement('style');
@@ -557,12 +556,25 @@ export function initAITutor({ supabaseClient, getProblem = defaultGetProblem, ap
     const timeout = setTimeout(() => controller.abort('timeout'), REQUEST_TIMEOUT_MS);
 
     try {
-      const { data: { session } = {} } = await supabaseClient.auth.getSession();
-      if (!session?.access_token) throw Object.assign(new Error('Your session has expired. Please sign in again.'), { status: 401 });
+      let token = null;
+      try {
+        if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
+          const { data: { session } = {} } = await supabaseClient.auth.getSession();
+          token = session?.access_token || null;
+        }
+      } catch (authErr) {
+        console.warn('[ai-tutor] Session check error (proceeding anonymously):', authErr);
+      }
 
-      const res = await fetch(apiUrl, {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const endpoint = apiUrl || '/api/ai-tutor';
+      const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        headers,
         body: JSON.stringify(request.payload),
         signal: controller.signal,
       });
@@ -571,7 +583,8 @@ export function initAITutor({ supabaseClient, getProblem = defaultGetProblem, ap
       try { data = await res.json(); } catch { /* non-JSON error page */ }
 
       if (!res.ok || typeof data.reply !== 'string') {
-        throw Object.assign(new Error(data.error || friendlyStatus(res.status)), { status: res.status });
+        const errMsg = data.error || friendlyStatus(res.status);
+        throw Object.assign(new Error(errMsg), { status: res.status });
       }
 
       state.messages.push({ role: 'model', text: data.reply });
@@ -581,7 +594,7 @@ export function initAITutor({ supabaseClient, getProblem = defaultGetProblem, ap
       } else {
         const message = controller.signal.reason === 'timeout'
           ? 'The tutor took too long to respond. Please try again.'
-          : (err?.message && err.status ? err.message : 'Network error — check your connection and try again.');
+          : (err?.message || 'Network error — check your connection and try again.');
         state.messages.push({ role: 'error', text: message, request: err?.status === 401 ? null : request });
       }
     } finally {
