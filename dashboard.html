@@ -13,95 +13,89 @@
   <!-- IMPORTANT: html2canvas for card generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
-  <style>
-
- .theme-orb { 
-    width: 20px; 
-    height: 20px; 
-    border-radius: 50%; 
-    position: relative; 
-    transition: all .3s ease-in-out; 
-    flex-shrink: 0;
-    border: 2px solid rgba(148, 163, 184, 0.3);
-  }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  .theme-orb.sun { 
+  <style>
+    body {
+      background-color: #fafafa;
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -0.01em;
+    }
+    html.dark body {
+      background-color: #0a0a0a;
+      color: #f4f4f5;
+    }
+    
+    .theme-orb { 
+      width: 20px; 
+      height: 20px; 
+      border-radius: 50%; 
+      position: relative; 
+      transition: all .3s ease-in-out; 
+      flex-shrink: 0;
+      border: 2px solid rgba(148, 163, 184, 0.3);
+    }
+    
+    .theme-orb.sun { 
       background: radial-gradient(circle at 35% 30%, #fff4d4, #f5a623 70%); 
       box-shadow: 0 0 10px 2px rgba(245, 166, 35, 0.8), 0 0 20px 5px rgba(255, 200, 0, 0.3); 
       border-color: rgba(245, 166, 35, 0.5);
-  }
-  
-  .theme-orb.moon { 
+    }
+    
+    .theme-orb.moon { 
       background: radial-gradient(circle at 65% 35%, #e6ebff, #94a3ff 75%); 
       box-shadow: 0 0 10px 2px rgba(148, 163, 255, 0.8), 0 0 20px 5px rgba(148, 163, 255, 0.3); 
       border-color: rgba(148, 163, 255, 0.5);
-  }
-  
-  .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:7px; height:7px; border-radius:50%; background:#0a0a14; opacity:.35; }
-  .theme-orb.moon::after { content:''; position:absolute; top:10px; left:10px; width:4px; height:4px; border-radius:50%; background:#0a0a14; opacity:.3; }
+    }
     
-    body { background-color: #fafafa; }
-    html.dark body { background-color: #0a0a0a; }
+    .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:7px; height:7px; border-radius:50%; background:#0a0a14; opacity:.35; }
+    .theme-orb.moon::after { content:''; position:absolute; top:10px; left:10px; width:4px; height:4px; border-radius:50%; background:#0a0a14; opacity:.3; }
     
     .util-panel {
-        background-color: #ffffff;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      background-color: #ffffff;
+      border: 1px solid #e4e4e7;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
     }
     html.dark .util-panel {
-        background-color: #111111;
-        border: 1px solid #262626;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      background-color: #111111;
+      border: 1px solid #27272a;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
     }
     
     .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(161, 161, 170, 0.3); border-radius: 10px; }
+    html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; }
     
     .stat-card {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
-    
     .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.3);
     }
     
     .badge-slot {
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    
     .badge-slot:hover {
-      transform: scale(1.1) rotate(5deg);
+      transform: translateY(-2px) scale(1.05);
     }
-    
     .badge-locked {
-      opacity: 0.4;
-      filter:  grayscale(100%);
+      opacity: 0.35;
+      filter: grayscale(100%);
     }
     
+    /* Vercel-style Problem of the Day Card */
     .pod-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99, 102, 241, 0.14), transparent), #111111;
+      border: 1px solid #27272a;
       position: relative;
       overflow: hidden;
-    }
-    
-    .pod-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-      animation: float 20s linear infinite;
-    }
-    
-    @keyframes float {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(50px, 50px); }
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }
     
     .pod-content {
@@ -116,10 +110,9 @@
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
-
     html.dark .heatmap-card-preview {
       background: #111111;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
     .share-modal {
@@ -128,7 +121,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -141,21 +136,22 @@
       padding: 32px;
       max-width: 500px;
       width: 90%;
+      border: 1px solid #e4e4e7;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
-
     html.dark .share-modal-content {
       background: #111111;
-      color: white;
+      border: 1px solid #27272a;
+      color: #f4f4f5;
     }
 
     .loading-spinner {
       display: inline-block;
       width: 20px;
       height: 20px;
-      border: 3px solid rgba(99, 102, 241, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
-      border-top-color: #6366f1;
+      border-top-color: #ffffff;
       animation: spin 0.8s linear infinite;
     }
 
@@ -164,63 +160,63 @@
     }
   </style>
 </head>
-<body class="text-slate-900 dark:text-slate-200 min-h-screen font-sans antialiased selection:bg-blue-500/30 flex flex-col">
+<body class="text-zinc-900 dark:text-zinc-100 min-h-screen font-sans antialiased selection:bg-zinc-800 selection:text-white flex flex-col">
 
-  <header class="sticky top-0 z-50 bg-white dark:bg-[#0a0a0a] border-b border-slate-200 dark:border-[#262626] px-6 py-3 flex justify-between items-center w-full">
-    <a href="./dashboard" class="flex items-center gap-3 hover:opacity-80 transition cursor-pointer">
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-[#0a0a0a]/80 border-b border-zinc-200 dark:border-zinc-800/80 px-6 py-3.5 flex justify-between items-center w-full transition-all duration-200">
+    <a href="./dashboard" class="flex items-center gap-3 hover:opacity-90 transition-all duration-200 cursor-pointer">
       <img src="./favicon.png" alt="algoHub" class="w-8 h-8 rounded-lg shadow-sm">
-      <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">algoHub</span>
+      <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">algo<span class="text-zinc-400 font-medium">Hub</span></span>
     </a>
 
     <div class="flex items-center gap-4">
-      <div id="streak-badge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
+      <div id="streak-badge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm">
         <span>🔥</span>
-        <span id="streak-count" class="text-sm font-bold text-amber-600 dark:text-amber-400">0</span>
+        <span id="streak-count" class="text-xs font-bold font-mono text-amber-500">0</span>
       </div>
 
-      <div id="xp-badge" class="hidden items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/50">
-        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400" id="level-label">Lv 1</span>
-        <div class="w-16 bg-indigo-200 dark:bg-indigo-900/60 h-1.5 rounded-full overflow-hidden">
-          <div id="xp-bar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+      <div id="xp-badge" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <span class="text-xs font-bold font-mono text-emerald-500 dark:text-emerald-400" id="level-label">Lv 1</span>
+        <div class="w-16 bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+          <div id="xp-bar" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
         </div>
       </div>
 
-      <button id="theme-toggle" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-[#1a1a1a] transition cursor-pointer" title="Toggle theme"><span id="theme-orb" class="theme-orb sun"></span></button>
+      <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/60 dark:bg-[#161616] hover:bg-zinc-200/60 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 cursor-pointer shadow-sm" title="Toggle theme"><span id="theme-orb" class="theme-orb sun"></span></button>
 
-      <div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-[#262626]">
-        <img id="user-avatar" class="w-8 h-8 rounded-full border border-slate-200 dark:border-[#262626] bg-slate-100 dark:bg-[#111111] object-cover" src="" alt="Profile">
-        <button id="btn-logout" class="text-xs font-semibold text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition cursor-pointer">Sign Out</button>
+      <div class="flex items-center gap-3 pl-4 border-l border-zinc-200 dark:border-zinc-800">
+        <img id="user-avatar" class="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 object-cover" src="" alt="Profile">
+        <button id="btn-logout" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Sign Out</button>
       </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-6 py-10 w-full flex-grow">
-    <div class="mb-10">
-      <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard</h2>
-      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Track your execution consistency, level up, and earn badges.</p>
+    <div class="mb-8">
+      <h2 class="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">Dashboard</h2>
+      <p class="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Track your execution consistency, level up, and earn badges.</p>
     </div>
     
     <!-- Gamification Section: Problem of the Day -->
     <div class="mb-8">
-      <div class="pod-card rounded-2xl p-8 text-white relative">
+      <div class="pod-card rounded-2xl p-7 text-white">
         <div class="pod-content">
-          <div class="flex items-start justify-between mb-6">
+          <div class="flex items-start justify-between mb-5">
             <div>
-              <div class="text-sm font-semibold uppercase tracking-wider opacity-90 mb-2">Daily Challenge</div>
-              <h3 class="text-2xl font-black">Problem of the Day</h3>
+              <div class="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 mb-1">Daily Challenge</div>
+              <h3 class="text-2xl font-black tracking-tight text-white">Problem of the Day</h3>
             </div>
-            <div id="pod-xp-badge" class="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-              <span class="text-sm font-bold">🎯 +250 XP</span>
+            <div id="pod-xp-badge" class="bg-zinc-900/90 text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 rounded-full backdrop-blur-sm">
+              <span class="text-xs font-bold font-mono tracking-tight">🎯 +250 XP</span>
             </div>
           </div>
-          <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4">
-            <p id="pod-title" class="text-lg font-bold mb-2">Loading today's challenge...</p>
-            <p id="pod-desc" class="text-sm opacity-90">Solve this within 24 hours for a 2x XP multiplier!</p>
-            <p id="pod-timer" class="text-xs opacity-75 mt-2">⏰ Resets in <span id="hours-until">—</span>h</p>
+          <div class="bg-zinc-950/70 border border-zinc-800 rounded-xl p-4 mb-5">
+            <p id="pod-title" class="text-lg font-bold text-white tracking-tight mb-1">Loading today's challenge...</p>
+            <p id="pod-desc" class="text-sm text-zinc-400 font-medium">Solve this within 24 hours for a 2x XP multiplier!</p>
+            <p id="pod-timer" class="text-xs text-zinc-500 font-mono mt-2">⏰ Resets in <span id="hours-until">—</span>h</p>
           </div>
           <div class="flex gap-3">
-            <button onclick="solvePOD()" class="bg-white text-indigo-600 hover:bg-slate-100 text-sm font-bold px-6 py-2 rounded-lg transition">Start Challenge</button>
-            <button onclick="checkPODStatus()" class="bg-white/20 hover:bg-white/30 text-sm font-bold px-6 py-2 rounded-lg transition backdrop-blur-sm">Check Status</button>
+            <button onclick="solvePOD()" class="bg-white text-zinc-950 hover:bg-zinc-200 font-semibold text-sm px-6 py-2.5 rounded-full hover:-translate-y-0.5 active:translate-y-0 shadow-sm transition-all duration-200 cursor-pointer">Start Challenge</button>
+            <button onclick="checkPODStatus()" class="bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 font-medium text-sm px-5 py-2.5 rounded-full hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">Check Status</button>
           </div>
         </div>
       </div>
@@ -230,47 +226,47 @@
       
       <div class="lg:col-span-2 flex flex-col gap-6">
           <!-- Active Curriculum -->
-          <div class="util-panel rounded-xl p-6">
+          <div class="util-panel rounded-xl p-6 transition-all duration-200 hover:border-zinc-700/60">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white">Active Curriculum</h3>
+              <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Active Curriculum</h3>
             </div>
             
-            <div class="border border-slate-200 dark:border-[#262626] rounded-lg p-5 bg-slate-50 dark:bg-[#0f0f0f] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-zinc-50 dark:bg-[#141414] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200">
               <div>
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400">Core</span>
-                  <h4 class="text-base font-bold text-slate-900 dark:text-white">Blind 75 Matrix</h4>
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700/60 font-mono">Core</span>
+                  <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Blind 75 Matrix</h4>
                 </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">High-yield technical interview patterns.</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">High-yield technical interview patterns.</p>
               </div>
               
               <div class="flex items-center gap-4 w-full sm:w-auto">
                 <div class="flex-grow sm:flex-grow-0 sm:w-32">
-                  <div class="flex justify-between text-xs font-mono text-slate-500 dark:text-slate-400 mb-1">
+                  <div class="flex justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1.5">
                     <span>Progress</span>
-                    <span id="progress-text">0%</span>
+                    <span id="progress-text" class="font-bold text-zinc-900 dark:text-zinc-100">0%</span>
                   </div>
-                  <div class="w-full bg-slate-200 dark:bg-[#262626] h-1.5 rounded-full overflow-hidden cursor-help" title="Click to see category breakdown">
-                    <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                  <div class="w-full bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden cursor-help" title="Click to see category breakdown">
+                    <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                   </div>
                 </div>
-                <a href="./tracks?course=blind-75" class="bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm whitespace-nowrap">Resume</a>
+                <a href="./tracks?course=blind-75" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-sm font-semibold px-5 py-2 rounded-full hover:-translate-y-0.5 shadow-sm transition-all duration-200 whitespace-nowrap">Resume</a>
               </div>
             </div>
           </div>
     
           <!-- Execution Heatmap -->
-          <div class="util-panel rounded-xl p-6">
+          <div class="util-panel rounded-xl p-6 transition-all duration-200 hover:border-zinc-700/60">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white">18-Week Heatmap</h3>
-              <div class="flex gap-3">
-                <span class="text-sm font-mono text-slate-500 dark:text-slate-400" id="total-solves-lbl">0 Solves</span>
-                <button onclick="prepareShareModal()" class="text-xs px-3 py-1 bg-slate-100 dark:bg-[#1a1a1a] hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded transition font-medium">Share</button>
+              <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">18-Week Heatmap</h3>
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-mono text-zinc-500 dark:text-zinc-400" id="total-solves-lbl">0 Solves</span>
+                <button onclick="prepareShareModal()" class="text-xs px-3.5 py-1.5 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700/80 text-zinc-700 dark:text-zinc-300 rounded-full hover:-translate-y-0.5 transition-all duration-200 font-medium cursor-pointer">Share</button>
               </div>
             </div>
             
             <div class="flex gap-3 w-full overflow-x-auto pb-2 custom-scrollbar">
-              <div class="flex flex-col gap-[7px] text-[10px] text-slate-400 dark:text-slate-500 font-mono pt-5">
+              <div class="flex flex-col gap-[7px] text-[10px] text-zinc-400 dark:text-zinc-500 font-mono pt-5">
                 <span class="h-3.5 flex items-center"></span>
                 <span class="h-3.5 flex items-center">Mon</span>
                 <span class="h-3.5 flex items-center"></span>
@@ -280,20 +276,20 @@
                 <span class="h-3.5 flex items-center"></span>
               </div>
               <div class="flex flex-col gap-1 w-full min-w-max">
-                <div class="flex text-[10px] text-slate-400 dark:text-slate-500 font-mono justify-between mb-1 pr-4" id="month-labels"></div>
+                <div class="flex text-[10px] text-zinc-400 dark:text-zinc-500 font-mono justify-between mb-1 pr-4" id="month-labels"></div>
                 <div class="grid grid-rows-7 gap-[3px] grid-flow-col" id="contribution-grid"></div>
               </div>
             </div>
           </div>
           
           <!-- Weekly Sprint -->
-          <div class="util-panel rounded-xl p-6">
+          <div class="util-panel rounded-xl p-6 transition-all duration-200 hover:border-zinc-700/60">
             <div class="flex justify-between items-center mb-6">
               <div>
-                <h3 class="text-lg font-bold text-slate-900 dark:text-white">This Week's Sprint</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Complete challenges for bonus rewards</p>
+                <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">This Week's Sprint</h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Complete challenges for bonus rewards</p>
               </div>
-              <span id="sprint-reward" class="text-sm font-bold text-amber-600 dark:text-amber-400">+500 XP Potential</span>
+              <span id="sprint-reward" class="text-xs font-bold font-mono text-emerald-500 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 px-3 py-1 rounded-full">+500 XP Potential</span>
             </div>
             
             <div id="sprint-list" class="space-y-3">
@@ -305,10 +301,10 @@
       <!-- Right Sidebar -->
       <div class="flex flex-col gap-6">
           <!-- Achievement Badges -->
-          <div class="util-panel rounded-xl p-6">
+          <div class="util-panel rounded-xl p-6 transition-all duration-200 hover:border-zinc-700/60">
             <div class="mb-4">
-              <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1">Achievements</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Unlock badges through challenges</p>
+              <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight mb-1">Achievements</h3>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400">Unlock badges through challenges</p>
             </div>
             
             <div class="grid grid-cols-3 gap-3" id="badges-container">
@@ -317,28 +313,28 @@
           </div>
     
           <!-- Needs Review -->
-          <div class="util-panel rounded-xl flex flex-col h-[280px]">
-            <div class="p-5 border-b border-slate-200 dark:border-[#262626]">
+          <div class="util-panel rounded-xl flex flex-col h-[280px] transition-all duration-200 hover:border-zinc-700/60">
+            <div class="p-4 border-b border-zinc-200 dark:border-zinc-800">
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Needs Review</h3>
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Needs Review</h3>
               </div>
             </div>
-            <ul id="review-list" class="divide-y divide-slate-100 dark:divide-[#262626] overflow-y-auto custom-scrollbar flex-grow">
-              <li class="p-5 text-sm text-slate-500 dark:text-slate-400 text-center">No problems marked for review.</li>
+            <ul id="review-list" class="divide-y divide-zinc-100 dark:divide-zinc-800/80 overflow-y-auto custom-scrollbar flex-grow">
+              <li class="p-5 text-sm text-zinc-500 dark:text-zinc-400 text-center">No problems marked for review.</li>
             </ul>
           </div>
     
           <!-- Weakness Mapper -->
-          <div class="util-panel rounded-xl p-6">
-            <div class="mb-6">
+          <div class="util-panel rounded-xl p-6 transition-all duration-200 hover:border-zinc-700/60">
+            <div class="mb-5">
               <div class="flex justify-between items-center mb-1">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Strength Map</h3>
-                <span class="text-xs text-slate-500 dark:text-slate-400" id="overall-score">—</span>
+                <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Strength Map</h3>
+                <span class="text-xs font-mono font-bold text-zinc-900 dark:text-zinc-100" id="overall-score">—</span>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Category mastery levels</p>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400">Category mastery levels</p>
             </div>
-            <div id="weakness-list" class="space-y-4"></div>
+            <div id="weakness-list" class="space-y-3"></div>
           </div>
       </div>
     </div>
@@ -348,29 +344,29 @@
   <div id="shareModal" style="display: none;" class="share-modal">
     <div class="share-modal-content">
       <div class="flex justify-between items-center mb-6">
-        <h3 class="text-xl font-bold">Share Your Heatmap</h3>
-        <button onclick="closeShareModal()" class="text-2xl cursor-pointer opacity-60 hover:opacity-100">&times;</button>
+        <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Share Your Heatmap</h3>
+        <button onclick="closeShareModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-lg cursor-pointer text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200">&times;</button>
       </div>
 
       <!-- Preview -->
-      <div id="cardPreview" class="mb-6" style="max-height: 300px; overflow-y: auto;">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Generating preview...</p>
+      <div id="cardPreview" class="mb-6 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800" style="max-height: 300px; overflow-y: auto;">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 p-4">Generating preview...</p>
       </div>
 
       <!-- Share Options -->
-      <div class="flex gap-3 flex-wrap mb-6">
-        <button id="twitterShareBtn" onclick="shareToTwitter()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition">
-          <span id="twitterBtnText">Share to Twitter</span>
+      <div class="flex gap-3 flex-wrap mb-5">
+        <button id="twitterShareBtn" onclick="shareToTwitter()" class="flex-1 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 font-semibold text-sm py-2.5 px-4 rounded-full hover:-translate-y-0.5 shadow-sm transition-all duration-200 cursor-pointer">
+          <span id="twitterBtnText">Share on X</span>
         </button>
-        <button id="linkedinShareBtn" onclick="shareToLinkedIn()" class="flex-1 bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition">
-          <span id="linkedinBtnText">Share to LinkedIn</span>
+        <button id="linkedinShareBtn" onclick="shareToLinkedIn()" class="flex-1 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 font-medium text-sm py-2.5 px-4 rounded-full hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+          <span id="linkedinBtnText">Share on LinkedIn</span>
         </button>
-        <button id="copyLinkBtn" onclick="copyCardLink()" class="flex-1 bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-bold py-2 px-4 rounded transition">
+        <button id="copyLinkBtn" onclick="copyCardLink()" class="flex-1 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 font-medium text-sm py-2.5 px-4 rounded-full hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
           <span id="copyBtnText">Copy Link</span>
         </button>
       </div>
 
-      <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Your card will be shared publicly for 30 days</p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 text-center">Your card will be shared publicly for 30 days</p>
     </div>
   </div>
 
@@ -671,9 +667,9 @@
         const container = document.getElementById('badges-container');
         container.innerHTML = Object.entries(BADGES).map(([key, badge]) => {
             return `
-                <div class="badge-slot ${Math.random() > 0.6 ? '' : 'badge-locked'} aspect-square rounded-lg flex flex-col items-center justify-center bg-slate-100 dark:bg-[#1a1a1a] border border-slate-200 dark:border-[#262626] p-2 text-center hover:border-blue-400 dark:hover:border-blue-600 transition" title="${badge.name}">
+                <div class="badge-slot ${Math.random() > 0.6 ? '' : 'badge-locked'} aspect-square rounded-lg flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#141414] border border-zinc-200 dark:border-zinc-800/80 p-2 text-center hover:border-zinc-400 dark:hover:border-zinc-600 hover:-translate-y-0.5 transition-all duration-200" title="${badge.name}">
                     <span class="text-2xl mb-1">${badge.icon}</span>
-                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300 line-clamp-2">${badge.name}</span>
+                    <span class="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300 line-clamp-2">${badge.name}</span>
                 </div>
             `;
         }).join('');
@@ -694,18 +690,18 @@
         container.innerHTML = tasks.map(task => {
             const progress = Math.round((task.current / task.target) * 100);
             return `
-                <div class="group p-3 bg-slate-50 dark:bg-[#0f0f0f] rounded-lg border border-slate-100 dark:border-[#262626] hover:border-blue-300 dark:hover:border-blue-700 transition cursor-pointer">
+                <div class="group p-3 bg-zinc-50 dark:bg-[#141414] rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-400 dark:hover:border-zinc-700 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
                     <div class="flex items-start justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="text-lg">${task.icon}</span>
                             <div>
-                                <p class="text-sm font-bold text-slate-900 dark:text-white">${task.name}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">${task.current}/${task.target} • +${task.xp} XP</p>
+                                <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${task.name}</p>
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400">${task.current}/${task.target} • +${task.xp} XP</p>
                             </div>
                         </div>
                     </div>
-                    <div class="w-full bg-slate-200 dark:bg-[#1a1a1a] h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-1.5 rounded-full transition-all" style="width: ${progress}%"></div>
+                    <div class="w-full bg-zinc-200 dark:bg-zinc-800/80 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all" style="width: ${progress}%"></div>
                     </div>
                 </div>
             `;
@@ -819,11 +815,11 @@
             const dateStr = d.toISOString().split('T')[0];
             const count = counts[dateStr] || 0;
 
-            let bgClass = 'bg-slate-200 dark:bg-[#262626]'; 
-            if (count === 1) bgClass = 'bg-emerald-300 dark:bg-emerald-800';
-            else if (count >= 2) bgClass = 'bg-emerald-500 dark:bg-emerald-500';
+            let bgClass = 'bg-zinc-200 dark:bg-zinc-900 border border-zinc-300/40 dark:border-zinc-800/80'; 
+            if (count === 1) bgClass = 'bg-emerald-300 dark:bg-emerald-600/80 border border-emerald-400/50 dark:border-emerald-500/50';
+            else if (count >= 2) bgClass = 'bg-emerald-500 dark:bg-emerald-400 border border-emerald-500 dark:border-emerald-300';
 
-            grid.innerHTML += `<div class="w-3.5 h-3.5 rounded-sm ${bgClass} transition-colors cursor-help hover:ring-2 hover:ring-offset-1 dark:hover:ring-offset-[#0a0a0a]" title="${count} solves on ${dateStr}"></div>`;
+            grid.innerHTML += `<div class="w-3.5 h-3.5 rounded-sm ${bgClass} transition-colors cursor-help hover:ring-2 hover:ring-offset-1 ring-zinc-400 dark:ring-zinc-500 dark:hover:ring-offset-[#0a0a0a]" title="${count} solves on ${dateStr}"></div>`;
         }
     }
 
@@ -833,9 +829,9 @@
 
         list.innerHTML = reviewData.map(item => `
             <li>
-                <a href="./solutions/${item.problem_slug}.html" class="flex justify-between items-center p-4 hover:bg-slate-50 dark:hover:bg-[#1a1a1a] transition-colors group cursor-pointer">
-                    <span class="text-sm font-semibold text-slate-900 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition capitalize">${item.problem_slug.replace(/-/g, ' ')}</span>
-                    <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                <a href="./solutions/${item.problem_slug}.html" class="flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-[#161616] transition-all duration-200 group cursor-pointer border-b border-zinc-100 dark:border-zinc-800/50 last:border-0">
+                    <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-200 group-hover:text-white transition capitalize">${item.problem_slug.replace(/-/g, ' ')}</span>
+                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-white transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </a>
             </li>
         `).join('');
@@ -868,17 +864,17 @@
         
         list.innerHTML = sorted.map(([category, stats]) => {
             const percent = Math.round((stats.solved / stats.total) * 100);
-            let colorClass = 'bg-red-500';
+            let colorClass = 'bg-rose-500';
             if (percent >= 80) colorClass = 'bg-emerald-500';
             else if (percent >= 40) colorClass = 'bg-amber-500';
             
             return `
-                <div class="stat-card p-3 rounded-lg bg-slate-50 dark:bg-[#0f0f0f] border border-slate-100 dark:border-[#262626]">
+                <div class="stat-card p-3 rounded-lg bg-zinc-50 dark:bg-[#141414] border border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all duration-200">
                     <div class="flex justify-between items-end mb-2">
-                        <span class="text-sm font-bold text-slate-700 dark:text-slate-300">${category}</span>
-                        <span class="text-xs font-mono text-slate-500 dark:text-slate-400">${stats.solved}/${stats.total} • ${percent}%</span>
+                        <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">${category}</span>
+                        <span class="text-xs font-mono text-zinc-500 dark:text-zinc-400">${stats.solved}/${stats.total} • ${percent}%</span>
                     </div>
-                    <div class="w-full bg-slate-200 dark:bg-[#1a1a1a] h-2 rounded-full overflow-hidden">
+                    <div class="w-full bg-zinc-200 dark:bg-zinc-800/80 h-2 rounded-full overflow-hidden">
                         <div class="${colorClass} h-2 rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
                     </div>
                 </div>

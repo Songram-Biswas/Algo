@@ -11,3 +11,4 @@ builder.py
 node_modules/
 .vscode/
 .DS_Store
+.vercel

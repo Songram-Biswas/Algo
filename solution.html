@@ -10,34 +10,41 @@
     tailwind.config = { darkMode: 'class' }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    body {
+      font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -0.01em;
+    }
+    .mono { font-family: 'Geist Mono', 'JetBrains Mono', monospace; }
+    .theme-orb { width: 20px; height: 20px; border-radius: 50%; position: relative; transition: all .3s; flex-shrink: 0; }
+    .theme-orb.sun { background: radial-gradient(circle at 35% 30%, #ffe9b0, #f5a623 70%); box-shadow: 0 0 12px 2px rgba(245,166,35,0.55); }
+    .theme-orb.moon { background: radial-gradient(circle at 65% 35%, #d8def8, #e4e4e7 75%); box-shadow: 0 0 10px 1px rgba(228,228,231,0.3); }
+    .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:7px; height:7px; border-radius:50%; background:#141414; opacity:.5; }
+    .theme-orb.moon::after { content:''; position:absolute; top:10px; left:10px; width:4px; height:4px; border-radius:50%; background:#141414; opacity:.4; }
 
-  .theme-orb { width: 20px; height: 20px; border-radius: 50%; position: relative; transition: all .3s; flex-shrink: 0; }
-  .theme-orb.sun { background: radial-gradient(circle at 35% 30%, #ffe9b0, #f5a623 70%); box-shadow: 0 0 12px 2px rgba(245,166,35,0.55); }
-  .theme-orb.moon { background: radial-gradient(circle at 65% 35%, #d8def8, #94a3ff 75%); box-shadow: 0 0 10px 1px rgba(148,163,255,0.5); }
-  .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:7px; height:7px; border-radius:50%; background:#0a0a14; opacity:.35; }
-  .theme-orb.moon::after { content:''; position:absolute; top:10px; left:10px; width:4px; height:4px; border-radius:50%; background:#0a0a14; opacity:.3; }
-
-    .glass { backdrop-filter: blur(12px) saturate(180%); -webkit-backdrop-filter: blur(12px) saturate(180%); }
-    body { background-attachment: fixed; }
-    html.dark body { background-color: #020617; background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.08) 0px, transparent 50%); }
-    html:not(.dark) body { background-color: #f8fafc; background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.1) 0px, transparent 50%); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen font-sans selection:bg-blue-500/30 flex flex-col transition-colors duration-200">
+<body class="bg-zinc-50 text-zinc-900 dark:bg-[#0a0a0a] dark:text-zinc-100 min-h-screen selection:bg-zinc-500/20 flex flex-col transition-colors duration-200">
 
-  <header class="sticky top-0 z-50 bg-white/60 dark:bg-slate-950/60 border-b border-slate-200/50 dark:border-slate-800/50 glass px-6 py-4 flex justify-between items-center w-full mb-8">
-    <a href="./dashboard" class="flex items-center gap-3 hover:opacity-80 transition">
-      <img src="./icon.png" alt="algoHub" class="w-9 h-9 shadow-md rounded-xl">
-      <span class="text-xl font-black tracking-tight font-sans text-slate-900 dark:text-white">algoHub</span>
+  <header class="sticky top-0 z-50 border-b px-6 py-3.5 flex justify-between items-center w-full backdrop-blur-md bg-white/75 dark:bg-[#0a0a0a]/80 border-zinc-200 dark:border-zinc-800/80 transition-all mb-8">
+    <a href="./dashboard" class="flex items-center gap-3 hover:opacity-80 transition group">
+      <img src="./favicon.png" alt="algoHub" class="w-8 h-8 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-800/80 group-hover:scale-105 transition-transform duration-200">
+      <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">algoHub</span>
     </a>
 
     <div class="flex items-center gap-4">
-      <button id="theme-toggle" class="p-2 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer"><span id="theme-orb" class="theme-orb sun"></span></button>
+      <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/60 dark:bg-[#161616] hover:bg-zinc-200/60 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 cursor-pointer shadow-sm" title="Toggle theme">
+        <span id="theme-orb" class="theme-orb sun"></span>
+      </button>
 
-      <div class="flex items-center gap-3 border-l border-slate-300/50 dark:border-slate-700/50 pl-4">
-        <img id="user-avatar" class="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 object-cover shadow-sm" src="" alt="Profile">
-        <button id="btn-logout" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/30 dark:hover:bg-red-900/50 dark:text-red-400 border border-red-200 dark:border-red-900/50 px-4 py-2 rounded-xl font-bold transition cursor-pointer shadow-sm">Sign Out</button>
+      <div class="flex items-center gap-3 pl-4 border-l border-zinc-200 dark:border-zinc-800">
+        <img id="user-avatar" class="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-800 object-cover bg-zinc-100 dark:bg-zinc-800" src="" alt="Profile">
+        <button id="btn-logout" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Sign Out</button>
       </div>
     </div>
   </header>
@@ -45,12 +52,12 @@
   <div class="w-full max-w-6xl mx-auto px-6 pb-12 flex-grow flex flex-col lg:flex-row gap-8 items-start">
 
     <aside class="w-full lg:w-72 lg:sticky lg:top-24 flex-shrink-0 order-2 lg:order-1">
-      <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h3 id="sidebar-category-title" class="text-sm font-bold text-slate-900 dark:text-white"></h3>
-          <span id="sidebar-progress" class="text-xs font-mono text-slate-500 dark:text-slate-400"></span>
+      <div class="bg-white dark:bg-[#111111] border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+        <div class="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between">
+          <h3 id="sidebar-category-title" class="text-xs font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400"></h3>
+          <span id="sidebar-progress" class="text-xs mono text-zinc-400 font-semibold"></span>
         </div>
-        <ul id="sidebar-list" class="max-h-[70vh] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60"></ul>
+        <ul id="sidebar-list" class="max-h-[70vh] overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800/60"></ul>
       </div>
     </aside>
 
@@ -58,44 +65,43 @@
 
     <div class="flex justify-between items-start mb-6">
       <div>
-        <div id="breadcrumb" class="text-sm text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-2"></div>
-        <h1 id="prob-title" class="text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight"></h1>
-        <span id="prob-diff" class="px-2.5 py-1 rounded text-xs font-semibold tracking-wide"></span>
+        <div id="breadcrumb" class="text-xs text-zinc-500 dark:text-zinc-400 mb-2 flex items-center gap-2 mono uppercase tracking-wider"></div>
+        <h1 id="prob-title" class="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-3 tracking-tight"></h1>
+        <span id="prob-diff" class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"></span>
       </div>
-      <button id="btn-copy-page" class="flex items-center gap-2 bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-sm transition cursor-pointer shadow-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+      <button id="btn-copy-page" class="flex items-center gap-2 bg-white dark:bg-[#111111] hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
         <span>Copy page</span>
       </button>
     </div>
 
-    <a id="leetcode-link" href="#" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 text-sm font-medium mb-12 w-max">
-      Solve on LeetCode
-      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+    <a id="leetcode-link" href="#" target="_blank" class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 rounded-full px-3.5 py-1.5 bg-white dark:bg-[#111111] hover:-translate-y-0.5 transition-all duration-200 shadow-sm flex items-center gap-1.5 w-max mb-12">
+      Solve on LeetCode ↗
     </a>
 
     <div class="flex justify-end mt-auto mb-6 gap-3">
-      <button id="btn-toggle-review" class="flex items-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium transition shadow-sm cursor-pointer">
+      <button id="btn-toggle-review" class="flex items-center gap-2 bg-white dark:bg-[#111111] hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer">
         <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span id="text-review-status">Needs Review</span>
       </button>
 
-      <button id="btn-toggle-solved" class="flex items-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium transition shadow-sm cursor-pointer">
-        <svg id="icon-unsolved" class="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle></svg>
+      <button id="btn-toggle-solved" class="flex items-center gap-2 bg-white dark:bg-[#111111] hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer">
+        <svg id="icon-unsolved" class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle></svg>
         <svg id="icon-solved" class="w-4 h-4 text-emerald-500 dark:text-emerald-400 hidden" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
         <span id="text-solved-status">Mark as Complete</span>
       </button>
     </div>
 
-    <div class="text-right text-xs text-slate-500 dark:text-slate-400 mb-6">
+    <div class="text-right text-xs text-zinc-500 dark:text-zinc-400 mb-6 mono">
       Last updated on <span id="date-label"></span>
     </div>
 
-    <div class="border-t border-slate-200 dark:border-slate-800 py-6 flex justify-between items-center">
-      <a id="link-prev" href="#" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 text-sm font-semibold invisible">
+    <div class="border-t border-zinc-200 dark:border-zinc-800 py-6 flex justify-between items-center">
+      <a id="link-prev" href="#" class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition flex items-center gap-2 text-sm font-semibold invisible">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
         <span id="text-prev"></span>
       </a>
-      <a id="link-next" href="#" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 text-sm font-semibold invisible">
+      <a id="link-next" href="#" class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition flex items-center gap-2 text-sm font-semibold invisible">
         <span id="text-next"></span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
       </a>
@@ -264,13 +270,13 @@
 
             const icon = isSolved
                 ? `<svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`
-                : `<div class="w-3.5 h-3.5 rounded-full border-2 border-slate-300 dark:border-slate-700 flex-shrink-0"></div>`;
+                : `<div class="w-3.5 h-3.5 rounded-full border-2 border-zinc-300 dark:border-zinc-700 flex-shrink-0"></div>`;
 
             return `
                 <li>
-                    <a href="./solution?slug=${p.slug}" class="flex items-center gap-3 px-4 py-3 text-sm transition-colors ${isActive ? 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-500' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 border-l-2 border-transparent'}">
+                    <a href="./solution?slug=${p.slug}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${isActive ? 'bg-zinc-100 dark:bg-[#18181b] border-l-2 border-zinc-900 dark:border-white' : 'hover:bg-zinc-50 dark:hover:bg-[#141414] border-l-2 border-transparent'}">
                         ${icon}
-                        <span class="truncate ${isActive ? 'font-semibold text-blue-700 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}">${p.title}</span>
+                        <span class="truncate ${isActive ? 'font-semibold text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}">${p.title}</span>
                     </a>
                 </li>
             `;
@@ -285,7 +291,7 @@
         currentDifficulty = prob.difficulty;
         
         document.title = `algoHub | ${prob.title}`;
-        document.getElementById('breadcrumb').innerHTML = `<a href="./category?course=blind-75&type=${encodeURIComponent(prob.category)}" class="hover:text-blue-500 transition">${prob.category}</a> <span class="text-slate-400 dark:text-slate-600">&gt;</span> <span># ${prob.title}</span>`;
+        document.getElementById('breadcrumb').innerHTML = `<a href="./category?course=blind-75&type=${encodeURIComponent(prob.category)}" class="hover:text-zinc-900 dark:hover:text-white transition">${prob.category}</a> <span class="text-zinc-400 dark:text-zinc-600">&gt;</span> <span># ${prob.title}</span>`;
         document.getElementById('prob-title').textContent = prob.title;
         document.getElementById('leetcode-link').href = `https://leetcode.com/problems/${prob.slug}/`;
         
@@ -295,9 +301,9 @@
 
         const diffEl = document.getElementById('prob-diff');
         diffEl.textContent = prob.difficulty;
-        if(prob.difficulty === 'Easy') diffEl.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400";
-        if(prob.difficulty === 'Medium') diffEl.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400";
-        if(prob.difficulty === 'Hard') diffEl.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400";
+        if(prob.difficulty === 'Easy') diffEl.className = "px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+        if(prob.difficulty === 'Medium') diffEl.className = "px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
+        if(prob.difficulty === 'Hard') diffEl.className = "px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20";
 
         if (probIndex > 0) {
             const prev = PROBLEM_REGISTRY[probIndex - 1];
@@ -404,14 +410,14 @@
 
     function showRewardToast(xpGain, streak, streakExtended) {
         const toast = document.createElement('div');
-        toast.className = "fixed bottom-6 right-6 z-[100] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-2xl px-5 py-4 flex items-center gap-3 translate-y-4 opacity-0 transition-all duration-300";
+        toast.className = "fixed bottom-6 right-6 z-[100] bg-white dark:bg-[#111111] border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-2xl px-5 py-4 flex items-center gap-3 translate-y-4 opacity-0 transition-all duration-300";
         toast.innerHTML = `
-            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
             </div>
             <div>
-                <p class="text-sm font-bold text-slate-900 dark:text-white">+${xpGain} XP earned</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <p class="text-sm font-bold text-zinc-900 dark:text-zinc-100">+${xpGain} XP earned</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                     <span>🔥</span>
                     ${streakExtended ? `${streak} day streak${streak > 1 ? ' — keep it going!' : ' started!'}` : `Streak: ${streak} day${streak > 1 ? 's' : ''}`}
                 </p>
@@ -436,8 +442,8 @@
         const btnReview = document.getElementById('btn-toggle-review');
         const textReview = document.getElementById('text-review-status');
 
-        btnSolved.className = "flex items-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium transition shadow-sm cursor-pointer";
-        btnReview.className = "flex items-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm font-medium transition shadow-sm cursor-pointer";
+        btnSolved.className = "flex items-center gap-2 bg-white dark:bg-[#111111] hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer";
+        btnReview.className = "flex items-center gap-2 bg-white dark:bg-[#111111] hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer";
         
         iconUnsolved.classList.remove('hidden');
         iconSolved.classList.add('hidden');
@@ -445,12 +451,12 @@
         textReview.textContent = 'Needs Review';
 
         if (currentStatus === 'solved') {
-            btnSolved.className = "flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer";
+            btnSolved.className = "flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm";
             iconUnsolved.classList.add('hidden');
             iconSolved.classList.remove('hidden');
             textSolved.textContent = 'Completed';
         } else if (currentStatus === 'review') {
-            btnReview.className = "flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer";
+            btnReview.className = "flex items-center gap-2 bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm";
             textReview.textContent = 'Reviewing';
         }
     }
