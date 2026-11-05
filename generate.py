@@ -80,6 +80,9 @@ def render(problem):
     html = html.replace('__SIDEBAR_JSON__', json.dumps(problem['sidebar']))
     html = html.replace('__PREV_NEXT_HTML__', problem['prev_next_html'])
     html = html.replace('__TRACE_JS__', problem['trace_js'])
+    course = problem.get('course', 'blind-75')
+    html = html.replace('course=blind-75&type=__CATEGORY_URL__', f"course={course}&type={problem['category']}")
+    html = html.replace('course=blind-75', f"course={course}")
 
     return html
 
@@ -1039,10 +1042,2332 @@ class Solution:
 '''
 ))
 
+# /Users/songram/.gemini/antigravity/brain/39462a12-ba4c-41e9-b197-de792c14e4ba/scratch/extra_problems.py
+
+# GENERIC_TRICKS already defined
+_IGNORE = [
+  '<strong class="accent-text">Count the loops, not the lines.</strong> One pass over n elements with O(1) work per element gives O(n); nested loops over the same input usually multiply.',
+  '<strong class="accent-text">Hash set/map operations are O(1) average.</strong> A loop doing one lookup or insert per iteration stays O(n) overall — the hash structure doesn\'t add a factor.',
+  '<strong class="accent-text">Space tracks "extra" memory, not the input.</strong> Ask what new structure you\'re building and how big it can get.',
+  '<strong class="accent-text">Two pointers / sliding window ≠ O(n²).</strong> Even though it looks like nested loops, each pointer only ever moves forward — total work stays O(n).'
+]
+
+EXTRA_PROBLEMS = []
+
+# 0. two-sum
+EXTRA_PROBLEMS.append(dict(
+    slug='two-sum', title='Two Sum', category='Array', course='blind-75',
+    difficulty='Easy', tags=['Hash Map', 'Array'],
+    leetcode_url='https://leetcode.com/problems/two-sum/',
+    statement_html='''<p class="leading-relaxed mb-4">
+          Given an array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code> and an integer <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">target</code>, return the indices of the two numbers that add up to <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">target</code>.
+        </p>
+        <p class="text-soft text-sm mb-5">You may assume exactly one solution exists, and you may not use the same element twice.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums = [2,7,11,15], target = 9</p><p><span class="text-soft">Output:</span> [0,1] <span class="cm">// nums[0] + nums[1] == 9</span></p>',
+    trace_html='''<div id="array-track" class="flex gap-3 pb-5"></div>
+          <div class="w-full">
+            <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">hash map &nbsp;(value → index)</p>
+            <div id="map-track" class="flex gap-2 flex-wrap min-h-[42px]"></div>
+          </div>''',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Single pass through the array. Each hash map lookup and insert takes O(1) time on average.',
+    space_big='O(n)',
+    space_explain='The hash map stores at most n elements in the worst case before a complement is found.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Hash map complement trick:</strong> Instead of checking all pairs with two loops (O(n²)), check if (target - num) is in a hash map as you iterate (O(n)).'],
+    approach_html='''<p class="mb-3">A brute-force check of every pair costs O(n²). The interview-standard fix: walk the array once, and at each index ask <em>"have I already seen the number that completes this pair?"</em></p>
+          <ol class="list-decimal list-inside space-y-2 text-soft">
+            <li>For the current number, compute <code class="mono accent-text">complement = target - num</code>.</li>
+            <li>Look up <code class="mono accent-text">complement</code> in the hash map.</li>
+            <li>If found, return the stored index and the current index — done in a single pass.</li>
+            <li>Otherwise, store <code class="mono accent-text">num → index</code> and continue.</li>
+          </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        seen = {}  # value -> index
+
+        for i, num in enumerate(nums):
+            complement = target - num
+
+            if complement in seen:
+                return [seen[complement], i]
+
+            seen[num] = i
+
+        return []  # no solution found''',
+    trace_js='''
+    const NUMS = [2, 7, 11, 15];
+    const TARGET = 9;
+    let steps = [];
+    let stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const seen = new Map();
+      for (let i = 0; i < NUMS.length; i++) {
+        const complement = TARGET - NUMS[i];
+        steps.push({ type: 'scan', i, complement, mapSnapshot: new Map(seen) });
+        if (seen.has(complement)) {
+          steps.push({ type: 'hit', i, j: seen.get(complement), mapSnapshot: new Map(seen) });
+          break;
+        }
+        seen.set(NUMS[i], i);
+        steps.push({ type: 'store', i, mapSnapshot: new Map(seen) });
+      }
+    }
+
+    function buildTrace() {
+      computeSteps();
+      stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((n, i) => `
+        <div class="cell" id="cell-${i}">${n}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('map-track').innerHTML = '';
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => {
+        const cell = document.getElementById(`cell-${i}`);
+        cell.classList.remove('scan', 'hit', 'done');
+      });
+
+      const mapTrack = document.getElementById('map-track');
+      const caption = document.getElementById('trace-caption');
+
+      if (stepIndex < 0) {
+        mapTrack.innerHTML = '';
+        caption.textContent = 'Click "Next" to begin.';
+        updateStepControls();
+        return;
+      }
+
+      const step = steps[stepIndex];
+      mapTrack.innerHTML = Array.from(step.mapSnapshot.entries())
+        .map(([val, idx]) => `<div class="map-slot filled">${val} → ${idx}</div>`).join('')
+        || '<span class="text-xs text-soft mono">empty</span>';
+
+      for (let i = 0; i < step.i; i++) document.getElementById(`cell-${i}`).classList.add('done');
+
+      if (step.type === 'scan') {
+        document.getElementById(`cell-${step.i}`).classList.add('scan');
+        caption.textContent = `i=${step.i} → complement of ${NUMS[step.i]} is ${step.complement}. Checking map…`;
+      } else if (step.type === 'store') {
+        document.getElementById(`cell-${step.i}`).classList.add('scan');
+        caption.textContent = `Not found. Storing nums[${step.i}]=${NUMS[step.i]} → index ${step.i} in the map.`;
+      } else if (step.type === 'hit') {
+        document.getElementById(`cell-${step.i}`).classList.add('hit');
+        document.getElementById(`cell-${step.j}`).classList.add('hit');
+        caption.textContent = `Found! nums[${step.j}] + nums[${step.i}] = ${TARGET} → return [${step.j}, ${step.i}]`;
+      }
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# reorder-list
+EXTRA_PROBLEMS.append(dict(
+    slug='reorder-list', title='Reorder List', category='Linked List', course='blind-75',
+    difficulty='Medium', tags=['Linked List', 'Two Pointers'],
+    leetcode_url='https://leetcode.com/problems/reorder-list/',
+    statement_html='''<p class="leading-relaxed mb-4">
+          You are given the head of a singly linked list. The list can be represented as <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → L1 → … → Ln-1 → Ln</code>. Reorder it in place to the form <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …</code>
+        </p>
+        <p class="text-soft text-sm mb-5">You may not modify the values in the list's nodes — only the nodes themselves may be rearranged.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> head = [1,2,3,4,5]</p><p><span class="text-soft">Output:</span> [1,5,2,4,3] <span class="cm">// weave front and back halves together</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Finding middle (n/2), reversing second half (n/2), and merging (n/2) each take linear time.',
+    space_big='O(1)',
+    space_explain='In-place pointer rewiring uses a constant number of pointer variables.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Three-Phase Linked List:</strong> (1) Find middle with slow/fast pointers, (2) reverse second half, (3) merge halves alternately.'],
+    approach_html='''<p class="mb-3">Break the problem into three classic linked list subproblems:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Find the middle of the linked list using slow and fast pointers.</li>
+      <li>Split the list and reverse the second half in place.</li>
+      <li>Merge the first half and the reversed second half node-by-node alternately.</li>
+    </ol>''',
+    python_code='''from typing import Optional
+
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution:
+    def reorderList(self, head: Optional[ListNode]) -> None:
+        if not head or not head.next:
+            return
+
+        # 1. Find middle
+        slow, fast = head, head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        # 2. Reverse second half
+        prev, curr = None, slow.next
+        slow.next = None
+        while curr:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
+
+        # 3. Merge alternating
+        first, second = head, prev
+        while second:
+            tmp1, tmp2 = first.next, second.next
+            first.next = second
+            second.next = tmp1
+            first, second = tmp1, tmp2''',
+    trace_js='''
+    const LIST = [1, 2, 3, 4, 5];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ state: [1, 2, 3, 4, 5], note: "Initial List: 1 → 2 → 3 → 4 → 5" });
+      steps.push({ state: [1, 2, 3], note: "Phase 1: Middle found at node 3 (slow pointer)" });
+      steps.push({ state: [5, 4], note: "Phase 2: Second half [4, 5] reversed to [5, 4]" });
+      steps.push({ state: [1, 5, 2, 4, 3], note: "Phase 3: Merged alternating → 1 → 5 → 2 → 4 → 3" });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = LIST.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">node ${i+1}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      LIST.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      LIST.forEach((v, i) => {
+        if (s.state.includes(v)) document.getElementById(`cell-${i}`).classList.add('hit');
+      });
+      caption.textContent = s.note;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# best-time-to-buy-and-sell-stock
+EXTRA_PROBLEMS.append(dict(
+    slug='best-time-to-buy-and-sell-stock',
+    title='Best Time to Buy and Sell Stock',
+    category='Array',
+    course='blind-75',
+    difficulty='Easy',
+    tags=['Array', 'Dynamic Programming'],
+    leetcode_url='https://leetcode.com/problems/best-time-to-buy-and-sell-stock/',
+    statement_html='''<p class="leading-relaxed mb-4">You are given an array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">prices</code> where <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">prices[i]</code> is the price of a given stock on the <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">i</code>th day.</p>
+    <p class="leading-relaxed mb-4">You want to maximize your profit by choosing a <strong>single day</strong> to buy one stock and choosing a <strong>different day in the future</strong> to sell that stock.</p>
+    <p class="text-soft text-sm mb-5">Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return <code class="mono">0</code>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> prices = [7,1,5,3,6,4]</p><p><span class="text-soft">Output:</span> 5 <span class="cm">// Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6 - 1 = 5</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Single pass through prices array of length n. Constant work per day.',
+    space_big='O(1)',
+    space_explain='Only two variables needed: min_price and max_profit.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">One pass greedily tracking the minimum:</strong> As you scan forward, every day asks: "if I had bought at the cheapest day seen so far, what is my profit today?"'],
+    approach_html='''<p class="mb-3">A naive brute force computes profit for every buy-sell pair in O(n²). Instead, observe that the best selling day always pairs with the lowest price prior to it:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Maintain <code class="mono accent-text">min_price = infinity</code> and <code class="mono accent-text">max_profit = 0</code>.</li>
+      <li>Iterate through each price in the array.</li>
+      <li>If current price is lower than <code class="mono accent-text">min_price</code>, update <code class="mono accent-text">min_price</code>.</li>
+      <li>Otherwise, calculate potential profit <code class="mono accent-text">price - min_price</code> and update <code class="mono accent-text">max_profit</code>.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        min_price = float('inf')
+        max_profit = 0
+
+        for price in prices:
+            if price < min_price:
+                min_price = price
+            elif price - min_price > max_profit:
+                max_profit = price - min_price
+
+        return max_profit''',
+    trace_js='''
+    const PRICES = [7, 1, 5, 3, 6, 4];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let minPrice = Infinity, minIdx = -1, maxProfit = 0;
+      for (let i = 0; i < PRICES.length; i++) {
+        const p = PRICES[i];
+        let newMin = false, newProfit = false;
+        if (p < minPrice) {
+          minPrice = p; minIdx = i; newMin = true;
+        } else if (p - minPrice > maxProfit) {
+          maxProfit = p - minPrice; newProfit = true;
+        }
+        steps.push({ i, p, minPrice, minIdx, profit: p - minPrice, maxProfit, newMin, newProfit });
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = PRICES.map((p, i) => `<div class="cell" id="cell-${i}">${p}<span class="idx">day ${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      PRICES.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < s.i; i++) document.getElementById(`cell-${i}`).classList.add('discarded');
+      document.getElementById(`cell-${s.i}`).classList.add(s.newProfit ? 'hit' : 'scan');
+      if (s.minIdx >= 0) {
+        document.getElementById(`cell-${s.minIdx}`).classList.remove('discarded');
+        document.getElementById(`cell-${s.minIdx}`).classList.add('scan');
+        document.getElementById(`ptr-${s.minIdx}`).textContent = 'min';
+      }
+      document.getElementById(`ptr-${s.i}`).textContent = s.i === s.minIdx ? 'min' : 'sell?';
+      caption.textContent = `Day ${s.i}: Price $${s.p} → min price so far: $${s.minPrice} | Profit: $${Math.max(0, s.profit)} | Max profit: $${s.maxProfit}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# product-of-array-except-self
+EXTRA_PROBLEMS.append(dict(
+    slug='product-of-array-except-self',
+    title='Product of Array Except Self',
+    category='Array',
+    course='blind-75',
+    difficulty='Medium',
+    tags=['Array', 'Prefix Sum'],
+    leetcode_url='https://leetcode.com/problems/product-of-array-except-self/',
+    statement_html='''<p class="leading-relaxed mb-4">Given an integer array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code>, return an array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">answer</code> such that <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">answer[i]</code> is equal to the product of all the elements of <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code> except <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums[i]</code>.</p>
+    <p class="leading-relaxed mb-4">The product of any prefix or suffix of <code class="mono">nums</code> is guaranteed to fit in a <strong>32-bit</strong> integer.</p>
+    <p class="text-soft text-sm mb-5">You must write an algorithm that runs in <code class="mono">O(n)</code> time and <strong>without using the division operation</strong>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums = [1,2,3,4]</p><p><span class="text-soft">Output:</span> [24,12,8,6]</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Two linear passes over the array of size n (prefix pass then postfix pass).',
+    space_big='O(1)',
+    space_explain='Output array does not count toward extra space complexity per problem constraints.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Prefix * Postfix:</strong> Any element\'s missing factor is just (product of all items to its left) * (product of all items to its right).'],
+    approach_html='''<p class="mb-3">We cannot use division, so we split each answer into two components: the prefix product (elements before index i) and the postfix product (elements after index i):</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Initialize the output array with 1s.</li>
+      <li>Pass left-to-right: each cell gets the cumulative product of elements to its left.</li>
+      <li>Pass right-to-left: multiply each cell by the cumulative product of elements to its right.</li>
+      <li>Return the resulting output array in O(n) time and O(1) extra space.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        res = [1] * n
+
+        prefix = 1
+        for i in range(n):
+            res[i] = prefix
+            prefix *= nums[i]
+
+        postfix = 1
+        for i in range(n - 1, -1, -1):
+            res[i] *= postfix
+            postfix *= nums[i]
+
+        return res''',
+    trace_js='''
+    const NUMS = [1, 2, 3, 4];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const n = NUMS.length;
+      let res = new Array(n).fill(1);
+      let prefix = 1;
+      for (let i = 0; i < n; i++) {
+        res[i] = prefix;
+        steps.push({ pass: 'prefix', i, res: [...res], prefix, val: NUMS[i] });
+        prefix *= NUMS[i];
+      }
+      let postfix = 1;
+      for (let i = n - 1; i >= 0; i--) {
+        res[i] *= postfix;
+        steps.push({ pass: 'postfix', i, res: [...res], postfix, val: NUMS[i] });
+        postfix *= NUMS[i];
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">1<span class="idx">nums[${i}]=${v}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      NUMS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).childNodes[0].nodeValue = s.res[i];
+      });
+      document.getElementById(`cell-${s.i}`).classList.add(s.pass === 'postfix' ? 'hit' : 'scan');
+      document.getElementById(`ptr-${s.i}`).textContent = s.pass;
+      caption.textContent = `[${s.pass.toUpperCase()} PASS] index ${s.i}: multiplier=${s.pass === 'prefix' ? s.prefix : s.postfix} → res[${s.i}]=${s.res[s.i]}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# longest-substring-without-repeating-characters
+EXTRA_PROBLEMS.append(dict(
+    slug='longest-substring-without-repeating-characters',
+    title='Longest Substring Without Repeating Characters',
+    category='String',
+    course='blind-75',
+    difficulty='Medium',
+    tags=['Hash Table', 'String', 'Sliding Window'],
+    leetcode_url='https://leetcode.com/problems/longest-substring-without-repeating-characters/',
+    statement_html='''<p class="leading-relaxed mb-4">Given a string <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s</code>, find the length of the <strong>longest substring</strong> without duplicate characters.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> s = "abcabcbb"</p><p><span class="text-soft">Output:</span> 3 <span class="cm">// The answer is "abc", with the length of 3.</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(min(m, n))', 'O(n²)'],
+    time_big='O(n)',
+    time_explain='Each character is visited at most twice by left and right sliding window pointers.',
+    space_big='O(min(m, n))',
+    space_explain='Hash set size bounded by the character alphabet size m or string length n.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Sliding Window with Set:</strong> Expand right pointer greedily. If a collision occurs, contract left pointer until unique.'],
+    approach_html='''<p class="mb-3">Use a sliding window <code class="mono accent-text">[left...right]</code> backed by a hash set to detect duplicate characters:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Iterate <code class="mono accent-text">right</code> pointer across the string.</li>
+      <li>While <code class="mono accent-text">s[right]</code> already exists in the set, remove <code class="mono accent-text">s[left]</code> and advance <code class="mono accent-text">left</code>.</li>
+      <li>Insert <code class="mono accent-text">s[right]</code> into the set.</li>
+      <li>Update max length as <code class="mono accent-text">max_len = max(max_len, right - left + 1)</code>.</li>
+    </ol>''',
+    python_code='''class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        char_set = set()
+        left = 0
+        max_len = 0
+
+        for right in range(len(s)):
+            while s[right] in char_set:
+                char_set.remove(s[left])
+                left += 1
+            char_set.add(s[right])
+            max_len = max(max_len, right - left + 1)
+
+        return max_len''',
+    trace_js='''
+    const STR = "abcabcbb";
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let charSet = new Set(), left = 0, maxLen = 0;
+      for (let right = 0; right < STR.length; right++) {
+        const c = STR[right];
+        while (charSet.has(c)) {
+          steps.push({ left, right, charSet: new Set(charSet), maxLen, conflict: true, c });
+          charSet.delete(STR[left]);
+          left++;
+        }
+        charSet.add(c);
+        maxLen = Math.max(maxLen, right - left + 1);
+        steps.push({ left, right, charSet: new Set(charSet), maxLen, conflict: false, c });
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = STR.split('').map((ch, i) => `<div class="cell" id="cell-${i}">${ch}<span class="idx">i=${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      STR.split('').forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < STR.length; i++) {
+        if (i < s.left || i > s.right) document.getElementById(`cell-${i}`).classList.add('discarded');
+        else document.getElementById(`cell-${i}`).classList.add(s.conflict ? 'scan' : 'hit');
+      }
+      document.getElementById(`ptr-${s.left}`).textContent = 'L';
+      document.getElementById(`ptr-${s.right}`).textContent = (s.left === s.right) ? 'L/R' : 'R';
+      caption.textContent = s.conflict
+        ? `Duplicate '${s.c}' found! Shrinking window left (L=${s.left})`
+        : `Window "${STR.slice(s.left, s.right + 1)}" valid (len: ${s.right - s.left + 1}) — Max len: ${s.maxLen}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# valid-anagram
+EXTRA_PROBLEMS.append(dict(
+    slug='valid-anagram',
+    title='Valid Anagram',
+    category='String',
+    course='blind-75',
+    difficulty='Easy',
+    tags=['Hash Table', 'String', 'Sorting'],
+    leetcode_url='https://leetcode.com/problems/valid-anagram/',
+    statement_html='''<p class="leading-relaxed mb-4">Given two strings <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s</code> and <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">t</code>, return <code class="mono">true</code> if <code class="mono">t</code> is an anagram of <code class="mono">s</code>, and <code class="mono">false</code> otherwise.</p>
+    <p class="text-soft text-sm mb-5">An <strong>anagram</strong> is a word formed by rearranging the letters of a different word, using all original letters exactly once.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> s = "anagram", t = "nagaram"</p><p><span class="text-soft">Output:</span> true</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Counting frequencies of both strings takes linear time in string length n.',
+    space_big='O(1)',
+    space_explain='Alphabet has at most 26 lowercase English characters.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Fixed 26-character frequency table:</strong> If lengths match, count char frequencies. If all net counts hit 0, it is an anagram.'],
+    approach_html='''<p class="mb-3">Two strings are anagrams if and only if they contain the exact same characters in equal counts:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>If <code class="mono accent-text">len(s) != len(t)</code>, return false immediately.</li>
+      <li>Tally character counts of <code class="mono accent-text">s</code> in a frequency table.</li>
+      <li>Decrement counts using characters of <code class="mono accent-text">t</code>.</li>
+      <li>If any count drops below 0, return false; otherwise return true.</li>
+    </ol>''',
+    python_code='''from collections import Counter
+
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s) != len(t):
+            return False
+        return Counter(s) == Counter(t)''',
+    trace_js='''
+    const S = "anagram", T = "nagaram";
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const counts = {};
+      for (let i = 0; i < S.length; i++) {
+        counts[S[i]] = (counts[S[i]] || 0) + 1;
+        steps.push({ phase: 'count_s', i, char: S[i], counts: { ...counts } });
+      }
+      for (let i = 0; i < T.length; i++) {
+        counts[T[i]] = (counts[T[i]] || 0) - 1;
+        steps.push({ phase: 'check_t', i, char: T[i], counts: { ...counts } });
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = S.split('').map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">s[${i}]</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      S.split('').forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.i % S.length}`).classList.add(s.phase === 'check_t' ? 'hit' : 'scan');
+      caption.textContent = s.phase === 'count_s'
+        ? `[TALLY S] Scanning s[${s.i}]='${s.char}' → count=${s.counts[s.char]}`
+        : `[MATCH T] Matching t[${s.i}]='${s.char}' → remaining needed count=${s.counts[s.char]}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+
+# /Users/songram/.gemini/antigravity/brain/39462a12-ba4c-41e9-b197-de792c14e4ba/scratch/extra_problems_neetcode.py
+
+
+NEETCODE_PROBLEMS = []
+
+# 1. top-k-frequent-elements
+NEETCODE_PROBLEMS.append(dict(
+    slug='top-k-frequent-elements',
+    title='Top K Frequent Elements',
+    category='Arrays & Hashing',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Hash Table', 'Bucket Sort', 'Heap (Priority Queue)'],
+    leetcode_url='https://leetcode.com/problems/top-k-frequent-elements/',
+    statement_html='''<p class="leading-relaxed mb-4">Given an integer array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code> and an integer <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">k</code>, return the <code class="mono">k</code> most frequent elements. You may return the answer in <strong>any order</strong>.</p>
+    <p class="text-soft text-sm mb-5">Your algorithm's time complexity must be better than <code class="mono">O(n log n)</code>, where n is the array's size.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums = [1,1,1,2,2,3], k = 2</p><p><span class="text-soft">Output:</span> [1,2]</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Bucket sort indexes elements by frequency in range 0..n, avoiding sorting.',
+    space_big='O(n)',
+    space_explain='Hash map and bucket array together scale linearly with n.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Bucket Sort by Frequency:</strong> Instead of sorting by frequency in O(n log n), create n buckets where bucket[freq] holds all numbers with that frequency.'],
+    approach_html='''<p class="mb-3">To beat O(n log n) heap/sorting time, use Bucket Sort:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Count frequencies of each number with a hash map in O(n).</li>
+      <li>Create an array of buckets of size <code class="mono accent-text">len(nums) + 1</code>.</li>
+      <li>Place each number into the bucket corresponding to its frequency count.</li>
+      <li>Scan buckets backwards from <code class="mono accent-text">n</code> down to 1, collecting the first <code class="mono accent-text">k</code> items.</li>
+    </ol>''',
+    python_code='''from typing import List
+from collections import Counter
+
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        count = Counter(nums)
+        buckets = [[] for _ in range(len(nums) + 1)]
+
+        for num, freq in count.items():
+            buckets[freq].append(num)
+
+        res = []
+        for i in range(len(buckets) - 1, 0, -1):
+            for num in buckets[i]:
+                res.append(num)
+                if len(res) == k:
+                    return res
+        return res''',
+    trace_js='''
+    const NUMS = [1, 1, 1, 2, 2, 3];
+    const K = 2;
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ msg: 'Tally frequencies: {1: 3 times, 2: 2 times, 3: 1 time}', res: [] });
+      steps.push({ msg: 'Place into buckets: bucket[3]=[1], bucket[2]=[2], bucket[1]=[3]', res: [] });
+      steps.push({ msg: 'Read bucket[3]: collect number 1', res: [1] });
+      steps.push({ msg: 'Read bucket[2]: collect number 2 → reached k=2 elements!', res: [1, 2] });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      NUMS.forEach((v, i) => {
+        if (s.res.includes(v)) document.getElementById(`cell-${i}`).classList.add('hit');
+      });
+      caption.textContent = `${s.msg} | Result: [${s.res.join(', ')}]`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 2. valid-sudoku
+NEETCODE_PROBLEMS.append(dict(
+    slug='valid-sudoku',
+    title='Valid Sudoku',
+    category='Arrays & Hashing',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Hash Table', 'Matrix'],
+    leetcode_url='https://leetcode.com/problems/valid-sudoku/',
+    statement_html='''<p class="leading-relaxed mb-4">Determine if a <code class="mono">9 x 9</code> Sudoku board is valid. Only the filled cells need to be validated according to the following rules:</p>
+    <ul class="list-disc list-inside space-y-1 text-soft mb-4">
+      <li>Each row must contain the digits 1-9 without repetition.</li>
+      <li>Each column must contain the digits 1-9 without repetition.</li>
+      <li>Each of the nine 3 x 3 sub-boxes of the grid must contain the digits 1-9 without repetition.</li>
+    </ul>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> 9x9 standard valid board</p><p><span class="text-soft">Output:</span> true</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n²)', 'O(9!)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(n²)'],
+    time_big='O(1)',
+    time_explain='The board size is fixed at 9 x 9 (81 iterations of constant-time hash set checks).',
+    space_big='O(1)',
+    space_explain='Fixed hash sets for 9 rows, 9 columns, and 9 sub-boxes.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Box coordinates (r // 3, c // 3):</strong> Mapping (r, c) to box (r // 3, c // 3) identifies which 3x3 block any cell belongs to.'],
+    approach_html='''<p class="mb-3">Traverse the board cell by cell with 3 sets of hash collections:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Maintain hash sets for each row <code class="mono accent-text">rows[r]</code>.</li>
+      <li>Maintain hash sets for each column <code class="mono accent-text">cols[c]</code>.</li>
+      <li>Maintain hash sets for each sub-box <code class="mono accent-text">boxes[(r // 3, c // 3)]</code>.</li>
+      <li>If any non-empty digit is already in its row, column, or box set, return false immediately.</li>
+    </ol>''',
+    python_code='''from typing import List
+from collections import defaultdict
+
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        rows = defaultdict(set)
+        cols = defaultdict(set)
+        boxes = defaultdict(set)
+
+        for r in range(9):
+            for c in range(9):
+                val = board[r][c]
+                if val == '.':
+                    continue
+
+                box_key = (r // 3, c // 3)
+                if val in rows[r] or val in cols[c] or val in boxes[box_key]:
+                    return False
+
+                rows[r].add(val)
+                cols[c].add(val)
+                boxes[box_key].add(val)
+
+        return True''',
+    trace_js='''
+    const SAMPLE_ROW = ["5","3",".",".","7",".",".",".","."];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const seen = new Set();
+      for (let c = 0; c < SAMPLE_ROW.length; c++) {
+        const val = SAMPLE_ROW[c];
+        if (val === '.') steps.push({ c, val, status: 'empty' });
+        else {
+          const dup = seen.has(val);
+          seen.add(val);
+          steps.push({ c, val, status: dup ? 'duplicate' : 'valid' });
+        }
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = SAMPLE_ROW.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">col ${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      SAMPLE_ROW.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.c}`).classList.add(s.status === 'valid' ? 'hit' : 'scan');
+      caption.textContent = `Row 0, Col ${s.c}: Cell='${s.val}' → ${s.status === 'empty' ? 'Skipped empty cell' : 'Verified valid in row/col/box set!'}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 3. valid-palindrome
+NEETCODE_PROBLEMS.append(dict(
+    slug='valid-palindrome',
+    title='Valid Palindrome',
+    category='Two Pointers',
+    course='neetcode-150',
+    difficulty='Easy',
+    tags=['Two Pointers', 'String'],
+    leetcode_url='https://leetcode.com/problems/valid-palindrome/',
+    statement_html='''<p class="leading-relaxed mb-4">A phrase is a <strong>palindrome</strong> if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.</p>
+    <p class="text-soft text-sm mb-5">Given a string <code class="mono">s</code>, return <code class="mono">true</code> if it is a palindrome, or <code class="mono">false</code> otherwise.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> s = "race a car"</p><p><span class="text-soft">Output:</span> false</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Two pointers traverse inwards; each character inspected at most once.',
+    space_big='O(1)',
+    space_explain='Only two index pointers in-place without copying filtered strings.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">In-place Two Pointers:</strong> Skipping invalid characters on the fly keeps extra space O(1).'],
+    approach_html='''<p class="mb-3">Position two pointers at the ends of string <code class="mono accent-text">s</code> and move toward the center:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Set <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(s) - 1</code>.</li>
+      <li>Advance <code class="mono accent-text">left</code> past any non-alphanumeric character.</li>
+      <li>Retreat <code class="mono accent-text">right</code> past any non-alphanumeric character.</li>
+      <li>Compare <code class="mono accent-text">s[left].lower() == s[right].lower()</code>. If mismatched, return false.</li>
+    </ol>''',
+    python_code='''class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        left, right = 0, len(s) - 1
+
+        while left < right:
+            while left < right and not s[left].isalnum():
+                left += 1
+            while left < right and not s[right].isalnum():
+                right -= 1
+
+            if s[left].lower() != s[right].lower():
+                return False
+
+            left += 1
+            right -= 1
+
+        return True''',
+    trace_js='''
+    const CHARS = ['r', 'a', 'c', 'e', 'c', 'a', 'r'];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let l = 0, r = CHARS.length - 1;
+      while (l <= r) {
+        steps.push({ l, r, match: CHARS[l] === CHARS[r] });
+        l++; r--;
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = CHARS.map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">i=${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      CHARS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.l}`).classList.add('hit');
+      document.getElementById(`cell-${s.r}`).classList.add('hit');
+      document.getElementById(`ptr-${s.l}`).textContent = 'L';
+      document.getElementById(`ptr-${s.r}`).textContent = (s.l === s.r) ? 'L/R' : 'R';
+      caption.textContent = `Left='${CHARS[s.l]}' at i=${s.l} matches Right='${CHARS[s.r]}' at i=${s.r}!`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 4. two-sum-ii-input-array-is-sorted
+NEETCODE_PROBLEMS.append(dict(
+    slug='two-sum-ii-input-array-is-sorted',
+    title='Two Sum II - Input Array Is Sorted',
+    category='Two Pointers',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Two Pointers', 'Binary Search'],
+    leetcode_url='https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/',
+    statement_html='''<p class="leading-relaxed mb-4">Given a <strong>1-indexed</strong> array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">numbers</code> that is already <strong>sorted in non-decreasing order</strong>, find two numbers such that they add up to a specific <code class="mono">target</code> number.</p>
+    <p class="text-soft text-sm mb-5">Return the indices of the two numbers, 1-indexed, as an integer array <code class="mono">[index1, index2]</code> of length 2.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> numbers = [2,7,11,15], target = 9</p><p><span class="text-soft">Output:</span> [1,2] <span class="cm">// 2 + 7 == 9</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Two pointers converge inward in at most n comparisons.',
+    space_big='O(1)',
+    space_explain='No auxiliary data structures used; sorted order allows constant memory.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Sorted Array Leverage:</strong> If sum > target, only moving right pointer left can decrease sum. If sum < target, only moving left pointer right can increase it.'],
+    approach_html='''<p class="mb-3">Because the array is already sorted, we can use two pointers with zero extra space:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Set <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(numbers) - 1</code>.</li>
+      <li>Compute <code class="mono accent-text">sum = numbers[left] + numbers[right]</code>.</li>
+      <li>If <code class="mono accent-text">sum == target</code>, return <code class="mono accent-text">[left + 1, right + 1]</code>.</li>
+      <li>If <code class="mono accent-text">sum > target</code>, decrease <code class="mono accent-text">right</code>; else increase <code class="mono accent-text">left</code>.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        left = 0
+        right = len(numbers) - 1
+
+        while left < right:
+            current_sum = numbers[left] + numbers[right]
+            if current_sum == target:
+                return [left + 1, right + 1]
+            elif current_sum < target:
+                left += 1
+            else:
+                right -= 1
+
+        return []''',
+    trace_js='''
+    const NUMS = [2, 7, 11, 15];
+    const TARGET = 9;
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let l = 0, r = NUMS.length - 1;
+      while (l < r) {
+        const sum = NUMS[l] + NUMS[r];
+        steps.push({ l, r, sum, match: sum === TARGET });
+        if (sum === TARGET) break;
+        if (sum > TARGET) r--; else l++;
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">#${i+1}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.l}`).classList.add(s.match ? 'hit' : 'scan');
+      document.getElementById(`cell-${s.r}`).classList.add(s.match ? 'hit' : 'scan');
+      document.getElementById(`ptr-${s.l}`).textContent = 'L';
+      document.getElementById(`ptr-${s.r}`).textContent = 'R';
+      caption.textContent = `L=${s.l+1} (${NUMS[s.l]}) + R=${s.r+1} (${NUMS[s.r]}) = ${s.sum} ${s.match ? '== TARGET! Return [' + (s.l+1) + ', ' + (s.r+1) + ']' : (s.sum > TARGET ? '> target → move R left' : '< target → move L right')}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 5. 3sum
+NEETCODE_PROBLEMS.append(dict(
+    slug='3sum',
+    title='3Sum',
+    category='Two Pointers',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Two Pointers', 'Sorting'],
+    leetcode_url='https://leetcode.com/problems/3sum/',
+    statement_html='''<p class="leading-relaxed mb-4">Given an integer array <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code>, return all the triplets <code class="mono">[nums[i], nums[j], nums[k]]</code> such that <code class="mono">i != j</code>, <code class="mono">i != k</code>, and <code class="mono">j != k</code>, and <code class="mono">nums[i] + nums[j] + nums[k] == 0</code>.</p>
+    <p class="text-soft text-sm mb-5">Notice that the solution set must not contain duplicate triplets.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums = [-1,0,1,2,-1,-4]</p><p><span class="text-soft">Output:</span> [[-1,-1,2],[-1,0,1]]</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(n)', 'O(n log n)', 'O(n²)', 'O(n³)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(n²)'],
+    time_big='O(n²)',
+    time_explain='Sorting takes O(n log n), followed by nested two-pointer search taking O(n²).',
+    space_big='O(1)',
+    space_explain='Excluding the return list, sorting and two-pointers use O(1) auxiliary space in Python.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Sort + Two Pointers:</strong> Sort first. Loop i from 0..n-2 and run Two Sum II on the remaining subarray. Skip duplicates on i, left, and right.'],
+    approach_html='''<p class="mb-3">Reduce the 3Sum problem to Two Sum on a sorted list:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Sort the array in ascending order.</li>
+      <li>Iterate <code class="mono accent-text">i</code> from 0 to <code class="mono accent-text">n - 2</code>. If <code class="mono accent-text">nums[i] > 0</code>, stop early.</li>
+      <li>Skip duplicate values of <code class="mono accent-text">nums[i]</code>.</li>
+      <li>Use two pointers <code class="mono accent-text">left = i + 1</code> and <code class="mono accent-text">right = n - 1</code> to find pairs summing to <code class="mono accent-text">-nums[i]</code>.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        res = []
+
+        for i in range(len(nums) - 2):
+            if nums[i] > 0:
+                break
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+
+            left, right = i + 1, len(nums) - 1
+            while left < right:
+                total = nums[i] + nums[left] + nums[right]
+                if total < 0:
+                    left += 1
+                elif total > 0:
+                    right -= 1
+                else:
+                    res.append([nums[i], nums[left], nums[right]])
+                    while left < right and nums[left] == nums[left + 1]:
+                        left += 1
+                    while left < right and nums[right] == nums[right - 1]:
+                        right -= 1
+                    left += 1
+                    right -= 1
+
+        return res''',
+    trace_js='''
+    const NUMS = [-4, -1, -1, 0, 1, 2];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ i: 0, l: 1, r: 5, sum: -4 + -1 + 2, match: false, note: 'nums[0]=-4: sum=-3 < 0' });
+      steps.push({ i: 1, l: 2, r: 5, sum: -1 + -1 + 2, match: true, note: 'nums[1]=-1: [-1, -1, 2] = 0! MATCH' });
+      steps.push({ i: 1, l: 3, r: 4, sum: -1 + 0 + 1, match: true, note: 'nums[1]=-1: [-1, 0, 1] = 0! MATCH' });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">i=${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.i}`).classList.add('scan');
+      document.getElementById(`cell-${s.l}`).classList.add(s.match ? 'hit' : 'scan');
+      document.getElementById(`cell-${s.r}`).classList.add(s.match ? 'hit' : 'scan');
+      document.getElementById(`ptr-${s.i}`).textContent = 'i';
+      document.getElementById(`ptr-${s.l}`).textContent = 'L';
+      document.getElementById(`ptr-${s.r}`).textContent = 'R';
+      caption.textContent = `${s.note}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 6. trapping-rain-water
+NEETCODE_PROBLEMS.append(dict(
+    slug='trapping-rain-water',
+    title='Trapping Rain Water',
+    category='Two Pointers',
+    course='neetcode-150',
+    difficulty='Hard',
+    tags=['Array', 'Two Pointers', 'Dynamic Programming', 'Stack'],
+    leetcode_url='https://leetcode.com/problems/trapping-rain-water/',
+    statement_html='''<p class="leading-relaxed mb-4">Given <code class="mono">n</code> non-negative integers representing an elevation map where the width of each bar is <code class="mono">1</code>, compute how much water it can trap after raining.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> height = [0,1,0,2,1,0,1,3,2,1,2,1]</p><p><span class="text-soft">Output:</span> 6</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Left and right pointers traverse inward until meeting; each index processed once.',
+    space_big='O(1)',
+    space_explain='Only four tracking variables: left, right, left_max, right_max.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Bottleneck Principle:</strong> Water trapped at any bar is determined by min(max_left, max_right) - height[i]. Move the pointer with the smaller max inward.'],
+    approach_html='''<p class="mb-3">Two pointers avoid the O(n) prefix/suffix memory arrays:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Initialize <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(height) - 1</code>.</li>
+      <li>Track <code class="mono accent-text">left_max</code> and <code class="mono accent-text">right_max</code>.</li>
+      <li>If <code class="mono accent-text">left_max < right_max</code>, advance left; add <code class="mono accent-text">left_max - height[left]</code> to water.</li>
+      <li>Otherwise retreat right; add <code class="mono accent-text">right_max - height[right]</code> to water.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        if not height:
+            return 0
+
+        left, right = 0, len(height) - 1
+        left_max, right_max = height[left], height[right]
+        water = 0
+
+        while left < right:
+            if left_max < right_max:
+                left += 1
+                left_max = max(left_max, height[left])
+                water += left_max - height[left]
+            else:
+                right -= 1
+                right_max = max(right_max, height[right])
+                water += right_max - height[right]
+
+        return water''',
+    trace_js='''
+    const HEIGHTS = [0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let l = 0, r = HEIGHTS.length - 1, lMax = HEIGHTS[l], rMax = HEIGHTS[r], water = 0;
+      while (l < r) {
+        if (lMax < rMax) {
+          l++;
+          lMax = Math.max(lMax, HEIGHTS[l]);
+          const added = Math.max(0, lMax - HEIGHTS[l]);
+          water += added;
+          steps.push({ l, r, lMax, rMax, added, water });
+        } else {
+          r--;
+          rMax = Math.max(rMax, HEIGHTS[r]);
+          const added = Math.max(0, rMax - HEIGHTS[r]);
+          water += added;
+          steps.push({ l, r, lMax, rMax, added, water });
+        }
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = HEIGHTS.map((h, i) => `<div class="cell" id="cell-${i}" style="height:${28 + h * 8}px; align-items:flex-end; padding-bottom:4px;">${h}<span class="idx">i=${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      HEIGHTS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.l}`).classList.add(s.added > 0 ? 'hit' : 'scan');
+      document.getElementById(`cell-${s.r}`).classList.add(s.added > 0 ? 'hit' : 'scan');
+      document.getElementById(`ptr-${s.l}`).textContent = 'L';
+      document.getElementById(`ptr-${s.r}`).textContent = 'R';
+      caption.textContent = `L=${s.l}, R=${s.r} | LeftMax=${s.lMax}, RightMax=${s.rMax} | Added +${s.added} water → Total: ${s.water}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 7. permutation-in-string
+NEETCODE_PROBLEMS.append(dict(
+    slug='permutation-in-string',
+    title='Permutation in String',
+    category='Sliding Window',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Hash Table', 'Two Pointers', 'String', 'Sliding Window'],
+    leetcode_url='https://leetcode.com/problems/permutation-in-string/',
+    statement_html='''<p class="leading-relaxed mb-4">Given two strings <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s1</code> and <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s2</code>, return <code class="mono">true</code> if <code class="mono">s2</code> contains a permutation of <code class="mono">s1</code>, or <code class="mono">false</code> otherwise.</p>
+    <p class="text-soft text-sm mb-5">In other words, return <code class="mono">true</code> if one of <code class="mono">s1</code>'s permutations is the substring of <code class="mono">s2</code>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> s1 = "ab", s2 = "eidbaooo"</p><p><span class="text-soft">Output:</span> true <span class="cm">// s2 contains "ba" which is a permutation of "ab".</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(len(s2))', 'O(len(s1) * len(s2))', 'O(26!)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(len(s2))',
+    time_explain='Fixed-size sliding window slides across s2 in a single linear pass.',
+    space_big='O(1)',
+    space_explain='Two frequency arrays of fixed size 26 for lowercase English letters.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Fixed Window Length len(s1):</strong> Since permutations must have identical length, keep window size strictly equal to len(s1).'],
+    approach_html='''<p class="mb-3">Slide a fixed-size window across <code class="mono accent-text">s2</code>:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>If <code class="mono accent-text">len(s1) > len(s2)</code>, return false.</li>
+      <li>Initialize frequency counts for <code class="mono accent-text">s1</code> and the first <code class="mono accent-text">len(s1)</code> chars of <code class="mono accent-text">s2</code>.</li>
+      <li>Slide the window right: add new incoming char, decrement/remove old outgoing char.</li>
+      <li>If the window frequency matches <code class="mono accent-text">s1</code> frequency, return true.</li>
+    </ol>''',
+    python_code='''from collections import Counter
+
+class Solution:
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        if len(s1) > len(s2):
+            return False
+
+        s1_count = Counter(s1)
+        window = Counter(s2[:len(s1)])
+
+        if s1_count == window:
+            return True
+
+        for i in range(len(s1), len(s2)):
+            window[s2[i]] += 1
+            old_char = s2[i - len(s1)]
+            window[old_char] -= 1
+            if window[old_char] == 0:
+                del window[old_char]
+
+            if window == s1_count:
+                return True
+
+        return False''',
+    trace_js='''
+    const S1 = "ab", S2 = "eidbaooo";
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const k = S1.length;
+      for (let i = 0; i <= S2.length - k; i++) {
+        const sub = S2.slice(i, i + k);
+        const match = (sub === 'ab' || sub === 'ba');
+        steps.push({ i, sub, match });
+        if (match) break;
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = S2.split('').map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      S2.split('').forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < S2.length; i++) {
+        if (i >= s.i && i < s.i + S1.length) document.getElementById(`cell-${i}`).classList.add(s.match ? 'hit' : 'scan');
+        else document.getElementById(`cell-${i}`).classList.add('discarded');
+      }
+      caption.textContent = `Window [${s.i}..${s.i+1}]: "${s.sub}" ${s.match ? 'is a permutation of "ab"! Return true.' : 'does not match target "ab".'}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 8. minimum-window-substring
+NEETCODE_PROBLEMS.append(dict(
+    slug='minimum-window-substring',
+    title='Minimum Window Substring',
+    category='Sliding Window',
+    course='neetcode-150',
+    difficulty='Hard',
+    tags=['Hash Table', 'String', 'Sliding Window'],
+    leetcode_url='https://leetcode.com/problems/minimum-window-substring/',
+    statement_html='''<p class="leading-relaxed mb-4">Given two strings <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s</code> and <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">t</code> of lengths <code class="mono">m</code> and <code class="mono">n</code> respectively, return the <strong>minimum window substring</strong> of <code class="mono">s</code> such that every character in <code class="mono">t</code> (including duplicates) is included in the window.</p>
+    <p class="text-soft text-sm mb-5">If there is no such substring, return the empty string <code class="mono">""</code>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> s = "ADOBECODEBANC", t = "ABC"</p><p><span class="text-soft">Output:</span> "BANC"</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(m + n)', 'O(m * n)', 'O(m log n)', 'O(2^n)'],
+    quiz_space_opts=['O(1)', 'O(m + n)', 'O(m * n)'],
+    time_big='O(m + n)',
+    time_explain='Right pointer visits each character once; left pointer advances at most m times.',
+    space_big='O(m + n)',
+    space_explain='Hash maps for character frequency requirements of t and active window characters of s.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Have vs Need variables:</strong> Track the count of unique matching characters to verify window validity in O(1) instead of comparing full maps.'],
+    approach_html='''<p class="mb-3">Sliding window with dynamic contraction:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Map target character frequencies with <code class="mono accent-text">target_counts</code> and track <code class="mono accent-text">need = len(target_counts)</code>.</li>
+      <li>Expand <code class="mono accent-text">right</code> pointer and update <code class="mono accent-text">have</code> when a character frequency is met.</li>
+      <li>While <code class="mono accent-text">have == need</code>, record minimum window, then contract from <code class="mono accent-text">left</code>.</li>
+      <li>Return shortest valid slice or empty string.</li>
+    </ol>''',
+    python_code='''from collections import Counter
+
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        if not t or not s:
+            return ""
+
+        target_counts = Counter(t)
+        window_counts = {}
+        have, need = 0, len(target_counts)
+        res, res_len = [-1, -1], float("inf")
+        l = 0
+
+        for r in range(len(s)):
+            c = s[r]
+            window_counts[c] = window_counts.get(c, 0) + 1
+
+            if c in target_counts and window_counts[c] == target_counts[c]:
+                have += 1
+
+            while have == need:
+                if (r - l + 1) < res_len:
+                    res = [l, r]
+                    res_len = r - l + 1
+
+                window_counts[s[l]] -= 1
+                if s[l] in target_counts and window_counts[s[l]] < target_counts[s[l]]:
+                    have -= 1
+                l += 1
+
+        l, r = res
+        return s[l:r + 1] if res_len != float("inf") else ""''',
+    trace_js='''
+    const S = "ADOBECODEBANC";
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ l: 0, r: 5, sub: "ADOBEC", match: true, best: "ADOBEC" });
+      steps.push({ l: 5, r: 10, sub: "CODEBA", match: true, best: "CODEBA" });
+      steps.push({ l: 9, r: 12, sub: "BANC", match: true, best: "BANC" });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = S.split('').map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      S.split('').forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < S.length; i++) {
+        if (i >= s.l && i <= s.r) document.getElementById(`cell-${i}`).classList.add('hit');
+        else document.getElementById(`cell-${i}`).classList.add('discarded');
+      }
+      caption.textContent = `Valid window found at [${s.l}..${s.r}]: "${s.sub}" → Current best window: "${s.best}" (len ${s.best.length})`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 9. sliding-window-maximum
+NEETCODE_PROBLEMS.append(dict(
+    slug='sliding-window-maximum',
+    title='Sliding Window Maximum',
+    category='Sliding Window',
+    course='neetcode-150',
+    difficulty='Hard',
+    tags=['Array', 'Queue', 'Sliding Window', 'Monotonic Queue'],
+    leetcode_url='https://leetcode.com/problems/sliding-window-maximum/',
+    statement_html='''<p class="leading-relaxed mb-4">You are given an array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code>, there is a sliding window of size <code class="mono">k</code> which is moving from the very left of the array to the very right.</p>
+    <p class="text-soft text-sm mb-5">You can only see the <code class="mono">k</code> numbers in the window. Each time the sliding window moves right by one position, return the <strong>max sliding window</strong>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums = [1,3,-1,-3,5,3,6,7], k = 3</p><p><span class="text-soft">Output:</span> [3,3,5,5,6,7]</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(n)', 'O(n log k)', 'O(n * k)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(k)', 'O(n)'],
+    time_big='O(n)',
+    time_explain='Each array element is pushed and popped from the monotonic deque at most once.',
+    space_big='O(k)',
+    space_explain='The monotonic deque stores at most k indices corresponding to the active window.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Monotonic Decreasing Deque:</strong> Maintain elements in decreasing order in a deque. Smaller preceding elements can never be the maximum again.'],
+    approach_html='''<p class="mb-3">Monotonic Deque tracks candidates in O(n) total time:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Maintain a double-ended queue storing indices in decreasing value order.</li>
+      <li>Before adding <code class="mono accent-text">nums[i]</code>, pop smaller elements from the back.</li>
+      <li>Evict indices from the front that have fallen out of the <code class="mono accent-text">k</code>-length window.</li>
+      <li>The front index of the deque is always the maximum for the current window.</li>
+    </ol>''',
+    python_code='''from typing import List
+from collections import deque
+
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        q = deque()  # stores indices
+        res = []
+
+        for i, n in enumerate(nums):
+            while q and nums[q[-1]] < n:
+                q.pop()
+            q.append(i)
+
+            if q[0] <= i - k:
+                q.popleft()
+
+            if i >= k - 1:
+                res.append(nums[q[0]])
+
+        return res''',
+    trace_js='''
+    const NUMS = [1, 3, -1, -3, 5, 3, 6, 7];
+    const K = 3;
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const res = [3, 3, 5, 5, 6, 7];
+      for (let i = 0; i <= NUMS.length - K; i++) {
+        steps.push({ start: i, end: i + K - 1, max: res[i] });
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < NUMS.length; i++) {
+        if (i >= s.start && i <= s.end) {
+          document.getElementById(`cell-${i}`).classList.add(NUMS[i] === s.max ? 'hit' : 'scan');
+        } else {
+          document.getElementById(`cell-${i}`).classList.add('discarded');
+        }
+      }
+      caption.textContent = `Window [${s.start}..${s.end}]: [${NUMS.slice(s.start, s.end + 1).join(', ')}] → Window Max is ${s.max}!`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 10. valid-parentheses
+NEETCODE_PROBLEMS.append(dict(
+    slug='valid-parentheses',
+    title='Valid Parentheses',
+    category='Stack',
+    course='neetcode-150',
+    difficulty='Easy',
+    tags=['String', 'Stack'],
+    leetcode_url='https://leetcode.com/problems/valid-parentheses/',
+    statement_html='''<p class="leading-relaxed mb-4">Given a string <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">s</code> containing just the characters <code class="mono">'('</code>, <code class="mono">')'</code>, <code class="mono">'{'</code>, <code class="mono">'}'</code>, <code class="mono">'['</code> and <code class="mono">']'</code>, determine if the input string is valid.</p>
+    <p class="text-soft text-sm mb-5">Open brackets must be closed by the same type of brackets in the correct order, and every close bracket has a corresponding open bracket.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> s = "()[]{}"</p><p><span class="text-soft">Output:</span> true</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Single pass through s with O(1) push and pop stack operations.',
+    space_big='O(n)',
+    space_explain='In the worst case (all open brackets), stack holds n characters.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">LIFO Stack Matching:</strong> Each closing bracket must pair with the most recently opened unmatched bracket.'],
+    approach_html='''<p class="mb-3">Use a stack to match brackets in last-in, first-out order:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Map each closing bracket to its matching open bracket in a dictionary.</li>
+      <li>Iterate through characters: if opening bracket, push to stack.</li>
+      <li>If closing bracket, verify that stack is non-empty and top matches; pop it.</li>
+      <li>Return true if the stack is completely empty at the end.</li>
+    </ol>''',
+    python_code='''class Solution:
+    def isValid(self, s: str) -> bool:
+        stack = []
+        pairs = {')': '(', '}': '{', ']': '['}
+
+        for char in s:
+            if char in pairs:
+                if not stack or stack[-1] != pairs[char]:
+                    return False
+                stack.pop()
+            else:
+                stack.append(char)
+
+        return len(stack) == 0''',
+    trace_js='''
+    const CHARS = ['(', '{', '[', ']', '}', ')'];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const stack = [];
+      const pairs = { ')': '(', '}': '{', ']': '[' };
+      for (let i = 0; i < CHARS.length; i++) {
+        const c = CHARS[i];
+        if (pairs[c]) {
+          const popped = stack.pop();
+          steps.push({ i, c, action: 'pop', stack: [...stack], match: popped === pairs[c] });
+        } else {
+          stack.push(c);
+          steps.push({ i, c, action: 'push', stack: [...stack], match: true });
+        }
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = CHARS.map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      CHARS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.i}`).classList.add(s.action === 'pop' ? 'hit' : 'scan');
+      caption.textContent = `Scanned '${s.c}' → ${s.action.toUpperCase()} | Stack: [${s.stack.join(', ') || 'empty'}]`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 11. min-stack
+NEETCODE_PROBLEMS.append(dict(
+    slug='min-stack',
+    title='Min Stack',
+    category='Stack',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Stack', 'Design'],
+    leetcode_url='https://leetcode.com/problems/min-stack/',
+    statement_html='''<p class="leading-relaxed mb-4">Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.</p>
+    <ul class="list-disc list-inside space-y-1 text-soft mb-4">
+      <li><code class="mono">push(val)</code> pushes element val onto the stack.</li>
+      <li><code class="mono">pop()</code> removes the element on the top of the stack.</li>
+      <li><code class="mono">top()</code> gets the top element of the stack.</li>
+      <li><code class="mono">getMin()</code> retrieves the minimum element in the stack in O(1).</li>
+    </ul>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> ["MinStack","push","push","push","getMin","pop","top","getMin"]<br>[[],[-2],[0],[-3],[],[],[],[]]</p><p><span class="text-soft">Output:</span> [null,null,null,null,-3,null,0,-2]</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1) all ops', 'O(n) getMin', 'O(log n) push', 'O(n) push'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(n²)'],
+    time_big='O(1)',
+    time_explain='Every operation (push, pop, top, getMin) executes in constant O(1) time.',
+    space_big='O(n)',
+    space_explain='Auxiliary minimum tracking stack scales linearly with total number of elements.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Parallel Min Stack:</strong> Store the running minimum alongside every element. When an element pops, its corresponding min automatically pops too.'],
+    approach_html='''<p class="mb-3">Use two synchronized stacks:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Main stack stores all pushed values.</li>
+      <li>Min stack stores <code class="mono accent-text">min(val, min_stack[-1])</code> for each push.</li>
+      <li>On <code class="mono accent-text">pop()</code>, pop from both stacks.</li>
+      <li><code class="mono accent-text">getMin()</code> simply returns <code class="mono accent-text">min_stack[-1]</code> in O(1) time.</li>
+    </ol>''',
+    python_code='''class MinStack:
+    def __init__(self):
+        self.stack = []
+        self.min_stack = []
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        min_val = min(val, self.min_stack[-1] if self.min_stack else val)
+        self.min_stack.append(min_val)
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.min_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.min_stack[-1]''',
+    trace_js='''
+    const OPS = [
+      { op: "push(-2)", stack: [-2], min: [-2] },
+      { op: "push(0)", stack: [-2, 0], min: [-2, -2] },
+      { op: "push(-3)", stack: [-2, 0, -3], min: [-2, -2, -3] },
+      { op: "getMin() → -3", stack: [-2, 0, -3], min: [-2, -2, -3] },
+      { op: "pop()", stack: [-2, 0], min: [-2, -2] },
+      { op: "getMin() → -2", stack: [-2, 0], min: [-2, -2] }
+    ];
+    let stepIndex = -1;
+
+    function buildTrace() {
+      stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = OPS.map((o, i) => `<div class="cell" id="cell-${i}" style="width:auto; padding:0 12px; font-size:13px;">${o.op}</div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      OPS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = OPS[stepIndex];
+      document.getElementById(`cell-${stepIndex}`).classList.add('hit');
+      caption.textContent = `${s.op} | Main Stack: [${s.stack.join(', ')}] | Min Stack Top: ${s.min[s.min.length - 1]}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${OPS.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= OPS.length - 1;
+    }
+'''
+))
+
+# 12. evaluate-reverse-polish-notation
+NEETCODE_PROBLEMS.append(dict(
+    slug='evaluate-reverse-polish-notation',
+    title='Evaluate Reverse Polish Notation',
+    category='Stack',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Math', 'Stack'],
+    leetcode_url='https://leetcode.com/problems/evaluate-reverse-polish-notation/',
+    statement_html='''<p class="leading-relaxed mb-4">You are given an array of strings <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">tokens</code> that represents an arithmetic expression in a <strong>Reverse Polish Notation</strong> (postfix).</p>
+    <p class="text-soft text-sm mb-5">Evaluate the expression and return an integer that represents its value. Valid operators are <code class="mono">'+'</code>, <code class="mono">'-'</code>, <code class="mono">'*'</code>, and <code class="mono">'/'</code>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> tokens = ["2","1","+","3","*"]</p><p><span class="text-soft">Output:</span> 9 <span class="cm">// ((2 + 1) * 3) = 9</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Single pass through tokens with constant-time stack operations per token.',
+    space_big='O(n)',
+    space_explain='Stack holds operands and intermediate evaluation results.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Operand Stack:</strong> In RPN, operators immediately follow their operands. Push numbers, pop twice on operator, push evaluated result back.'],
+    approach_html='''<p class="mb-3">Evaluate postfix expression in a single pass using an operand stack:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Iterate through each token in the input list.</li>
+      <li>If token is a number, push it onto the stack.</li>
+      <li>If token is an operator, pop operand <code class="mono accent-text">b</code> then operand <code class="mono accent-text">a</code>.</li>
+      <li>Apply operator <code class="mono accent-text">a op b</code> and push the integer result back.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        stack = []
+        for t in tokens:
+            if t in "+-*/":
+                b = stack.pop()
+                a = stack.pop()
+                if t == '+': stack.append(a + b)
+                elif t == '-': stack.append(a - b)
+                elif t == '*': stack.append(a * b)
+                elif t == '/': stack.append(int(a / b))
+            else:
+                stack.append(int(t))
+        return stack[0]''',
+    trace_js='''
+    const TOKENS = ["2", "1", "+", "3", "*"];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ i: 0, t: "2", stack: [2], caption: 'Push 2' });
+      steps.push({ i: 1, t: "1", stack: [2, 1], caption: 'Push 1' });
+      steps.push({ i: 2, t: "+", stack: [3], caption: 'Operator + : 2 + 1 = 3' });
+      steps.push({ i: 3, t: "3", stack: [3, 3], caption: 'Push 3' });
+      steps.push({ i: 4, t: "*", stack: [9], caption: 'Operator * : 3 * 3 = 9' });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = TOKENS.map((t, i) => `<div class="cell" id="cell-${i}">${t}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      TOKENS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.i}`).classList.add(s.t in {"+":1,"*":1} ? 'hit' : 'scan');
+      caption.textContent = `Token '${s.t}': ${s.caption} | Stack: [${s.stack.join(', ')}]`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 13. daily-temperatures
+NEETCODE_PROBLEMS.append(dict(
+    slug='daily-temperatures',
+    title='Daily Temperatures',
+    category='Stack',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Stack', 'Monotonic Stack'],
+    leetcode_url='https://leetcode.com/problems/daily-temperatures/',
+    statement_html='''<p class="leading-relaxed mb-4">Given an array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">temperatures</code> represents the daily temperatures, return an array <code class="mono">answer</code> such that <code class="mono">answer[i]</code> is the number of days you have to wait after the <code class="mono">i</code>th day to get a warmer temperature.</p>
+    <p class="text-soft text-sm mb-5">If there is no future day for which this is possible, keep <code class="mono">answer[i] == 0</code> instead.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> temperatures = [73,74,75,71,69,72,76,73]</p><p><span class="text-soft">Output:</span> [1,1,4,2,1,1,0,0]</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Every day is pushed onto the monotonic stack and popped at most once.',
+    space_big='O(n)',
+    space_explain='Monotonic stack stores pairs of (temperature, index) up to length n.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Monotonic Decreasing Stack:</strong> Keep days waiting for a warmer temperature on a stack in decreasing temperature order. When a warmer day arrives, resolve all smaller days!'],
+    approach_html='''<p class="mb-3">Use a monotonic decreasing stack:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Initialize result array with zeros of size <code class="mono accent-text">len(temperatures)</code>.</li>
+      <li>Iterate through each day with temperature <code class="mono accent-text">t</code> and index <code class="mono accent-text">i</code>.</li>
+      <li>While stack is not empty and <code class="mono accent-text">t > stack[-1][0]</code>, pop <code class="mono accent-text">(prev_t, prev_i)</code> and set <code class="mono accent-text">res[prev_i] = i - prev_i</code>.</li>
+      <li>Push current <code class="mono accent-text">(t, i)</code> to stack.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        res = [0] * len(temperatures)
+        stack = []  # pairs: (temp, index)
+
+        for i, t in enumerate(temperatures):
+            while stack and t > stack[-1][0]:
+                stack_t, stack_i = stack.pop()
+                res[stack_i] = i - stack_i
+            stack.append((t, i))
+
+        return res''',
+    trace_js='''
+    const TEMPS = [73, 74, 75, 71, 69, 72, 76, 73];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      const res = new Array(TEMPS.length).fill(0);
+      const stack = [];
+      for (let i = 0; i < TEMPS.length; i++) {
+        const t = TEMPS[i];
+        while (stack.length && t > stack[stack.length - 1][0]) {
+          const [st, si] = stack.pop();
+          res[si] = i - si;
+          steps.push({ i, t, resolvedIdx: si, wait: i - si, res: [...res] });
+        }
+        stack.push([t, i]);
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = TEMPS.map((t, i) => `<div class="cell" id="cell-${i}">${t}°<span class="idx">day ${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      TEMPS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.i}`).classList.add('hit');
+      document.getElementById(`cell-${s.resolvedIdx}`).classList.add('scan');
+      caption.textContent = `Day ${s.i} (${s.t}°) is warmer than Day ${s.resolvedIdx} (${TEMPS[s.resolvedIdx]}°)! Waited ${s.wait} day(s).`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 14. largest-rectangle-in-histogram
+NEETCODE_PROBLEMS.append(dict(
+    slug='largest-rectangle-in-histogram',
+    title='Largest Rectangle in Histogram',
+    category='Stack',
+    course='neetcode-150',
+    difficulty='Hard',
+    tags=['Array', 'Stack', 'Monotonic Stack'],
+    leetcode_url='https://leetcode.com/problems/largest-rectangle-in-histogram/',
+    statement_html='''<p class="leading-relaxed mb-4">Given an array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">heights</code> representing the histogram\'s bar height where the width of each bar is <code class="mono">1</code>, return the area of the <strong>largest rectangle</strong> in the histogram.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> heights = [2,1,5,6,2,3]</p><p><span class="text-soft">Output:</span> 10 <span class="cm">// Bars at index 2 and 3 with height 5 create rectangle of area 5 * 2 = 10.</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(n)', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n)',
+    time_explain='Each bar is pushed and popped from the monotonic increasing stack at most once.',
+    space_big='O(n)',
+    space_explain='Monotonic stack stores at most n index-height pairs.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Monotonic Increasing Stack:</strong> As long as bars get taller, push to stack. When a shorter bar appears, pop taller bars and compute their maximum extendable width.'],
+    approach_html='''<p class="mb-3">Monotonic stack computes maximum area in linear time:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Maintain a monotonic increasing stack of pairs <code class="mono accent-text">(index, height)</code>.</li>
+      <li>When encountering a bar shorter than stack top, pop from stack.</li>
+      <li>Compute area with popped height across width <code class="mono accent-text">current_i - popped_index</code>.</li>
+      <li>Push the new bar with the leftmost index of any popped bars.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        max_area = 0
+        stack = []  # (index, height)
+
+        for i, h in enumerate(heights):
+            start = i
+            while stack and stack[-1][1] > h:
+                idx, height = stack.pop()
+                max_area = max(max_area, height * (i - idx))
+                start = idx
+            stack.append((start, h))
+
+        for idx, height in stack:
+            max_area = max(max_area, height * (len(heights) - idx))
+
+        return max_area''',
+    trace_js='''
+    const HEIGHTS = [2, 1, 5, 6, 2, 3];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ i: 0, h: 2, maxArea: 2, note: 'Push bar 2' });
+      steps.push({ i: 1, h: 1, maxArea: 2, note: 'Bar 1 < 2 → Pop 2, area=2*1=2' });
+      steps.push({ i: 2, h: 5, maxArea: 5, note: 'Push bar 5' });
+      steps.push({ i: 3, h: 6, maxArea: 6, note: 'Push bar 6' });
+      steps.push({ i: 4, h: 2, maxArea: 10, note: 'Bar 2 < 6, 5 → Pop 6 (area=6), Pop 5 (area=5*2=10! NEW MAX)' });
+      steps.push({ i: 5, h: 3, maxArea: 10, note: 'Final bars processed → Max Area: 10' });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = HEIGHTS.map((h, i) => `<div class="cell" id="cell-${i}" style="height:${28 + h * 7}px; align-items:flex-end; padding-bottom:4px;">${h}<span class="idx">i=${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      HEIGHTS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.i}`).classList.add('hit');
+      caption.textContent = `${s.note} | Running Max Area: ${s.maxArea}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 15. binary-search
+NEETCODE_PROBLEMS.append(dict(
+    slug='binary-search',
+    title='Binary Search',
+    category='Binary Search',
+    course='neetcode-150',
+    difficulty='Easy',
+    tags=['Array', 'Binary Search'],
+    leetcode_url='https://leetcode.com/problems/binary-search/',
+    statement_html='''<p class="leading-relaxed mb-4">Given an array of integers <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums</code> which is sorted in ascending order, and an integer <code class="mono">target</code>, write a function to search <code class="mono">target</code> in <code class="mono">nums</code>.</p>
+    <p class="text-soft text-sm mb-5">If <code class="mono">target</code> exists, then return its index. Otherwise, return <code class="mono">-1</code>. You must write an algorithm with <code class="mono">O(log n)</code> runtime complexity.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums = [-1,0,3,5,9,12], target = 9</p><p><span class="text-soft">Output:</span> 4 <span class="cm">// 9 exists in nums and its index is 4</span></p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'],
+    quiz_space_opts=['O(1)', 'O(log n)', 'O(n)'],
+    time_big='O(log n)',
+    time_explain='Search space is cut strictly in half on every step.',
+    space_big='O(1)',
+    space_explain='Only low, mid, and high pointers are maintained iteratively.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Divide and Conquer by 2:</strong> In a sorted array, comparing with the middle element eliminates half of all remaining candidates.'],
+    approach_html='''<p class="mb-3">Standard binary search on a sorted array:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Initialize <code class="mono accent-text">low = 0</code> and <code class="mono accent-text">high = len(nums) - 1</code>.</li>
+      <li>Compute midpoint <code class="mono accent-text">mid = (low + high) // 2</code>.</li>
+      <li>If <code class="mono accent-text">nums[mid] == target</code>, return <code class="mono accent-text">mid</code>.</li>
+      <li>If <code class="mono accent-text">nums[mid] < target</code>, eliminate left half: <code class="mono accent-text">low = mid + 1</code>.</li>
+      <li>Else eliminate right half: <code class="mono accent-text">high = mid - 1</code>.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        low, high = 0, len(nums) - 1
+
+        while low <= high:
+            mid = (low + high) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                low = mid + 1
+            else:
+                high = mid - 1
+
+        return -1''',
+    trace_js='''
+    const NUMS = [-1, 0, 3, 5, 9, 12];
+    const TARGET = 9;
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let low = 0, high = NUMS.length - 1;
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const match = NUMS[mid] === TARGET;
+        steps.push({ low, mid, high, match });
+        if (match) break;
+        if (NUMS[mid] < TARGET) low = mid + 1; else high = mid - 1;
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">i=${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      NUMS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < NUMS.length; i++) {
+        if (i < s.low || i > s.high) document.getElementById(`cell-${i}`).classList.add('discarded');
+      }
+      document.getElementById(`cell-${s.mid}`).classList.add(s.match ? 'hit' : 'scan');
+      document.getElementById(`ptr-${s.low}`).textContent = 'low';
+      document.getElementById(`ptr-${s.high}`).textContent = (s.low === s.high) ? 'low/high' : 'high';
+      document.getElementById(`ptr-${s.mid}`).textContent = s.match ? 'FOUND' : 'mid';
+      caption.textContent = `low=${s.low}, high=${s.high}, mid=${s.mid} (nums[${s.mid}]=${NUMS[s.mid]}) → ${s.match ? 'Match found! Return ' + s.mid : (NUMS[s.mid] < TARGET ? 'Less than target → search right half' : 'Greater than target → search left half')}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 16. search-a-2d-matrix
+NEETCODE_PROBLEMS.append(dict(
+    slug='search-a-2d-matrix',
+    title='Search a 2D Matrix',
+    category='Binary Search',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Binary Search', 'Matrix'],
+    leetcode_url='https://leetcode.com/problems/search-a-2d-matrix/',
+    statement_html='''<p class="leading-relaxed mb-4">You are given an <code class="mono">m x n</code> integer matrix with the following two properties:</p>
+    <ul class="list-disc list-inside space-y-1 text-soft mb-4">
+      <li>Each row is sorted in non-decreasing order.</li>
+      <li>The first integer of each row is greater than the last integer of the previous row.</li>
+    </ul>
+    <p class="text-soft text-sm mb-5">Given an integer <code class="mono">target</code>, return <code class="mono">true</code> if <code class="mono">target</code> is in <code class="mono">matrix</code> or <code class="mono">false</code> otherwise in <code class="mono">O(log(m * n))</code> time.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3</p><p><span class="text-soft">Output:</span> true</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(log(m * n))', 'O(m + n)', 'O(m * n)', 'O(log m * log n)'],
+    quiz_space_opts=['O(1)', 'O(m * n)', 'O(log(m * n))'],
+    time_big='O(log(m * n))',
+    time_explain='Binary search across virtual flattened 1D array of size m * n.',
+    space_big='O(1)',
+    space_explain='Index math converts 1D mid into (row, col) coordinates with zero memory overhead.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Virtual 1D Mapping:</strong> row = mid // cols, col = mid % cols treats an m x n sorted matrix as a flat sorted 1D array.'],
+    approach_html='''<p class="mb-3">Binary search directly across the entire matrix treated as a virtual 1D array:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Set <code class="mono accent-text">low = 0</code> and <code class="mono accent-text">high = (rows * cols) - 1</code>.</li>
+      <li>Compute virtual midpoint <code class="mono accent-text">mid = (low + high) // 2</code>.</li>
+      <li>Convert to 2D coordinates: <code class="mono accent-text">r = mid // cols</code>, <code class="mono accent-text">c = mid % cols</code>.</li>
+      <li>If <code class="mono accent-text">matrix[r][c] == target</code> return true; adjust low/high accordingly.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        if not matrix or not matrix[0]:
+            return False
+
+        rows, cols = len(matrix), len(matrix[0])
+        low, high = 0, rows * cols - 1
+
+        while low <= high:
+            mid = (low + high) // 2
+            val = matrix[mid // cols][mid % cols]
+
+            if val == target:
+                return True
+            elif val < target:
+                low = mid + 1
+            else:
+                high = mid - 1
+
+        return False''',
+    trace_js='''
+    const FLAT = [1, 3, 5, 7, 10, 11, 16, 20, 23, 30, 34, 60];
+    const TARGET = 3, COLS = 4;
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let low = 0, high = FLAT.length - 1;
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const match = FLAT[mid] === TARGET;
+        const r = Math.floor(mid / COLS), c = mid % COLS;
+        steps.push({ low, mid, high, r, c, val: FLAT[mid], match });
+        if (match) break;
+        if (FLAT[mid] < TARGET) low = mid + 1; else high = mid - 1;
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = FLAT.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">[${Math.floor(i/COLS)},${i%COLS}]</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      FLAT.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'discarded');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      for (let i = 0; i < FLAT.length; i++) {
+        if (i < s.low || i > s.high) document.getElementById(`cell-${i}`).classList.add('discarded');
+      }
+      document.getElementById(`cell-${s.mid}`).classList.add(s.match ? 'hit' : 'scan');
+      document.getElementById(`ptr-${s.mid}`).textContent = s.match ? 'TARGET' : 'mid';
+      caption.textContent = `mid=${s.mid} → matrix[${s.r}][${s.c}] = ${s.val} ${s.match ? '== TARGET! Found.' : (s.val < TARGET ? '< target → search right' : '> target → search left')}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 17. koko-eating-bananas
+NEETCODE_PROBLEMS.append(dict(
+    slug='koko-eating-bananas',
+    title='Koko Eating Bananas',
+    category='Binary Search',
+    course='neetcode-150',
+    difficulty='Medium',
+    tags=['Array', 'Binary Search'],
+    leetcode_url='https://leetcode.com/problems/koko-eating-bananas/',
+    statement_html='''<p class="leading-relaxed mb-4">Koko loves to eat bananas. There are <code class="mono">n</code> piles of bananas, the <code class="mono">i</code>th pile has <code class="mono">piles[i]</code> bananas. The guards will come back in <code class="mono">h</code> hours.</p>
+    <p class="text-soft text-sm mb-5">Koko can decide her bananas-per-hour eating speed of <code class="mono">k</code>. Return the minimum integer <code class="mono">k</code> such that she can eat all the bananas within <code class="mono">h</code> hours.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> piles = [3,6,7,11], h = 8</p><p><span class="text-soft">Output:</span> 4</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(n log(max(piles)))', 'O(n * max(piles))', 'O(n log n)', 'O(n²)'],
+    quiz_space_opts=['O(1)', 'O(n)', 'O(log n)'],
+    time_big='O(n log(max(piles)))',
+    time_explain='Binary search on speed k takes log(max(piles)) steps, each testing n piles.',
+    space_big='O(1)',
+    space_explain='Only tracking boundaries low, high, and candidate speed k.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Binary Search on the Answer Range:</strong> When the solution space is monotonic (if speed k works, any speed > k also works), binary search on range [1..max(piles)].'],
+    approach_html='''<p class="mb-3">Binary search the optimal eating speed <code class="mono accent-text">k</code>:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Set search boundaries <code class="mono accent-text">low = 1</code> and <code class="mono accent-text">high = max(piles)</code>.</li>
+      <li>At each midpoint speed <code class="mono accent-text">k</code>, calculate total hours: <code class="mono accent-text">sum(ceil(p / k))</code>.</li>
+      <li>If hours <code class="mono accent-text"><= h</code>, this speed works — record <code class="mono accent-text">k</code> and try a slower speed (<code class="mono accent-text">high = k - 1</code>).</li>
+      <li>Otherwise speed is too slow; increase speed (<code class="mono accent-text">low = k + 1</code>).</li>
+    </ol>''',
+    python_code='''from typing import List
+import math
+
+class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        low, high = 1, max(piles)
+        res = high
+
+        while low <= high:
+            k = (low + high) // 2
+            hours = sum(math.ceil(p / k) for p in piles)
+
+            if hours <= h:
+                res = k
+                high = k - 1
+            else:
+                low = k + 1
+
+        return res''',
+    trace_js='''
+    const PILES = [3, 6, 7, 11];
+    const H = 8;
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let low = 1, high = 11, res = 11;
+      while (low <= high) {
+        const k = Math.floor((low + high) / 2);
+        let hours = 0;
+        PILES.forEach(p => hours += Math.ceil(p / k));
+        const valid = hours <= H;
+        if (valid) { res = k; high = k - 1; }
+        else { low = k + 1; }
+        steps.push({ k, hours, valid, best: res });
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = PILES.map((p, i) => `<div class="cell" id="cell-${i}">${p}<span class="idx">pile ${i}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      PILES.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      PILES.forEach((_, i) => document.getElementById(`cell-${i}`).classList.add(s.valid ? 'hit' : 'scan'));
+      caption.textContent = `Testing Speed k = ${s.k} bananas/hr → Total hours needed: ${s.hours} hr (limit ${H} hr) | ${s.valid ? 'Valid! Trying smaller speed.' : 'Too slow! Increasing speed.'} Best: k=${s.best}`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+'''
+))
+
+# 18. median-of-two-sorted-arrays
+NEETCODE_PROBLEMS.append(dict(
+    slug='median-of-two-sorted-arrays',
+    title='Median of Two Sorted Arrays',
+    category='Binary Search',
+    course='neetcode-150',
+    difficulty='Hard',
+    tags=['Array', 'Binary Search', 'Divide and Conquer'],
+    leetcode_url='https://leetcode.com/problems/median-of-two-sorted-arrays/',
+    statement_html='''<p class="leading-relaxed mb-4">Given two sorted arrays <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums1</code> and <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">nums2</code> of size <code class="mono">m</code> and <code class="mono">n</code> respectively, return the <strong>median</strong> of the two sorted arrays.</p>
+    <p class="text-soft text-sm mb-5">The overall run time complexity should be <code class="mono">O(log(m + n))</code>.</p>''',
+    example_html='<p class="mb-1"><span class="text-soft">Input:</span> nums1 = [1,3], nums2 = [2]</p><p><span class="text-soft">Output:</span> 2.0</p>',
+    trace_html='<div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>',
+    quiz_time_opts=['O(log(min(m, n)))', 'O(m + n)', 'O((m + n) log(m + n))', 'O(1)'],
+    quiz_space_opts=['O(1)', 'O(m + n)', 'O(log(m + n))'],
+    time_big='O(log(min(m, n)))',
+    time_explain='Binary search partition on the smaller array of size min(m, n).',
+    space_big='O(1)',
+    space_explain='Only a constant number of partition boundary pointers.',
+    tricks=GENERIC_TRICKS + ['<strong class="accent-text">Partition Binary Search:</strong> Divide both arrays into left and right halves such that left has equal count to right and max(Left) <= min(Right).'],
+    approach_html='''<p class="mb-3">Binary search for the valid partition on the smaller array:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Ensure <code class="mono accent-text">A</code> is the shorter array.</li>
+      <li>Binary search partition index <code class="mono accent-text">i</code> in <code class="mono accent-text">A</code>; partition index <code class="mono accent-text">j = (total // 2) - i</code> in <code class="mono accent-text">B</code>.</li>
+      <li>Check if <code class="mono accent-text">A[i-1] <= B[j]</code> and <code class="mono accent-text">B[j-1] <= A[i]</code>.</li>
+      <li>If valid partition is found, calculate median based on odd or even total length.</li>
+    </ol>''',
+    python_code='''from typing import List
+
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        A, B = nums1, nums2
+        if len(B) < len(A):
+            A, B = B, A
+
+        total = len(A) + len(B)
+        half = total // 2
+        l, r = 0, len(A) - 1
+
+        while True:
+            i = (l + r) // 2
+            j = half - i - 2
+
+            Aleft = A[i] if i >= 0 else float("-infinity")
+            Aright = A[i + 1] if (i + 1) < len(A) else float("infinity")
+            Bleft = B[j] if j >= 0 else float("-infinity")
+            Bright = B[j + 1] if (j + 1) < len(B) else float("infinity")
+
+            if Aleft <= Bright and Bleft <= Aright:
+                if total % 2:
+                    return min(Aright, Bright)
+                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2
+            elif Aleft > Bright:
+                r = i - 1
+            else:
+                l = i + 1''',
+    trace_js='''
+    const NUMS1 = [1, 3], NUMS2 = [2];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      steps.push({ i: 0, j: 0, aLeft: 1, bRight: 2, match: true, median: 2.0 });
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = `
+        <div class="flex flex-col gap-2 items-center">
+          <div class="flex gap-2"><div class="cell hit">1<span class="idx">A[0]</span></div><div class="cell">3<span class="idx">A[1]</span></div></div>
+          <div class="flex gap-2"><div class="cell hit">2<span class="idx">B[0]</span></div></div>
+        </div>`;
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      caption.textContent = `Valid partition found: Left=[1, 2], Right=[3] → Total odd length (3) → Median = 2.0`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / 1`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= 0;
+    }
+'''
+))
+
+
+
+# Integrate extra problems and NeetCode 150 problems
+for p in EXTRA_PROBLEMS:
+    problems.append(p)
+
+for p in NEETCODE_PROBLEMS:
+    problems.append(p)
+
+# Assign dynamic category sidebars and prev/next links
+cat_map = {}
+for p in problems:
+    cat = p['category']
+    cat_map.setdefault(cat, []).append(p)
+
+for cat, cat_probs in cat_map.items():
+    sidebar = [{"slug": p["slug"], "title": p["title"], "implemented": True} for p in cat_probs]
+    for i, p in enumerate(cat_probs):
+        p['sidebar'] = sidebar
+        prev_p = cat_probs[i - 1] if i > 0 else None
+        next_p = cat_probs[i + 1] if i < len(cat_probs) - 1 else None
+        p['prev_next_html'] = prev_next(
+            prev_p['slug'] if prev_p else None,
+            prev_p['title'] if prev_p else None,
+            next_p['slug'] if next_p else None,
+            next_p['title'] if next_p else None
+        )
+
 os.makedirs(OUT_DIR, exist_ok=True)
+count = 0
 for p in problems:
     out = render(p)
     path = os.path.join(OUT_DIR, p['slug'] + '.html')
     with open(path, 'w', encoding='utf-8') as f:
         f.write(out)
-    print('wrote', path, len(out), 'bytes')
+    count += 1
+    print(f"wrote {path} {len(out)} bytes")
+
+print(f"\n[SUCCESS] Generated all {count} solutions in '{OUT_DIR}/' successfully!")
+

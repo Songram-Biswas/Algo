@@ -295,12 +295,12 @@
       </div>
 
       <div class="border-t border-soft pt-6 flex justify-between items-center">
-        <a id="link-prev" href="./maximum-product-subarray" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+        <a id="link-prev" href="./contains-duplicate" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-          <span># Maximum Product Subarray</span>
-        </a>
-        <a id="link-next" href="./contains-duplicate" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
           <span># Contains Duplicate</span>
+        </a>
+        <a id="link-next" href="./longest-consecutive-sequence" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+          <span># Longest Consecutive Sequence</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </a>
       </div>
@@ -316,7 +316,8 @@
 
     const targetSlug = 'find-minimum-in-rotated-sorted-array';
     const currentDifficulty = 'Medium';
-    const sidebar = [{"slug": "two-sum", "title": "Two Sum", "implemented": true}, {"slug": "container-with-most-water", "title": "Container With Most Water", "implemented": true}, {"slug": "search-in-rotated-sorted-array", "title": "Search in Rotated Sorted Array", "implemented": true}, {"slug": "maximum-subarray", "title": "Maximum Subarray", "implemented": true}, {"slug": "longest-consecutive-sequence", "title": "Longest Consecutive Sequence", "implemented": true}, {"slug": "maximum-product-subarray", "title": "Maximum Product Subarray", "implemented": true}, {"slug": "find-minimum-in-rotated-sorted-array", "title": "Find Minimum in Rotated Sorted Array", "implemented": true}, {"slug": "contains-duplicate", "title": "Contains Duplicate", "implemented": true}, {"slug": "product-of-array-except-self", "title": "Product of Array Except Self", "implemented": false}];
+    const currentCategory = 'Array';
+    const sidebar = [{"slug": "container-with-most-water", "title": "Container With Most Water", "implemented": true}, {"slug": "contains-duplicate", "title": "Contains Duplicate", "implemented": true}, {"slug": "find-minimum-in-rotated-sorted-array", "title": "Find Minimum in Rotated Sorted Array", "implemented": true}, {"slug": "longest-consecutive-sequence", "title": "Longest Consecutive Sequence", "implemented": true}, {"slug": "maximum-product-subarray", "title": "Maximum Product Subarray", "implemented": true}, {"slug": "maximum-subarray", "title": "Maximum Subarray", "implemented": true}, {"slug": "search-in-rotated-sorted-array", "title": "Search in Rotated Sorted Array", "implemented": true}, {"slug": "two-sum", "title": "Two Sum", "implemented": true}, {"slug": "best-time-to-buy-and-sell-stock", "title": "Best Time to Buy and Sell Stock", "implemented": true}, {"slug": "product-of-array-except-self", "title": "Product of Array Except Self", "implemented": true}];
     let currentUserId = null;
     let currentStatus = null;
     let solvedSlugSet = new Set();
@@ -456,7 +457,7 @@
 
         if (newStatus === 'solved' && previousStatus !== 'solved') {
           solvedSlugSet.add(targetSlug);
-          awardXPAndStreak(currentDifficulty);
+          awardXPAndStreak(currentDifficulty, currentCategory);
         }
       } else {
         solvedSlugSet.delete(targetSlug);
@@ -489,9 +490,23 @@
       }
     }
 
-    async function awardXPAndStreak(difficulty) {
+    async function awardXPAndStreak(difficulty, category) {
       const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
       const xpGain = XP_MAP[difficulty] || 10;
+
+      // Category-specific XP
+      const cat = category || currentCategory || 'Array';
+      const catKey = 'xp_' + cat;
+      const prevCatXp = Number(localStorage.getItem(catKey)) || 0;
+      const newCatXp = prevCatXp + xpGain;
+      localStorage.setItem(catKey, String(newCatXp));
+
+      try {
+        const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+        catMap[cat] = newCatXp;
+        localStorage.setItem('algohub_category_xp', JSON.stringify(catMap));
+      } catch (e) {}
+
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
 

@@ -287,6 +287,7 @@
 
     const targetSlug = '__SLUG__';
     const currentDifficulty = '__DIFFICULTY__';
+    const currentCategory = '__CATEGORY__';
     const sidebar = __SIDEBAR_JSON__;
     let currentUserId = null;
     let currentStatus = null;
@@ -427,7 +428,7 @@
 
         if (newStatus === 'solved' && previousStatus !== 'solved') {
           solvedSlugSet.add(targetSlug);
-          awardXPAndStreak(currentDifficulty);
+          awardXPAndStreak(currentDifficulty, currentCategory);
         }
       } else {
         solvedSlugSet.delete(targetSlug);
@@ -460,9 +461,23 @@
       }
     }
 
-    async function awardXPAndStreak(difficulty) {
+    async function awardXPAndStreak(difficulty, category) {
       const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
       const xpGain = XP_MAP[difficulty] || 10;
+
+      // Category-specific XP
+      const cat = category || currentCategory || '__CATEGORY__';
+      const catKey = 'xp_' + cat;
+      const prevCatXp = Number(localStorage.getItem(catKey)) || 0;
+      const newCatXp = prevCatXp + xpGain;
+      localStorage.setItem(catKey, String(newCatXp));
+
+      try {
+        const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+        catMap[cat] = newCatXp;
+        localStorage.setItem('algohub_category_xp', JSON.stringify(catMap));
+      } catch (e) {}
+
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
 

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>algoHub | Valid Palindrome</title>
+<link rel="icon" type="image/png" href="../favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config = { darkMode: 'class' }</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa; --panel: #ffffff; --panel-border: #e4e4e7; --ink: #09090b; --ink-soft: #71717a; --rail: #f4f4f5;
+    --accent: #18181b; --accent-soft: #f4f4f5;
+    --good: #059669; --good-soft: #ecfdf5;
+    --warn: #d97706; --warn-soft: #fffbeb;
+    --bad: #e11d48; --bad-soft: #fff1f2;
+    --trace-scan: #18181b; --trace-hit: #059669;
+    --sun: #f5a623; --moon: #71717a;
+  }
+  html.dark {
+    --bg: #0a0a0a; --panel: #111111; --panel-border: #27272a; --ink: #f4f4f5; --ink-soft: #a1a1aa; --rail: #141414;
+    --accent: #ffffff; --accent-soft: #18181b;
+    --good: #10b981; --good-soft: rgba(16, 185, 129, 0.12);
+    --warn: #f59e0b; --warn-soft: rgba(245, 158, 11, 0.12);
+    --bad: #f43f5e; --bad-soft: rgba(244, 63, 94, 0.12);
+    --trace-scan: #ffffff; --trace-hit: #10b981;
+    --sun: #f5a623; --moon: #e4e4e7;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background .2s, color .2s;
+    letter-spacing: -0.01em;
+  }
+  .mono { font-family: 'Geist Mono', 'JetBrains Mono', monospace; }
+  .panel { background: var(--panel); border: 1px solid var(--panel-border); }
+  .rail-bg { background: var(--rail); }
+  .text-soft { color: var(--ink-soft); }
+  .accent-text { color: var(--accent); }
+  .border-soft { border-color: var(--panel-border); }
+
+  .cell {
+    width: 52px; height: 52px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 16px;
+    position: relative;
+    transition: all .2s cubic-bezier(.4,0,.2,1);
+  }
+  .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
+  .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
+  .cell.done { opacity: .4; }
+  .cell.discarded { opacity: .2; }
+
+  .map-slot {
+    border: 1px dashed var(--panel-border); border-radius: 8px; padding: 8px 12px;
+    font-family: 'Geist Mono', 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft);
+    transition: all .2s; opacity: .4;
+  }
+  .map-slot.filled { border-style: solid; border-color: var(--accent); color: var(--ink); opacity: 1; background: var(--accent-soft); }
+
+  .tab-btn { color: var(--ink-soft); border-bottom: 2px solid transparent; font-weight: 500; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--ink); border-color: var(--accent); font-weight: 600; }
+
+  .code-block { background: #121214; border: 1px solid var(--panel-border); font-family: 'Geist Mono', 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.65; }
+  .kw { color: #f43f5e; } .fn { color: #38bdf8; } .num { color: #fb923c; } .str { color: #4ade80; } .cm { color: #71717a; font-style: italic; }
+  html:not(.dark) .kw { color: #e11d48; } html:not(.dark) .fn { color: #0284c7; } html:not(.dark) .num { color: #ea580c; } html:not(.dark) .str { color: #16a34a; } html:not(.dark) .cm { color: #a1a1aa; font-style: italic; }
+
+  .step-btn { background: var(--panel); border: 1px solid var(--panel-border); color: var(--ink); }
+  .step-btn:hover:not(:disabled) { background: var(--rail); border-color: var(--ink-soft); }
+  .step-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+  .quiz-opt { border: 1px solid var(--panel-border); background: var(--panel); cursor: pointer; transition: all .15s; }
+  .quiz-opt:hover { border-color: var(--accent); background: var(--rail); }
+  .quiz-opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .quiz-opt.correct { border-color: var(--good) !important; background: var(--good-soft) !important; }
+  .quiz-opt.incorrect { border-color: var(--bad) !important; background: var(--bad-soft) !important; }
+
+  .theme-orb { width: 22px; height: 22px; border-radius: 50%; position: relative; transition: all .3s; }
+  .theme-orb.sun { background: radial-gradient(circle at 35% 30%, #ffe9b0, var(--sun) 70%); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--sun) 60%, transparent); }
+  .theme-orb.moon { background: radial-gradient(circle at 65% 35%, #d8def8, var(--moon) 75%); box-shadow: 0 0 12px 1px color-mix(in srgb, var(--moon) 50%, transparent); }
+  .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:8px; height:8px; border-radius:50%; background: var(--rail); opacity:.5; }
+  .theme-orb.moon::after { content:''; position:absolute; top:11px; left:11px; width:5px; height:5px; border-radius:50%; background: var(--rail); opacity:.4; }
+
+  /* Linked list trace styles */
+  .ll-node { display: flex; align-items: center; }
+  .ll-box { width: 40px; height: 40px; border: 1.5px solid var(--panel-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; position: relative; font-family: 'Geist Mono', monospace; }
+  .ll-box.cur { border-color: var(--trace-scan); }
+  .ll-box.prev { border-color: var(--trace-hit); }
+  .ll-label { position: absolute; top: -20px; font-size: 10px; font-weight: 600; }
+  .ll-arrow { margin: 0 8px; color: var(--ink-soft); font-weight: 600; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 10px; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-zinc-500/20">
+
+  <header class="sticky top-0 z-50 border-b px-6 py-3.5 flex justify-between items-center w-full backdrop-blur-md bg-white/75 dark:bg-[#0a0a0a]/80 border-zinc-200 dark:border-zinc-800/80 transition-all">
+    <a href="../dashboard" class="flex items-center gap-3 hover:opacity-80 transition group">
+      <img src="../favicon.png" alt="algoHub" class="w-8 h-8 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-800/80 group-hover:scale-105 transition-transform duration-200">
+      <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">algoHub</span>
+    </a>
+    <div class="flex items-center gap-4">
+      <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/60 dark:bg-[#161616] hover:bg-zinc-200/60 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 cursor-pointer shadow-sm" title="Toggle theme">
+        <span id="theme-orb" class="theme-orb sun"></span>
+      </button>
+      <div class="flex items-center gap-3 pl-4 border-l border-zinc-200 dark:border-zinc-800">
+        <img id="user-avatar" class="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-800 object-cover bg-zinc-100 dark:bg-zinc-800" src="" alt="Profile">
+        <button id="btn-logout" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="w-full max-w-6xl mx-auto px-6 pb-16 flex-grow flex flex-col lg:flex-row gap-8 items-start">
+
+    <aside class="w-full lg:w-72 lg:sticky lg:top-24 flex-shrink-0 order-2 lg:order-1">
+      <div class="panel rounded-xl overflow-hidden shadow-sm">
+        <div class="px-4 py-3 border-b border-soft flex items-center justify-between">
+          <h3 class="text-xs font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400">Two Pointers</h3>
+          <span id="sidebar-progress" class="text-xs mono text-soft font-semibold">0/0</span>
+        </div>
+        <ul id="sidebar-list" class="max-h-[70vh] overflow-y-auto divide-y" style="border-color: var(--panel-border);"></ul>
+      </div>
+    </aside>
+
+    <main class="w-full flex-grow flex flex-col order-1 lg:order-2 pt-8">
+
+      <div id="breadcrumb" class="text-xs text-soft mb-3 flex items-center gap-2 mono font-medium uppercase tracking-wider">
+        <a href="../category?course=neetcode-150&type=Two Pointers" class="hover:text-zinc-900 dark:hover:text-white transition">Two Pointers</a>
+        <span>/</span><span>#1</span>
+      </div>
+
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-zinc-900 dark:text-zinc-100">Valid Palindrome</h1>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" style="background:var(--good-soft); color:var(--good); border: 1px solid color-mix(in srgb, var(--good) 25%, transparent)">Easy</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Two Pointers</span><span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">String</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="https://leetcode.com/problems/valid-palindrome/" target="_blank" class="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 rounded-full px-3.5 py-1.5 bg-white dark:bg-[#111111] hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
+            LeetCode ↗
+          </a>
+          <button id="btn-copy-page" class="flex items-center gap-2 panel hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-soft px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm text-zinc-700 dark:text-zinc-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span>Copy link</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl p-6 mb-6 shadow-sm" data-ai-statement>
+        <p class="leading-relaxed mb-4">A phrase is a <strong>palindrome</strong> if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.</p>
+    <p class="text-soft text-sm mb-5">Given a string <code class="mono">s</code>, return <code class="mono">true</code> if it is a palindrome, or <code class="mono">false</code> otherwise.</p>
+        <div class="rounded-xl p-4 mono text-sm border border-zinc-200/50 dark:border-zinc-800/80" style="background:var(--rail)">
+          <p class="mb-1"><span class="text-soft">Input:</span> s = "race a car"</p><p><span class="text-soft">Output:</span> false</p>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl p-6 mb-6 shadow-sm">
+        <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div>
+            <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">Execution Trace</h3>
+            <p class="text-xs text-soft mt-0.5">Step through the algorithm at your own pace.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-prev" class="step-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 shadow-sm" disabled>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              Prev
+            </button>
+            <span id="step-counter" class="text-xs mono text-soft px-2">Step 0 / 0</span>
+            <button id="btn-next" class="step-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 shadow-sm">
+              Next
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <button id="btn-reset" class="step-btn w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 shadow-sm" title="Reset">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-8 py-4">
+          <div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>
+          <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center">Click "Next" to begin.</p>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl p-6 mb-6 shadow-sm">
+        <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 mb-1">Guess the Complexity</h3>
+        <p class="text-xs text-soft mb-5">Before peeking at the answer — what's the time and space complexity?</p>
+
+        <div class="grid sm:grid-cols-2 gap-6 mb-5">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
+            <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
+            <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(1)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-check-quiz" class="px-5 py-2.5 rounded-full text-xs font-semibold bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Check my answer</button>
+
+        <div id="quiz-feedback" class="hidden mt-5 rounded-xl p-4 text-sm leading-relaxed border border-soft"></div>
+
+        <div id="quiz-tricks" class="hidden mt-4 rounded-xl p-4 text-sm leading-relaxed border border-soft" style="background:var(--rail)">
+          <p class="font-bold mb-2 flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100">💡 Secret tricks</p>
+          <ul class="list-disc list-inside space-y-1.5 text-soft">
+            <li><strong class="accent-text">Count the loops, not the lines.</strong> One pass over n elements with O(1) work per element gives O(n); nested loops over the same input usually multiply.</li><li><strong class="accent-text">Hash set/map operations are O(1) average.</strong> A loop doing one lookup or insert per iteration stays O(n) overall — the hash structure doesn't add a factor.</li><li><strong class="accent-text">Space tracks "extra" memory, not the input.</strong> Ask what new structure you're building and how big it can get.</li><li><strong class="accent-text">Two pointers / sliding window ≠ O(n²).</strong> Even though it looks like nested loops, each pointer only ever moves forward — total work stays O(n).</li><li><strong class="accent-text">In-place Two Pointers:</strong> Skipping invalid characters on the fly keeps extra space O(1).</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel rounded-2xl overflow-hidden mb-6 shadow-sm">
+        <div class="flex border-b border-soft px-2 bg-zinc-50/50 dark:bg-[#0e0e0e]/50">
+          <button data-tab="approach" class="tab-btn active px-4 py-3 text-sm font-semibold transition-all cursor-pointer">Approach</button>
+          <button data-tab="code" class="tab-btn px-4 py-3 text-sm font-semibold transition-all cursor-pointer">Code</button>
+          <button data-tab="complexity" class="tab-btn px-4 py-3 text-sm font-semibold transition-all cursor-pointer">Complexity</button>
+        </div>
+
+        <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+          <p class="mb-3">Position two pointers at the ends of string <code class="mono accent-text">s</code> and move toward the center:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Set <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(s) - 1</code>.</li>
+      <li>Advance <code class="mono accent-text">left</code> past any non-alphanumeric character.</li>
+      <li>Retreat <code class="mono accent-text">right</code> past any non-alphanumeric character.</li>
+      <li>Compare <code class="mono accent-text">s[left].lower() == s[right].lower()</code>. If mismatched, return false.</li>
+    </ol>
+        </div>
+
+        <div id="tab-code" class="hidden p-6">
+          <div class="code-block rounded-xl p-5 overflow-x-auto relative">
+            <button id="btn-copy-code" class="absolute top-3 right-3 text-xs font-medium text-zinc-400 hover:text-white px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/60 transition cursor-pointer">Copy</button>
+<pre><span class="kw">class</span> Solution:
+    <span class="kw">def</span> <span class="fn">isPalindrome</span>(<span class="kw">self</span>, s: str) -&gt; bool:
+        left, right = <span class="num">0</span>, <span class="fn">len</span>(s) - <span class="num">1</span>
+
+        <span class="kw">while</span> left &lt; right:
+            <span class="kw">while</span> left &lt; right <span class="kw">and</span> <span class="kw">not</span> s[left].isalnum():
+                left += <span class="num">1</span>
+            <span class="kw">while</span> left &lt; right <span class="kw">and</span> <span class="kw">not</span> s[right].isalnum():
+                right -= <span class="num">1</span>
+
+            <span class="kw">if</span> s[left].lower() != s[right].lower():
+                <span class="kw">return</span> <span class="kw">False</span>
+
+            left += <span class="num">1</span>
+            right -= <span class="num">1</span>
+
+        <span class="kw">return</span> <span class="kw">True</span></pre>
+          </div>
+        </div>
+
+        <div id="tab-complexity" class="hidden p-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
+              <p class="text-xs text-soft mt-1">Two pointers traverse inwards; each character inspected at most once.</p>
+            </div>
+            <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
+              <p class="text-xs text-soft mt-1">Only two index pointers in-place without copying filtered strings.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mb-6">
+        <button id="btn-toggle-review" class="flex items-center gap-2 panel hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-soft px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer">
+          <svg class="w-4 h-4" style="color:var(--warn)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="text-review-status">Needs Review</span>
+        </button>
+        <button id="btn-toggle-solved" class="flex items-center gap-2 panel hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-soft px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer">
+          <svg id="icon-unsolved" class="w-4 h-4 text-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle></svg>
+          <svg id="icon-solved" class="w-4 h-4 hidden" style="color:var(--good)" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+          <span id="text-solved-status">Mark as Complete</span>
+        </button>
+      </div>
+
+      <div class="border-t border-soft pt-6 flex justify-between items-center">
+        <span class="invisible"></span>
+        <a id="link-next" href="./two-sum-ii-input-array-is-sorted" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+          <span># Two Sum II - Input Array Is Sorted</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { SUPABASE_CONFIG } from '../config.js';
+    import { initAITutor } from '../ai-tutor.js';
+    const supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    initAITutor({ supabaseClient });
+
+    const targetSlug = 'valid-palindrome';
+    const currentDifficulty = 'Easy';
+    const currentCategory = 'Two Pointers';
+    const sidebar = [{"slug": "valid-palindrome", "title": "Valid Palindrome", "implemented": true}, {"slug": "two-sum-ii-input-array-is-sorted", "title": "Two Sum II - Input Array Is Sorted", "implemented": true}, {"slug": "3sum", "title": "3Sum", "implemented": true}, {"slug": "trapping-rain-water", "title": "Trapping Rain Water", "implemented": true}];
+    let currentUserId = null;
+    let currentStatus = null;
+    let solvedSlugSet = new Set();
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const orb = document.getElementById('theme-orb');
+
+    function applyTheme(isDark) {
+      document.documentElement.classList.toggle('dark', isDark);
+      orb.classList.toggle('sun', !isDark);
+      orb.classList.toggle('moon', isDark);
+    }
+    const storedTheme = localStorage.getItem('color-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(storedTheme === 'dark' || (!storedTheme && prefersDark));
+
+    themeToggleBtn.addEventListener('click', () => {
+      const goingDark = !document.documentElement.classList.contains('dark');
+      applyTheme(goingDark);
+      localStorage.setItem('color-theme', goingDark ? 'dark' : 'light');
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        ['approach', 'code', 'complexity'].forEach(t => {
+          document.getElementById('tab-' + t).classList.toggle('hidden', t !== btn.dataset.tab);
+        });
+      });
+    });
+
+    let timeSelected = null, spaceSelected = null;
+    document.querySelectorAll('#quiz-time .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz-time .quiz-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        timeSelected = opt.dataset.val;
+      });
+    });
+    document.querySelectorAll('#quiz-space .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz-space .quiz-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        spaceSelected = opt.dataset.val;
+      });
+    });
+
+    document.getElementById('btn-check-quiz').onclick = () => {
+      if (!timeSelected || !spaceSelected) {
+        alert('Pick both a time and space complexity first!');
+        return;
+      }
+      const correctTime = document.getElementById('quiz-time').dataset.correct;
+      const correctSpace = document.getElementById('quiz-space').dataset.correct;
+
+      document.querySelectorAll('#quiz-time .quiz-opt').forEach(o => {
+        if (o.dataset.val === correctTime) o.classList.add('correct');
+        else if (o.dataset.val === timeSelected) o.classList.add('incorrect');
+      });
+      document.querySelectorAll('#quiz-space .quiz-opt').forEach(o => {
+        if (o.dataset.val === correctSpace) o.classList.add('correct');
+        else if (o.dataset.val === spaceSelected) o.classList.add('incorrect');
+      });
+
+      const timeRight = timeSelected === correctTime;
+      const spaceRight = spaceSelected === correctSpace;
+      const feedback = document.getElementById('quiz-feedback');
+      feedback.classList.remove('hidden');
+
+      if (timeRight && spaceRight) {
+        feedback.style.background = 'var(--good-soft)'; feedback.style.color = 'var(--good)';
+        feedback.innerHTML = `<strong>Nailed it 🎯</strong>`;
+      } else {
+        feedback.style.background = 'var(--bad-soft)'; feedback.style.color = 'var(--bad)';
+        feedback.innerHTML = `<strong>Not quite.</strong> Check the Complexity tab below.`;
+      }
+      document.getElementById('quiz-tricks').classList.remove('hidden');
+    };
+
+    function urlFor(p) { return p.implemented ? `./${p.slug}` : `../solution?slug=${p.slug}`; }
+
+    async function init() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) { window.location.href = '../'; return; }
+      currentUserId = session.user.id;
+      const avatar = document.getElementById('user-avatar');
+      if (avatar && session.user.user_metadata.avatar_url) avatar.src = session.user.user_metadata.avatar_url;
+
+      await fetchSolvedSet();
+      renderSidebar();
+      await fetchCloudState();
+      buildTrace();
+    }
+
+    async function fetchSolvedSet() {
+      const { data, error } = await supabaseClient
+        .from('user_progress').select('problem_slug').eq('user_id', currentUserId).eq('status', 'solved');
+      solvedSlugSet = (!error && data) ? new Set(data.map(d => d.problem_slug)) : new Set();
+    }
+
+    function renderSidebar() {
+      const solvedCount = sidebar.filter(p => solvedSlugSet.has(p.slug)).length;
+      document.getElementById('sidebar-progress').textContent = `${solvedCount}/${sidebar.length}`;
+      const list = document.getElementById('sidebar-list');
+      list.innerHTML = sidebar.map(p => {
+        const isSolved = solvedSlugSet.has(p.slug);
+        const isActive = p.slug === targetSlug;
+        const icon = isSolved
+          ? `<svg class="w-4 h-4 flex-shrink-0" style="color:var(--good)" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`
+          : `<div class="w-3.5 h-3.5 rounded-full border-2 flex-shrink-0" style="border-color:var(--panel-border)"></div>`;
+        return `<li>
+          <a href="${urlFor(p)}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-zinc-100 dark:hover:bg-[#161616]" style="border-left:2px solid ${isActive ? 'var(--accent)' : 'transparent'}; ${isActive ? 'background:var(--accent-soft)' : ''}">
+            ${icon}
+            <span class="truncate ${isActive ? 'font-semibold text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}">${p.title}</span>
+          </a>
+        </li>`;
+      }).join('');
+    }
+
+    async function fetchCloudState() {
+      const { data } = await supabaseClient.from('user_progress').select('status')
+        .eq('user_id', currentUserId).eq('problem_slug', targetSlug).single();
+      currentStatus = data ? data.status : null;
+      updateStatusUI();
+    }
+
+    async function setCloudState(newStatus) {
+      const previousStatus = currentStatus;
+      currentStatus = currentStatus === newStatus ? null : newStatus;
+      updateStatusUI();
+
+      if (currentStatus) {
+        await supabaseClient.from('user_progress').upsert({
+          user_id: currentUserId, problem_slug: targetSlug, status: currentStatus, updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id, problem_slug' });
+
+        if (newStatus === 'solved' && previousStatus !== 'solved') {
+          solvedSlugSet.add(targetSlug);
+          awardXPAndStreak(currentDifficulty, currentCategory);
+        }
+      } else {
+        solvedSlugSet.delete(targetSlug);
+        await supabaseClient.from('user_progress').delete()
+          .eq('user_id', currentUserId).eq('problem_slug', targetSlug);
+      }
+      renderSidebar();
+    }
+
+    function updateStatusUI() {
+      const btnSolved = document.getElementById('btn-toggle-solved');
+      const textSolved = document.getElementById('text-solved-status');
+      const iconUnsolved = document.getElementById('icon-unsolved');
+      const iconSolved = document.getElementById('icon-solved');
+      const btnReview = document.getElementById('btn-toggle-review');
+      const textReview = document.getElementById('text-review-status');
+
+      iconUnsolved.classList.remove('hidden'); iconSolved.classList.add('hidden');
+      textSolved.textContent = 'Mark as Complete'; textReview.textContent = 'Needs Review';
+      btnSolved.style.background = ''; btnSolved.style.color = ''; btnSolved.style.borderColor = '';
+      btnReview.style.background = ''; btnReview.style.color = ''; btnReview.style.borderColor = '';
+
+      if (currentStatus === 'solved') {
+        iconUnsolved.classList.add('hidden'); iconSolved.classList.remove('hidden');
+        textSolved.textContent = 'Completed';
+        btnSolved.style.background = 'var(--good-soft)'; btnSolved.style.color = 'var(--good)'; btnSolved.style.borderColor = 'var(--good)';
+      } else if (currentStatus === 'review') {
+        textReview.textContent = 'Reviewing';
+        btnReview.style.background = 'var(--warn-soft)'; btnReview.style.color = 'var(--warn)'; btnReview.style.borderColor = 'var(--warn)';
+      }
+    }
+
+    async function awardXPAndStreak(difficulty, category) {
+      const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
+      const xpGain = XP_MAP[difficulty] || 10;
+
+      // Category-specific XP
+      const cat = category || currentCategory || 'Two Pointers';
+      const catKey = 'xp_' + cat;
+      const prevCatXp = Number(localStorage.getItem(catKey)) || 0;
+      const newCatXp = prevCatXp + xpGain;
+      localStorage.setItem(catKey, String(newCatXp));
+
+      try {
+        const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+        catMap[cat] = newCatXp;
+        localStorage.setItem('algohub_category_xp', JSON.stringify(catMap));
+      } catch (e) {}
+
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      const { data: stats } = await supabaseClient.from('user_stats').select('*').eq('user_id', currentUserId).single();
+
+      let xp = xpGain, newStreak = 1, longestStreak = 1, streakExtended = true;
+      if (stats) {
+        xp = (stats.xp || 0) + xpGain;
+        longestStreak = stats.longest_streak || 1;
+        if (stats.last_active_date === todayStr) {
+          newStreak = stats.current_streak || 1; streakExtended = false;
+        } else {
+          const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+          const yStr = yesterday.toISOString().split('T')[0];
+          newStreak = (stats.last_active_date === yStr) ? (stats.current_streak || 0) + 1 : 1;
+        }
+        longestStreak = Math.max(longestStreak, newStreak);
+      }
+
+      await supabaseClient.from('user_stats').upsert({
+        user_id: currentUserId, xp, current_streak: newStreak, longest_streak: longestStreak,
+        last_active_date: todayStr, updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+
+      try {
+        localStorage.setItem('algohub_xp', String(xp));
+        localStorage.setItem('algohub_user_stats', JSON.stringify({
+          xp, current_streak: newStreak, longest_streak: longestStreak, last_active_date: todayStr
+        }));
+      } catch (e) {}
+    }
+
+    
+    const CHARS = ['r', 'a', 'c', 'e', 'c', 'a', 'r'];
+    let steps = [], stepIndex = -1;
+
+    function computeSteps() {
+      steps = [];
+      let l = 0, r = CHARS.length - 1;
+      while (l <= r) {
+        steps.push({ l, r, match: CHARS[l] === CHARS[r] });
+        l++; r--;
+      }
+    }
+
+    function buildTrace() {
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = CHARS.map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">i=${i}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
+    }
+
+    function renderStep() {
+      CHARS.forEach((_, i) => {
+        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const ptr = document.getElementById(`ptr-${i}`);
+        if (ptr) ptr.textContent = '';
+      });
+      const caption = document.getElementById('trace-caption');
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      document.getElementById(`cell-${s.l}`).classList.add('hit');
+      document.getElementById(`cell-${s.r}`).classList.add('hit');
+      document.getElementById(`ptr-${s.l}`).textContent = 'L';
+      document.getElementById(`ptr-${s.r}`).textContent = (s.l === s.r) ? 'L/R' : 'R';
+      caption.textContent = `Left='${CHARS[s.l]}' at i=${s.l} matches Right='${CHARS[s.r]}' at i=${s.r}!`;
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      document.getElementById('step-counter').textContent = `Step ${stepIndex + 1} / ${steps.length}`;
+      document.getElementById('btn-prev').disabled = stepIndex < 0;
+      document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
+    }
+
+
+    document.getElementById('btn-next').onclick = () => {
+      if (stepIndex < steps.length - 1) { stepIndex++; renderStep(); }
+    };
+    document.getElementById('btn-prev').onclick = () => {
+      if (stepIndex >= 0) { stepIndex--; renderStep(); }
+    };
+    document.getElementById('btn-reset').onclick = () => { buildTrace(); };
+
+    document.getElementById('btn-copy-page').onclick = async (e) => {
+      await navigator.clipboard.writeText(window.location.href);
+      const span = e.currentTarget.querySelector('span');
+      const orig = span.textContent; span.textContent = 'Copied!';
+      setTimeout(() => span.textContent = orig, 2000);
+    };
+
+    document.getElementById('btn-copy-code').onclick = async (e) => {
+      await navigator.clipboard.writeText("class Solution:\n    def isPalindrome(self, s: str) -> bool:\n        left, right = 0, len(s) - 1\n\n        while left < right:\n            while left < right and not s[left].isalnum():\n                left += 1\n            while left < right and not s[right].isalnum():\n                right -= 1\n\n            if s[left].lower() != s[right].lower():\n                return False\n\n            left += 1\n            right -= 1\n\n        return True");
+      const btn = e.currentTarget; const orig = btn.textContent;
+      btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
+    };
+
+    document.getElementById('btn-toggle-solved').onclick = () => setCloudState('solved');
+    document.getElementById('btn-toggle-review').onclick = () => setCloudState('review');
+    document.getElementById('btn-logout').onclick = async () => { await supabaseClient.auth.signOut(); window.location.href = '../'; };
+
+    init();
+  </script>
+</body>
+</html>

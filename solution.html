@@ -135,31 +135,31 @@
         });
 
     const PROBLEM_REGISTRY = [
-        { slug: "two-sum", id: 1, title: "Two Sum", difficulty: "Easy", category: "Array" },
-        { slug: "search-in-rotated-sorted-array", id: 33, title: "Search in Rotated Sorted Array", difficulty: "Medium", category: "Array" },
-        { slug: "maximum-subarray", id: 53, title: "Maximum Subarray", difficulty: "Medium", category: "Array" },
-        { slug: "best-time-to-buy-and-sell-stock", id: 121, title: "Best Time to Buy and Sell Stock", difficulty: "Easy", category: "Array" },
-        { slug: "longest-consecutive-sequence", id: 128, title: "Longest Consecutive Sequence", difficulty: "Medium", category: "Array" },
-        { slug: "maximum-product-subarray", id: 152, title: "Maximum Product Subarray", difficulty: "Medium", category: "Array" },
-        { slug: "find-minimum-in-rotated-sorted-array", id: 153, title: "Find Minimum in Rotated Sorted Array", difficulty: "Medium", category: "Array" },
-        { slug: "contains-duplicate", id: 217, title: "Contains Duplicate", difficulty: "Easy", category: "Array" },
-        { slug: "product-of-array-except-self", id: 238, title: "Product of Array Except Self", difficulty: "Medium", category: "Array" },
-        { slug: "longest-substring-without-repeating-characters", id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium", category: "String" },
+        { slug: "two-sum", id: 1, title: "Two Sum", difficulty: "Easy", category: "Array", implemented: true },
+        { slug: "search-in-rotated-sorted-array", id: 33, title: "Search in Rotated Sorted Array", difficulty: "Medium", category: "Array", implemented: true },
+        { slug: "maximum-subarray", id: 53, title: "Maximum Subarray", difficulty: "Medium", category: "Array", implemented: true },
+        { slug: "best-time-to-buy-and-sell-stock", id: 121, title: "Best Time to Buy and Sell Stock", difficulty: "Easy", category: "Array", implemented: true },
+        { slug: "longest-consecutive-sequence", id: 128, title: "Longest Consecutive Sequence", difficulty: "Medium", category: "Array", implemented: true },
+        { slug: "maximum-product-subarray", id: 152, title: "Maximum Product Subarray", difficulty: "Medium", category: "Array", implemented: true },
+        { slug: "find-minimum-in-rotated-sorted-array", id: 153, title: "Find Minimum in Rotated Sorted Array", difficulty: "Medium", category: "Array", implemented: true },
+        { slug: "contains-duplicate", id: 217, title: "Contains Duplicate", difficulty: "Easy", category: "Array", implemented: true },
+        { slug: "product-of-array-except-self", id: 238, title: "Product of Array Except Self", difficulty: "Medium", category: "Array", implemented: true },
+        { slug: "longest-substring-without-repeating-characters", id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium", category: "String", implemented: true },
         { slug: "longest-palindromic-substring", id: 5, title: "Longest Palindromic Substring", difficulty: "Medium", category: "String" },
-        { slug: "group-anagrams", id: 49, title: "Group Anagrams", difficulty: "Medium", category: "String" },
-        { slug: "minimum-window-substring", id: 76, title: "Minimum Window Substring", difficulty: "Hard", category: "String" },
-        { slug: "valid-palindrome", id: 125, title: "Valid Palindrome", difficulty: "Easy", category: "String" },
-        { slug: "valid-anagram", id: 242, title: "Valid Anagram", difficulty: "Easy", category: "String" },
+        { slug: "group-anagrams", id: 49, title: "Group Anagrams", difficulty: "Medium", category: "String", implemented: true },
+        { slug: "minimum-window-substring", id: 76, title: "Minimum Window Substring", difficulty: "Hard", category: "String", implemented: true },
+        { slug: "valid-palindrome", id: 125, title: "Valid Palindrome", difficulty: "Easy", category: "String", implemented: true },
+        { slug: "valid-anagram", id: 242, title: "Valid Anagram", difficulty: "Easy", category: "String", implemented: true },
         { slug: "encode-and-decode-strings", id: 271, title: "Encode and Decode Strings", difficulty: "Medium", category: "String" },
-        { slug: "longest-repeating-character-replacement", id: 424, title: "Longest Repeating Character Replacement", difficulty: "Medium", category: "String" },
+        { slug: "longest-repeating-character-replacement", id: 424, title: "Longest Repeating Character Replacement", difficulty: "Medium", category: "String", implemented: true },
         { slug: "palindromic-substrings", id: 647, title: "Palindromic Substrings", difficulty: "Medium", category: "String" },
         { slug: "remove-nth-node-from-end-of-list", id: 19, title: "Remove Nth Node From End of List", difficulty: "Medium", category: "Linked List" },
-        { slug: "valid-parentheses", id: 20, title: "Valid Parentheses", difficulty: "Easy", category: "Linked List" },
+        { slug: "valid-parentheses", id: 20, title: "Valid Parentheses", difficulty: "Easy", category: "Linked List", implemented: true },
         { slug: "merge-two-sorted-lists", id: 21, title: "Merge Two Sorted Lists", difficulty: "Easy", category: "Linked List" },
         { slug: "merge-k-sorted-lists", id: 23, title: "Merge k Sorted Lists", difficulty: "Hard", category: "Linked List" },
         { slug: "linked-list-cycle", id: 141, title: "Linked List Cycle", difficulty: "Easy", category: "Linked List" },
-        { slug: "reorder-list", id: 143, title: "Reorder List", difficulty: "Medium", category: "Linked List" },
-        { slug: "reverse-linked-list", id: 206, title: "Reverse Linked List", difficulty: "Easy", category: "Linked List" },
+        { slug: "reorder-list", id: 143, title: "Reorder List", difficulty: "Medium", category: "Linked List", implemented: true },
+        { slug: "reverse-linked-list", id: 206, title: "Reverse Linked List", difficulty: "Easy", category: "Linked List", implemented: true },
         { slug: "reverse-bits", id: 190, title: "Reverse Bits", difficulty: "Easy", category: "Binary" },
         { slug: "number-of-1-bits", id: 191, title: "Number of 1 Bits", difficulty: "Easy", category: "Binary" },
         { slug: "missing-number", id: 268, title: "Missing Number", difficulty: "Easy", category: "Binary" },
@@ -185,7 +185,7 @@
         { slug: "serialize-and-deserialize-binary-tree", id: 297, title: "Serialize and Deserialize Binary Tree", difficulty: "Hard", category: "Tree" },
         { slug: "subtree-of-another-tree", id: 572, title: "Subtree of Another Tree", difficulty: "Easy", category: "Tree" },
         { slug: "find-median-from-data-stream", id: 295, title: "Find Median from Data Stream", difficulty: "Hard", category: "Heap" },
-        { slug: "top-k-frequent-elements", id: 347, title: "Top K Frequent Elements", difficulty: "Medium", category: "Heap" },
+        { slug: "top-k-frequent-elements", id: 347, title: "Top K Frequent Elements", difficulty: "Medium", category: "Heap", implemented: true },
         { slug: "clone-graph", id: 133, title: "Clone Graph", difficulty: "Medium", category: "Graph" },
         { slug: "number-of-islands", id: 200, title: "Number of Islands", difficulty: "Medium", category: "Graph" },
         { slug: "course-schedule", id: 207, title: "Course Schedule", difficulty: "Medium", category: "Graph" },
@@ -196,8 +196,8 @@
         { slug: "alien-dictionary", id: 269, title: "Alien Dictionary", difficulty: "Hard", category: "Graph" },
         { slug: "number-of-connected-components-in-an-undirected-graph", id: 323, title: "Number of Connected Components in an Undirected Graph", difficulty: "Medium", category: "Graph" },
         { slug: "pacific-atlantic-water-flow", id: 417, title: "Pacific Atlantic Water Flow", difficulty: "Medium", category: "Graph" },
-        { slug: "container-with-most-water", id: 11, title: "Container With Most Water", difficulty: "Medium", category: "Dynamic Programming" },
-        { slug: "3sum", id: 15, title: "3Sum", difficulty: "Medium", category: "Dynamic Programming" },
+        { slug: "container-with-most-water", id: 11, title: "Container With Most Water", difficulty: "Medium", category: "Dynamic Programming", implemented: true },
+        { slug: "3sum", id: 15, title: "3Sum", difficulty: "Medium", category: "Dynamic Programming", implemented: true },
         { slug: "combination-sum", id: 39, title: "Combination Sum", difficulty: "Medium", category: "Dynamic Programming" },
         { slug: "jump-game", id: 55, title: "Jump Game", difficulty: "Medium", category: "Dynamic Programming" },
         { slug: "unique-paths", id: 62, title: "Unique Paths", difficulty: "Medium", category: "Dynamic Programming" },
@@ -209,13 +209,37 @@
         { slug: "house-robber-ii", id: 213, title: "House Robber II", difficulty: "Medium", category: "Dynamic Programming" },
         { slug: "longest-increasing-subsequence", id: 300, title: "Longest Increasing Subsequence", difficulty: "Medium", category: "Dynamic Programming" },
         { slug: "coin-change", id: 322, title: "Coin Change", difficulty: "Medium", category: "Dynamic Programming" },
-        { slug: "longest-common-subsequence", id: 1143, title: "Longest Common Subsequence", difficulty: "Medium", category: "Dynamic Programming" }
+        { slug: "longest-common-subsequence", id: 1143, title: "Longest Common Subsequence", difficulty: "Medium", category: "Dynamic Programming" },
+        // NeetCode 150 - Arrays & Hashing
+        { slug: "top-k-frequent-elements", id: 347, title: "Top K Frequent Elements", difficulty: "Medium", course: "neetcode-150", category: "Arrays & Hashing", implemented: true },
+        { slug: "valid-sudoku", id: 36, title: "Valid Sudoku", difficulty: "Medium", course: "neetcode-150", category: "Arrays & Hashing", implemented: true },
+        // NeetCode 150 - Two Pointers
+        { slug: "valid-palindrome", id: 125, title: "Valid Palindrome", difficulty: "Easy", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        { slug: "two-sum-ii-input-array-is-sorted", id: 167, title: "Two Sum II - Input Array Is Sorted", difficulty: "Medium", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        { slug: "3sum", id: 15, title: "3Sum", difficulty: "Medium", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        { slug: "trapping-rain-water", id: 42, title: "Trapping Rain Water", difficulty: "Hard", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        // NeetCode 150 - Sliding Window
+        { slug: "permutation-in-string", id: 567, title: "Permutation in String", difficulty: "Medium", course: "neetcode-150", category: "Sliding Window", implemented: true },
+        { slug: "minimum-window-substring", id: 76, title: "Minimum Window Substring", difficulty: "Hard", course: "neetcode-150", category: "Sliding Window", implemented: true },
+        { slug: "sliding-window-maximum", id: 239, title: "Sliding Window Maximum", difficulty: "Hard", course: "neetcode-150", category: "Sliding Window", implemented: true },
+        // NeetCode 150 - Stack
+        { slug: "valid-parentheses", id: 20, title: "Valid Parentheses", difficulty: "Easy", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "min-stack", id: 155, title: "Min Stack", difficulty: "Medium", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "evaluate-reverse-polish-notation", id: 150, title: "Evaluate Reverse Polish Notation", difficulty: "Medium", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "daily-temperatures", id: 739, title: "Daily Temperatures", difficulty: "Medium", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "largest-rectangle-in-histogram", id: 84, title: "Largest Rectangle in Histogram", difficulty: "Hard", course: "neetcode-150", category: "Stack", implemented: true },
+        // NeetCode 150 - Binary Search
+        { slug: "binary-search", id: 704, title: "Binary Search", difficulty: "Easy", course: "neetcode-150", category: "Binary Search", implemented: true },
+        { slug: "search-a-2d-matrix", id: 74, title: "Search a 2D Matrix", difficulty: "Medium", course: "neetcode-150", category: "Binary Search", implemented: true },
+        { slug: "koko-eating-bananas", id: 875, title: "Koko Eating Bananas", difficulty: "Medium", course: "neetcode-150", category: "Binary Search", implemented: true },
+        { slug: "median-of-two-sorted-arrays", id: 4, title: "Median of Two Sorted Arrays", difficulty: "Hard", course: "neetcode-150", category: "Binary Search", implemented: true }
     ];
 
     let currentUserId = null;
     let currentStatus = null;
     let targetSlug = null;
     let currentDifficulty = null;
+    let currentCategory = null;
 
     async function initialize() {
         const { data: { session } } = await supabaseClient.auth.getSession();
@@ -289,6 +313,7 @@
         
         const prob = PROBLEM_REGISTRY[probIndex];
         currentDifficulty = prob.difficulty;
+        currentCategory = prob.category;
         
         document.title = `algoHub | ${prob.title}`;
         document.getElementById('breadcrumb').innerHTML = `<a href="./category?course=blind-75&type=${encodeURIComponent(prob.category)}" class="hover:text-zinc-900 dark:hover:text-white transition">${prob.category}</a> <span class="text-zinc-400 dark:text-zinc-600">&gt;</span> <span># ${prob.title}</span>`;
@@ -348,7 +373,7 @@
 
             if (newStatus === 'solved' && previousStatus !== 'solved') {
                 solvedSlugSet.add(targetSlug);
-                awardXPAndStreak(currentDifficulty);
+                awardXPAndStreak(currentDifficulty, currentCategory);
             }
         } else {
             solvedSlugSet.delete(targetSlug);
@@ -360,9 +385,22 @@
         renderSidebar();
     }
 
-    async function awardXPAndStreak(difficulty) {
+    async function awardXPAndStreak(difficulty, category) {
         const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
         const xpGain = XP_MAP[difficulty] || 10;
+
+        // Persist category-specific XP to localStorage (e.g., xp_Array, xp_String)
+        const cat = category || currentCategory || 'Array';
+        const catKey = 'xp_' + cat;
+        const prevCatXp = Number(localStorage.getItem(catKey)) || 0;
+        const newCatXp = prevCatXp + xpGain;
+        localStorage.setItem(catKey, String(newCatXp));
+
+        try {
+            const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+            catMap[cat] = newCatXp;
+            localStorage.setItem('algohub_category_xp', JSON.stringify(catMap));
+        } catch (e) {}
 
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0];

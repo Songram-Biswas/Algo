@@ -174,9 +174,10 @@
         <span id="streak-count" class="text-xs font-bold font-mono text-amber-500">0</span>
       </div>
 
-      <div id="xp-badge" class="hidden items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm" title="Current level and progress">
+      <div id="xp-badge" class="hidden items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 shadow-sm" title="Current level, rank title, and progress">
         <span class="text-xs font-bold font-mono text-emerald-500 dark:text-emerald-400" id="level-label">Lv 1</span>
-        <div class="w-14 sm:w-16 bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+        <span id="rpg-title-label" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Novice</span>
+        <div class="w-12 sm:w-16 bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
           <div id="xp-bar" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
         </div>
       </div>
@@ -250,26 +251,53 @@
               <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Active Curriculum</h3>
             </div>
             
-            <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-zinc-50 dark:bg-[#141414] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200">
-              <div>
-                <div class="flex items-center gap-2 mb-1.5">
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700/60 font-mono">Core</span>
-                  <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Blind 75 Matrix</h4>
+            <div class="space-y-4">
+              <!-- Blind 75 Matrix Card -->
+              <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-zinc-50 dark:bg-[#141414] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200">
+                <div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700/60 font-mono">Core</span>
+                    <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Blind 75 Matrix</h4>
+                  </div>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400">High-yield technical interview patterns.</p>
                 </div>
-                <p class="text-xs text-zinc-500 dark:text-zinc-400">High-yield technical interview patterns.</p>
+                
+                <div class="flex items-center gap-4 w-full sm:w-auto">
+                  <div class="flex-grow sm:flex-grow-0 sm:w-32">
+                    <div class="flex justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1.5">
+                      <span>Progress</span>
+                      <span id="progress-text" class="font-bold text-zinc-900 dark:text-zinc-100">0%</span>
+                    </div>
+                    <div class="w-full bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden cursor-help" title="Click to see category breakdown">
+                      <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <a href="./tracks?course=blind-75" onclick="try{localStorage.setItem('algohub_selected_course','blind-75')}catch(e){}" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-sm font-semibold px-5 py-2 rounded-full hover:-translate-y-0.5 shadow-sm transition-all duration-200 whitespace-nowrap">Resume</a>
+                </div>
               </div>
-              
-              <div class="flex items-center gap-4 w-full sm:w-auto">
-                <div class="flex-grow sm:flex-grow-0 sm:w-32">
-                  <div class="flex justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1.5">
-                    <span>Progress</span>
-                    <span id="progress-text" class="font-bold text-zinc-900 dark:text-zinc-100">0%</span>
+
+              <!-- NeetCode 150 Card -->
+              <div class="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-zinc-50 dark:bg-[#141414] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all duration-200">
+                <div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700/60 font-mono">Core</span>
+                    <h4 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">NeetCode 150</h4>
                   </div>
-                  <div class="w-full bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden cursor-help" title="Click to see category breakdown">
-                    <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-                  </div>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400">Comprehensive pattern mastery and advanced data structures.</p>
                 </div>
-                <a href="./tracks?course=blind-75" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-sm font-semibold px-5 py-2 rounded-full hover:-translate-y-0.5 shadow-sm transition-all duration-200 whitespace-nowrap">Resume</a>
+                
+                <div class="flex items-center gap-4 w-full sm:w-auto">
+                  <div class="flex-grow sm:flex-grow-0 sm:w-32">
+                    <div class="flex justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-1.5">
+                      <span>Progress</span>
+                      <span id="progress-text-neetcode" class="font-bold text-zinc-900 dark:text-zinc-100">0%</span>
+                    </div>
+                    <div class="w-full bg-zinc-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden cursor-help" title="Click to see category breakdown">
+                      <div id="progress-bar-neetcode" class="bg-gradient-to-r from-emerald-400 to-cyan-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <a href="./tracks?course=neetcode-150" onclick="try{localStorage.setItem('algohub_selected_course','neetcode-150')}catch(e){}" class="bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-zinc-950 text-sm font-semibold px-5 py-2 rounded-full hover:-translate-y-0.5 shadow-sm transition-all duration-200 whitespace-nowrap">Resume</a>
+                </div>
               </div>
             </div>
           </div>
@@ -313,6 +341,28 @@
             
             <div id="sprint-list" class="space-y-3">
               <!-- Sprint tasks will be dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Global Leaderboard -->
+          <div class="util-panel rounded-xl p-6 transition-all duration-200 hover:border-zinc-700/60">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">Global Leaderboard</h3>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Season 1
+                  </span>
+                </div>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Top algorithmic engineers ranked by accumulated XP</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-zinc-400 dark:text-zinc-500">Live Standings</span>
+              </div>
+            </div>
+            
+            <div id="leaderboard-list" class="space-y-2.5">
+              <!-- Dynamically populated via renderLeaderboard() -->
             </div>
           </div>
       </div>
@@ -403,18 +453,42 @@
         { slug: "two-sum", id: 1, title: "Two Sum", difficulty: "Easy", course: "blind-75", category: "Array", implemented: true },
         { slug: "search-in-rotated-sorted-array", id: 33, title: "Search in Rotated Sorted Array", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
         { slug: "maximum-subarray", id: 53, title: "Maximum Subarray", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
-        { slug: "best-time-to-buy-and-sell-stock", id: 121, title: "Best Time to Buy and Sell Stock", difficulty: "Easy", course: "blind-75", category: "Array", implemented: false },
+        { slug: "best-time-to-buy-and-sell-stock", id: 121, title: "Best Time to Buy and Sell Stock", difficulty: "Easy", course: "blind-75", category: "Array", implemented: true },
         { slug: "longest-consecutive-sequence", id: 128, title: "Longest Consecutive Sequence", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
         { slug: "maximum-product-subarray", id: 152, title: "Maximum Product Subarray", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
         { slug: "find-minimum-in-rotated-sorted-array", id: 153, title: "Find Minimum in Rotated Sorted Array", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
         { slug: "contains-duplicate", id: 217, title: "Contains Duplicate", difficulty: "Easy", course: "blind-75", category: "Array", implemented: true },
         { slug: "product-of-array-except-self", id: 238, title: "Product of Array Except Self", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
         { slug: "container-with-most-water", id: 11, title: "Container With Most Water", difficulty: "Medium", course: "blind-75", category: "Array", implemented: true },
-        { slug: "longest-substring-without-repeating-characters", id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium", course: "blind-75", category: "String", implemented: false },
+        { slug: "longest-substring-without-repeating-characters", id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium", course: "blind-75", category: "String", implemented: true },
         { slug: "group-anagrams", id: 49, title: "Group Anagrams", difficulty: "Medium", course: "blind-75", category: "String", implemented: true },
-        { slug: "valid-anagram", id: 242, title: "Valid Anagram", difficulty: "Easy", course: "blind-75", category: "String", implemented: false },
+        { slug: "valid-anagram", id: 242, title: "Valid Anagram", difficulty: "Easy", course: "blind-75", category: "String", implemented: true },
         { slug: "longest-repeating-character-replacement", id: 424, title: "Longest Repeating Character Replacement", difficulty: "Medium", course: "blind-75", category: "String", implemented: true },
         { slug: "reverse-linked-list", id: 206, title: "Reverse Linked List", difficulty: "Easy", course: "blind-75", category: "Linked List", implemented: true },
+        { slug: "reorder-list", id: 143, title: "Reorder List", difficulty: "Medium", course: "blind-75", category: "Linked List", implemented: true },
+        // NeetCode 150 - Arrays & Hashing
+        { slug: "top-k-frequent-elements", id: 347, title: "Top K Frequent Elements", difficulty: "Medium", course: "neetcode-150", category: "Arrays & Hashing", implemented: true },
+        { slug: "valid-sudoku", id: 36, title: "Valid Sudoku", difficulty: "Medium", course: "neetcode-150", category: "Arrays & Hashing", implemented: true },
+        // NeetCode 150 - Two Pointers
+        { slug: "valid-palindrome", id: 125, title: "Valid Palindrome", difficulty: "Easy", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        { slug: "two-sum-ii-input-array-is-sorted", id: 167, title: "Two Sum II - Input Array Is Sorted", difficulty: "Medium", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        { slug: "3sum", id: 15, title: "3Sum", difficulty: "Medium", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        { slug: "trapping-rain-water", id: 42, title: "Trapping Rain Water", difficulty: "Hard", course: "neetcode-150", category: "Two Pointers", implemented: true },
+        // NeetCode 150 - Sliding Window
+        { slug: "permutation-in-string", id: 567, title: "Permutation in String", difficulty: "Medium", course: "neetcode-150", category: "Sliding Window", implemented: true },
+        { slug: "minimum-window-substring", id: 76, title: "Minimum Window Substring", difficulty: "Hard", course: "neetcode-150", category: "Sliding Window", implemented: true },
+        { slug: "sliding-window-maximum", id: 239, title: "Sliding Window Maximum", difficulty: "Hard", course: "neetcode-150", category: "Sliding Window", implemented: true },
+        // NeetCode 150 - Stack
+        { slug: "valid-parentheses", id: 20, title: "Valid Parentheses", difficulty: "Easy", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "min-stack", id: 155, title: "Min Stack", difficulty: "Medium", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "evaluate-reverse-polish-notation", id: 150, title: "Evaluate Reverse Polish Notation", difficulty: "Medium", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "daily-temperatures", id: 739, title: "Daily Temperatures", difficulty: "Medium", course: "neetcode-150", category: "Stack", implemented: true },
+        { slug: "largest-rectangle-in-histogram", id: 84, title: "Largest Rectangle in Histogram", difficulty: "Hard", course: "neetcode-150", category: "Stack", implemented: true },
+        // NeetCode 150 - Binary Search
+        { slug: "binary-search", id: 704, title: "Binary Search", difficulty: "Easy", course: "neetcode-150", category: "Binary Search", implemented: true },
+        { slug: "search-a-2d-matrix", id: 74, title: "Search a 2D Matrix", difficulty: "Medium", course: "neetcode-150", category: "Binary Search", implemented: true },
+        { slug: "koko-eating-bananas", id: 875, title: "Koko Eating Bananas", difficulty: "Medium", course: "neetcode-150", category: "Binary Search", implemented: true },
+        { slug: "median-of-two-sorted-arrays", id: 4, title: "Median of Two Sorted Arrays", difficulty: "Hard", course: "neetcode-150", category: "Binary Search", implemented: true },
     ];
 
     const BADGES = {
@@ -894,6 +968,82 @@
     }
 
     // ==========================================
+    // RPG LEVEL TITLES & CATEGORY XP HELPERS
+    // ==========================================
+
+    function getRpgTitle(level) {
+        const lvl = Number(level) || 1;
+        if (lvl <= 5) return 'Novice';
+        if (lvl <= 10) return 'Apprentice';
+        if (lvl <= 20) return 'Algo Knight';
+        return 'Master';
+    }
+
+    function getRpgTitleBadgeClass(title) {
+        switch (title) {
+            case 'Master':
+                return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25';
+            case 'Algo Knight':
+                return 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25';
+            case 'Apprentice':
+                return 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25';
+            default:
+                return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25';
+        }
+    }
+
+    function getCategoryXp(category) {
+        const directKey = 'xp_' + category;
+        const directVal = Number(localStorage.getItem(directKey));
+        if (!isNaN(directVal) && directVal > 0) return directVal;
+
+        try {
+            const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+            if (catMap[category] && !isNaN(Number(catMap[category]))) return Number(catMap[category]);
+        } catch (e) {}
+
+        const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
+        const solvedInCat = (userSolvedList || []).filter(s => {
+            const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+            return p && p.category === category;
+        });
+        const computed = solvedInCat.reduce((sum, s) => {
+            const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+            return sum + (XP_MAP[p?.difficulty] || 10);
+        }, 0);
+
+        if (computed > 0) {
+            localStorage.setItem(directKey, String(computed));
+        }
+        return computed;
+    }
+
+    function syncAllCategoryXp(solved) {
+        const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
+        const catTotals = {};
+        (solved || []).forEach(s => {
+            const p = PROBLEM_REGISTRY.find(pr => pr.slug === s.problem_slug);
+            if (p && p.category) {
+                catTotals[p.category] = (catTotals[p.category] || 0) + (XP_MAP[p.difficulty] || 10);
+            }
+        });
+
+        Object.entries(catTotals).forEach(([cat, xp]) => {
+            const key = 'xp_' + cat;
+            const existing = Number(localStorage.getItem(key)) || 0;
+            if (xp > existing) {
+                localStorage.setItem(key, String(xp));
+            }
+        });
+
+        try {
+            const existingMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+            const merged = { ...existingMap, ...catTotals };
+            localStorage.setItem('algohub_category_xp', JSON.stringify(merged));
+        } catch (e) {}
+    }
+
+    // ==========================================
     // USER STATS & DATA LOADING
     // ==========================================
 
@@ -933,20 +1083,29 @@
             streakBadge.classList.add('flex');
         }
 
-        // 3. Level & XP Progress to Next Level
+        // 3. Level, RPG Title & XP Progress to Next Level
         const xpBadge = document.getElementById('xp-badge');
         const levelLabel = document.getElementById('level-label');
+        const rpgTitleLabel = document.getElementById('rpg-title-label');
         const xpBar = document.getElementById('xp-bar');
 
         const level = Math.floor(xp / 100) + 1;
         const xpIntoLevel = xp % 100;
+        const rpgTitle = getRpgTitle(level);
 
         if (levelLabel) levelLabel.textContent = `Lv ${level}`;
+        if (rpgTitleLabel) {
+            rpgTitleLabel.textContent = rpgTitle;
+            rpgTitleLabel.className = `text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${getRpgTitleBadgeClass(rpgTitle)}`;
+        }
         if (xpBar) xpBar.style.width = `${xpIntoLevel}%`;
         if (xpBadge) {
             xpBadge.classList.remove('hidden');
             xpBadge.classList.add('flex');
         }
+
+        // Keep leaderboard in sync with latest user stats
+        renderLeaderboard(stats);
     }
 
     async function checkAuth() {
@@ -958,9 +1117,13 @@
             if (cachedStats) currentUserStats = JSON.parse(cachedStats);
         } catch (e) {}
 
+        syncAllCategoryXp(userSolvedList);
         updateUserStatsUI(currentUserStats);
+        updateProgression(userSolvedList);
         renderBadges();
         renderSprintTasks();
+        renderWeaknessMapper(userSolvedList);
+        renderLeaderboard(currentUserStats);
 
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { window.location.href = './'; return; }
@@ -1026,8 +1189,9 @@
         }
 
         userSolvedList = solved;
+        syncAllCategoryXp(solved);
 
-        updateProgression(solved.length);
+        updateProgression(solved);
         renderContributionGrid(solved);
         renderReviewList(review);
         renderWeaknessMapper(solved);
@@ -1035,12 +1199,57 @@
         renderBadges(solved, currentUserStats);
     }
 
-    function updateProgression(solvedCount) {
-        const blind75TotalCount = 75; 
-        const percent = Math.min(Math.round((solvedCount / blind75TotalCount) * 100), 100);
-        document.getElementById('progress-text').textContent = `${percent}%`;
-        document.getElementById('progress-bar').style.width = `${percent}%`;
-        document.getElementById('total-solves-lbl').textContent = `${solvedCount} Solves`;
+    function updateProgression(solvedData) {
+        let solvedList = [];
+        if (Array.isArray(solvedData)) {
+            solvedList = solvedData;
+        } else if (Array.isArray(userSolvedList)) {
+            solvedList = userSolvedList;
+        }
+
+        // Blind 75 Matrix calculation (remains intact and accurate)
+        const blind75Problems = PROBLEM_REGISTRY.filter(p => p.course === 'blind-75' || !p.course);
+        const blind75Slugs = new Set(blind75Problems.map(p => p.slug));
+        let blind75Solved = solvedList.filter(s => {
+            const slug = typeof s === 'string' ? s : (s.problem_slug || s.slug);
+            return blind75Slugs.has(slug);
+        }).length;
+
+        // Fallback if raw number was passed without array data
+        if (typeof solvedData === 'number' && solvedList.length === 0) {
+            blind75Solved = solvedData;
+        }
+
+        const blind75TotalCount = 75;
+        const blindPercent = Math.min(Math.round((blind75Solved / blind75TotalCount) * 100), 100);
+
+        const elBlindText = document.getElementById('progress-text');
+        const elBlindBar = document.getElementById('progress-bar');
+        if (elBlindText) elBlindText.textContent = `${blindPercent}%`;
+        if (elBlindBar) elBlindBar.style.width = `${blindPercent}%`;
+
+        // NeetCode 150 calculation (solved NeetCode problems / total NeetCode problems in registry)
+        const neetcodeProblems = PROBLEM_REGISTRY.filter(p => p.course === 'neetcode-150');
+        const neetcodeSlugs = new Set(neetcodeProblems.map(p => p.slug));
+        const neetcodeSolved = solvedList.filter(s => {
+            const slug = typeof s === 'string' ? s : (s.problem_slug || s.slug);
+            return neetcodeSlugs.has(slug);
+        }).length;
+
+        const neetcodeTotalCount = neetcodeProblems.length;
+        const neetcodePercent = neetcodeTotalCount > 0 
+            ? Math.min(Math.round((neetcodeSolved / neetcodeTotalCount) * 100), 100) 
+            : 0;
+
+        const elNeetText = document.getElementById('progress-text-neetcode');
+        const elNeetBar = document.getElementById('progress-bar-neetcode');
+        if (elNeetText) elNeetText.textContent = `${neetcodePercent}%`;
+        if (elNeetBar) elNeetBar.style.width = `${neetcodePercent}%`;
+
+        // Total Solves across curriculum
+        const totalCount = typeof solvedData === 'number' ? solvedData : solvedList.length;
+        const elTotalSolves = document.getElementById('total-solves-lbl');
+        if (elTotalSolves) elTotalSolves.textContent = `${totalCount} Solves`;
     }
 
     function renderContributionGrid(solvedData) {
@@ -1130,7 +1339,12 @@
             "Tree": "hover:border-emerald-500/50 hover:bg-emerald-500/5 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-950/20",
             "Heap": "hover:border-orange-500/50 hover:bg-orange-500/5 dark:hover:border-orange-500/40 dark:hover:bg-orange-950/20",
             "Graph": "hover:border-violet-500/50 hover:bg-violet-500/5 dark:hover:border-violet-500/40 dark:hover:bg-violet-950/20",
-            "Dynamic Programming": "hover:border-fuchsia-500/50 hover:bg-fuchsia-500/5 dark:hover:border-fuchsia-500/40 dark:hover:bg-fuchsia-950/20"
+            "Dynamic Programming": "hover:border-fuchsia-500/50 hover:bg-fuchsia-500/5 dark:hover:border-fuchsia-500/40 dark:hover:bg-fuchsia-950/20",
+            "Arrays & Hashing": "hover:border-blue-500/50 hover:bg-blue-500/5 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/20",
+            "Two Pointers": "hover:border-cyan-500/50 hover:bg-cyan-500/5 dark:hover:border-cyan-500/40 dark:hover:bg-cyan-950/20",
+            "Sliding Window": "hover:border-sky-500/50 hover:bg-sky-500/5 dark:hover:border-sky-500/40 dark:hover:bg-sky-950/20",
+            "Stack": "hover:border-amber-500/50 hover:bg-amber-500/5 dark:hover:border-amber-500/40 dark:hover:bg-amber-950/20",
+            "Binary Search": "hover:border-emerald-500/50 hover:bg-emerald-500/5 dark:hover:border-emerald-500/40 dark:hover:bg-emerald-950/20"
         };
         
         list.innerHTML = sorted.map(([category, stats]) => {
@@ -1139,15 +1353,161 @@
             if (percent >= 80) colorClass = 'bg-emerald-500';
             else if (percent >= 40) colorClass = 'bg-amber-500';
             const catHover = CATEGORY_HOVER_STYLES[category] || "hover:border-zinc-400 dark:hover:border-zinc-700";
+            const catXp = getCategoryXp(category);
             
             return `
-                <div class="stat-card p-3 rounded-lg bg-zinc-50 dark:bg-[#141414] border border-zinc-200/80 dark:border-zinc-800/80 ${catHover} hover:-translate-y-0.5 transition-all duration-200">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">${category}</span>
+                <div class="stat-card p-3 rounded-xl bg-zinc-50 dark:bg-[#141414] border border-zinc-200/80 dark:border-zinc-800/80 ${catHover} hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">${category}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-zinc-200/60 dark:bg-[#1a1a1a] text-zinc-700 dark:text-zinc-300 border border-zinc-300/60 dark:border-zinc-700/60" title="${category} XP">⚡ ${catXp} XP</span>
+                        </div>
                         <span class="text-xs font-mono text-zinc-500 dark:text-zinc-400">${stats.solved}/${stats.total} • ${percent}%</span>
                     </div>
                     <div class="w-full bg-zinc-200 dark:bg-zinc-800/80 h-2 rounded-full overflow-hidden">
                         <div class="${colorClass} h-2 rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ==========================================
+    // GLOBAL LEADERBOARD RENDERING
+    // ==========================================
+
+    function renderLeaderboard(stats = null) {
+        const container = document.getElementById('leaderboard-list');
+        if (!container) return;
+
+        let userXp = 0;
+        if (stats && typeof stats.xp !== 'undefined') {
+            userXp = Number(stats.xp) || 0;
+        } else {
+            try {
+                const storedStats = JSON.parse(localStorage.getItem('algohub_user_stats') || '{}');
+                userXp = Number(storedStats.xp) || Number(localStorage.getItem('algohub_xp')) || 0;
+            } catch (e) {}
+        }
+
+        const userLevel = Math.floor(userXp / 100) + 1;
+        const userTitle = getRpgTitle(userLevel);
+
+        // Demo leaderboard rows showcasing diverse levels & RPG titles
+        const demoLeaderboard = [
+            {
+                name: "Alex Rivers",
+                username: "@arivers",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+                level: 28,
+                title: "Master",
+                xp: 2840,
+                isCurrentUser: false
+            },
+            {
+                name: "Sophia Chen",
+                username: "@sophia_c",
+                avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80",
+                level: 19,
+                title: "Algo Knight",
+                xp: 1920,
+                isCurrentUser: false
+            },
+            {
+                name: "David Kim",
+                username: "@dkim_code",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+                level: 15,
+                title: "Algo Knight",
+                xp: 1510,
+                isCurrentUser: false
+            },
+            {
+                name: "Elena Rostova",
+                username: "@elena_r",
+                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+                level: 9,
+                title: "Apprentice",
+                xp: 890,
+                isCurrentUser: false
+            },
+            {
+                name: "Marcus Vance",
+                username: "@mvance",
+                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
+                level: 4,
+                title: "Novice",
+                xp: 380,
+                isCurrentUser: false
+            }
+        ];
+
+        // Read current user avatar if present
+        const avatarEl = document.getElementById('user-avatar');
+        const userAvatarSrc = avatarEl && avatarEl.src && !avatarEl.src.endsWith('/dashboard') ? avatarEl.src : '';
+
+        const currentUserEntry = {
+            name: "You",
+            username: "@algo_challenger",
+            avatar: userAvatarSrc,
+            level: userLevel,
+            title: userTitle,
+            xp: userXp,
+            isCurrentUser: true
+        };
+
+        // Combine and sort by XP descending
+        const allEntries = [...demoLeaderboard, currentUserEntry].sort((a, b) => b.xp - a.xp);
+
+        // Render 6 rows, guaranteeing the current user is visible in the standings
+        let renderedEntries = allEntries.slice(0, 6);
+        if (!renderedEntries.some(e => e.isCurrentUser)) {
+            renderedEntries[5] = currentUserEntry;
+        }
+
+        container.innerHTML = renderedEntries.map((player, index) => {
+            const rank = index + 1;
+            let rankBadge = '';
+            if (rank === 1) rankBadge = '<span class="text-base" title="1st Place">🥇</span>';
+            else if (rank === 2) rankBadge = '<span class="text-base" title="2nd Place">🥈</span>';
+            else if (rank === 3) rankBadge = '<span class="text-base" title="3rd Place">🥉</span>';
+            else rankBadge = `<span class="text-xs font-mono font-bold text-zinc-400 dark:text-zinc-500">#${rank}</span>`;
+
+            const isUser = player.isCurrentUser;
+            const rowStyle = isUser
+                ? 'border-emerald-500/40 dark:border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.06)]'
+                : 'border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-[#141414] hover:border-zinc-400 dark:hover:border-zinc-700';
+
+            const avatarHtml = player.avatar
+                ? `<img src="${player.avatar}" alt="${player.name}" class="w-8 h-8 rounded-full border ${isUser ? 'border-emerald-500/40' : 'border-zinc-200 dark:border-zinc-800'} object-cover flex-shrink-0">`
+                : `<div class="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 border ${isUser ? 'border-emerald-500/40' : 'border-zinc-300 dark:border-zinc-700'} flex items-center justify-center text-xs font-bold font-mono text-zinc-700 dark:text-zinc-300 flex-shrink-0">${player.name.slice(0, 2).toUpperCase()}</div>`;
+
+            const titleBadgeClass = getRpgTitleBadgeClass(player.title);
+
+            return `
+                <div class="flex items-center justify-between p-3 rounded-xl border ${rowStyle} transition-all duration-200 hover:-translate-y-0.5">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-6 flex items-center justify-center flex-shrink-0">
+                            ${rankBadge}
+                        </div>
+                        ${avatarHtml}
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">${player.name}</span>
+                                ${isUser ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500 text-zinc-950 uppercase tracking-wider flex-shrink-0">You</span>' : ''}
+                            </div>
+                            <span class="text-[11px] font-mono text-zinc-400 dark:text-zinc-500 truncate block">${player.username}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+                        <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${titleBadgeClass}">${player.title}</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-zinc-100 dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300">Lv ${player.level}</span>
+                        <div class="text-right min-w-[70px]">
+                            <span class="text-xs sm:text-sm font-mono font-bold text-zinc-900 dark:text-zinc-100 flex items-center justify-end gap-1">
+                                <span class="text-amber-500 text-xs">⚡</span>${player.xp.toLocaleString()} <span class="text-[10px] text-zinc-400 font-normal">XP</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
             `;

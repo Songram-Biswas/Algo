@@ -301,7 +301,10 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           <span># Group Anagrams</span>
         </a>
-        <span class="invisible"></span>
+        <a id="link-next" href="./longest-substring-without-repeating-characters" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+          <span># Longest Substring Without Repeating Characters</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </a>
       </div>
 
     </main>
@@ -315,7 +318,8 @@
 
     const targetSlug = 'longest-repeating-character-replacement';
     const currentDifficulty = 'Medium';
-    const sidebar = [{"slug": "group-anagrams", "title": "Group Anagrams", "implemented": true}, {"slug": "longest-repeating-character-replacement", "title": "Longest Repeating Character Replacement", "implemented": true}];
+    const currentCategory = 'String';
+    const sidebar = [{"slug": "group-anagrams", "title": "Group Anagrams", "implemented": true}, {"slug": "longest-repeating-character-replacement", "title": "Longest Repeating Character Replacement", "implemented": true}, {"slug": "longest-substring-without-repeating-characters", "title": "Longest Substring Without Repeating Characters", "implemented": true}, {"slug": "valid-anagram", "title": "Valid Anagram", "implemented": true}];
     let currentUserId = null;
     let currentStatus = null;
     let solvedSlugSet = new Set();
@@ -455,7 +459,7 @@
 
         if (newStatus === 'solved' && previousStatus !== 'solved') {
           solvedSlugSet.add(targetSlug);
-          awardXPAndStreak(currentDifficulty);
+          awardXPAndStreak(currentDifficulty, currentCategory);
         }
       } else {
         solvedSlugSet.delete(targetSlug);
@@ -488,9 +492,23 @@
       }
     }
 
-    async function awardXPAndStreak(difficulty) {
+    async function awardXPAndStreak(difficulty, category) {
       const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
       const xpGain = XP_MAP[difficulty] || 10;
+
+      // Category-specific XP
+      const cat = category || currentCategory || 'String';
+      const catKey = 'xp_' + cat;
+      const prevCatXp = Number(localStorage.getItem(catKey)) || 0;
+      const newCatXp = prevCatXp + xpGain;
+      localStorage.setItem(catKey, String(newCatXp));
+
+      try {
+        const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+        catMap[cat] = newCatXp;
+        localStorage.setItem('algohub_category_xp', JSON.stringify(catMap));
+      } catch (e) {}
+
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
 
@@ -514,6 +532,13 @@
         user_id: currentUserId, xp, current_streak: newStreak, longest_streak: longestStreak,
         last_active_date: todayStr, updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
+
+      try {
+        localStorage.setItem('algohub_xp', String(xp));
+        localStorage.setItem('algohub_user_stats', JSON.stringify({
+          xp, current_streak: newStreak, longest_streak: longestStreak, last_active_date: todayStr
+        }));
+      } catch (e) {}
     }
 
     

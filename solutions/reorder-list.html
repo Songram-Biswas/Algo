@@ -9,28 +9,35 @@
 <script>tailwind.config = { darkMode: 'class' }</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f8fb; --panel: #ffffff; --panel-border: #e7e9f0; --ink: #14161f; --ink-soft: #6b7080; --rail: #eef0f5;
-    --accent: #4f6df5; --accent-soft: #eef1ff;
-    --good: #1ea672; --good-soft: #e8f8f1;
-    --warn: #c2780a; --warn-soft: #fdf1e0;
-    --bad: #d23c4f; --bad-soft: #fde9ec;
-    --trace-scan: #4f6df5; --trace-hit: #1ea672;
-    --sun: #f5a623; --moon: #94a3ff;
+    --bg: #fafafa; --panel: #ffffff; --panel-border: #e4e4e7; --ink: #09090b; --ink-soft: #71717a; --rail: #f4f4f5;
+    --accent: #18181b; --accent-soft: #f4f4f5;
+    --good: #059669; --good-soft: #ecfdf5;
+    --warn: #d97706; --warn-soft: #fffbeb;
+    --bad: #e11d48; --bad-soft: #fff1f2;
+    --trace-scan: #18181b; --trace-hit: #059669;
+    --sun: #f5a623; --moon: #71717a;
   }
   html.dark {
-    --bg: #07080d; --panel: #0e1018; --panel-border: #1d2030; --ink: #eef0f7; --ink-soft: #8e93a8; --rail: #11131d;
-    --accent: #7c93ff; --accent-soft: #161a30;
-    --good: #34d399; --good-soft: #0e2420;
-    --warn: #f5b35a; --warn-soft: #271d0d;
-    --bad: #fb7185; --bad-soft: #2a1419;
-    --trace-scan: #7c93ff; --trace-hit: #34d399;
-    --sun: #f5a623; --moon: #b9c3ff;
+    --bg: #0a0a0a; --panel: #111111; --panel-border: #27272a; --ink: #f4f4f5; --ink-soft: #a1a1aa; --rail: #141414;
+    --accent: #ffffff; --accent-soft: #18181b;
+    --good: #10b981; --good-soft: rgba(16, 185, 129, 0.12);
+    --warn: #f59e0b; --warn-soft: rgba(245, 158, 11, 0.12);
+    --bad: #f43f5e; --bad-soft: rgba(244, 63, 94, 0.12);
+    --trace-scan: #ffffff; --trace-hit: #10b981;
+    --sun: #f5a623; --moon: #e4e4e7;
   }
-  body { background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, sans-serif; transition: background .25s, color .25s; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background .2s, color .2s;
+    letter-spacing: -0.01em;
+  }
+  .mono { font-family: 'Geist Mono', 'JetBrains Mono', monospace; }
   .panel { background: var(--panel); border: 1px solid var(--panel-border); }
   .rail-bg { background: var(--rail); }
   .text-soft { color: var(--ink-soft); }
@@ -39,40 +46,42 @@
 
   .cell {
     width: 52px; height: 52px;
-    border: 1.5px solid var(--panel-border);
+    border: 1px solid var(--panel-border);
     background: var(--panel);
     display: flex; align-items: center; justify-content: center;
-    border-radius: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600; font-size: 17px;
+    border-radius: 8px;
+    font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 16px;
     position: relative;
-    transition: all .3s cubic-bezier(.4,0,.2,1);
+    transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
-  .cell.scan { border-color: var(--trace-scan); background: color-mix(in srgb, var(--trace-scan) 14%, var(--panel)); transform: translateY(-4px); box-shadow: 0 6px 16px -6px var(--trace-scan); }
-  .cell.hit { border-color: var(--trace-hit); background: color-mix(in srgb, var(--trace-hit) 18%, var(--panel)); transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px -6px var(--trace-hit); }
-  .cell.done { opacity: .45; }
+  .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
+  .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
+  .cell.done { opacity: .4; }
+  .cell.discarded { opacity: .2; }
 
   .map-slot {
-    border: 1.5px dashed var(--panel-border); border-radius: 10px; padding: 8px 12px;
-    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft);
-    transition: all .3s; opacity: .35;
+    border: 1px dashed var(--panel-border); border-radius: 8px; padding: 8px 12px;
+    font-family: 'Geist Mono', 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-soft);
+    transition: all .2s; opacity: .4;
   }
   .map-slot.filled { border-style: solid; border-color: var(--accent); color: var(--ink); opacity: 1; background: var(--accent-soft); }
 
-  .tab-btn { color: var(--ink-soft); border-bottom: 2px solid transparent; }
-  .tab-btn.active { color: var(--accent); border-color: var(--accent); }
+  .tab-btn { color: var(--ink-soft); border-bottom: 2px solid transparent; font-weight: 500; }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--ink); border-color: var(--accent); font-weight: 600; }
 
-  .code-block { background: var(--rail); border: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.65; }
-  .kw { color: #c678dd; } .fn { color: #61afef; } .num { color: #d19a66; } .str { color: #98c379; } .cm { color: var(--ink-soft); font-style: italic; }
-  html:not(.dark) .kw { color: #9333ea; } html:not(.dark) .fn { color: #2563eb; } html:not(.dark) .num { color: #c2410c; } html:not(.dark) .str { color: #15803d; }
+  .code-block { background: #121214; border: 1px solid var(--panel-border); font-family: 'Geist Mono', 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.65; }
+  .kw { color: #f43f5e; } .fn { color: #38bdf8; } .num { color: #fb923c; } .str { color: #4ade80; } .cm { color: #71717a; font-style: italic; }
+  html:not(.dark) .kw { color: #e11d48; } html:not(.dark) .fn { color: #0284c7; } html:not(.dark) .num { color: #ea580c; } html:not(.dark) .str { color: #16a34a; } html:not(.dark) .cm { color: #a1a1aa; font-style: italic; }
 
   .step-btn { background: var(--panel); border: 1px solid var(--panel-border); color: var(--ink); }
-  .step-btn:hover:not(:disabled) { background: var(--rail); }
-  .step-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .step-btn:hover:not(:disabled) { background: var(--rail); border-color: var(--ink-soft); }
+  .step-btn:disabled { opacity: .3; cursor: not-allowed; }
 
-  .quiz-opt { border: 1.5px solid var(--panel-border); background: var(--panel); cursor: pointer; transition: all .15s; }
-  .quiz-opt:hover { border-color: var(--accent); }
+  .quiz-opt { border: 1px solid var(--panel-border); background: var(--panel); cursor: pointer; transition: all .15s; }
+  .quiz-opt:hover { border-color: var(--accent); background: var(--rail); }
   .quiz-opt.selected { border-color: var(--accent); background: var(--accent-soft); }
   .quiz-opt.correct { border-color: var(--good) !important; background: var(--good-soft) !important; }
   .quiz-opt.incorrect { border-color: var(--bad) !important; background: var(--bad-soft) !important; }
@@ -83,38 +92,32 @@
   .theme-orb.moon::before { content:''; position:absolute; top:3px; left:2px; width:8px; height:8px; border-radius:50%; background: var(--rail); opacity:.5; }
   .theme-orb.moon::after { content:''; position:absolute; top:11px; left:11px; width:5px; height:5px; border-radius:50%; background: var(--rail); opacity:.4; }
 
+  /* Linked list trace styles */
+  .ll-node { display: flex; align-items: center; }
+  .ll-box { width: 40px; height: 40px; border: 1.5px solid var(--panel-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; position: relative; font-family: 'Geist Mono', monospace; }
+  .ll-box.cur { border-color: var(--trace-scan); }
+  .ll-box.prev { border-color: var(--trace-hit); }
+  .ll-label { position: absolute; top: -20px; font-size: 10px; font-weight: 600; }
+  .ll-arrow { margin: 0 8px; color: var(--ink-soft); font-weight: 600; }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 10px; }
-
-  /* --- Reorder List specific: idea diagram + linked-list trace --- */
-  .idea-details summary { cursor: pointer; user-select: none; }
-  .idea-details summary::-webkit-details-marker { display: none; }
-  .flow-box rect { fill: var(--rail); stroke: var(--panel-border); }
-  .flow-box text { fill: var(--ink); }
-  .flow-arrow { stroke: var(--accent); }
-
-  .phase-pill { border: 1.5px solid var(--panel-border); background: var(--panel); color: var(--ink-soft); border-radius: 999px; padding: 6px 14px; font-size: 12px; font-weight: 700; transition: all .2s; }
-  .phase-pill.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-
-  #ll-stage { position: relative; width: 100%; max-width: 500px; height: 190px; margin: 0 auto; }
-  #ll-boxes, #ll-tags, #ll-arrows { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-  #ll-arrows { pointer-events: none; }
 </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-indigo-500/30">
+<body class="min-h-screen flex flex-col selection:bg-zinc-500/20">
 
-  <header class="sticky top-0 z-50 panel border-b px-6 py-3 flex justify-between items-center w-full backdrop-blur-sm" style="background: color-mix(in srgb, var(--panel) 88%, transparent);">
-    <a href="../dashboard" class="flex items-center gap-3 hover:opacity-80 transition">
-      <img src="../favicon.png" alt="algoHub" class="w-8 h-8 rounded-lg shadow-sm">
-      <span class="text-xl font-extrabold tracking-tight">algoHub</span>
+  <header class="sticky top-0 z-50 border-b px-6 py-3.5 flex justify-between items-center w-full backdrop-blur-md bg-white/75 dark:bg-[#0a0a0a]/80 border-zinc-200 dark:border-zinc-800/80 transition-all">
+    <a href="../dashboard" class="flex items-center gap-3 hover:opacity-80 transition group">
+      <img src="../favicon.png" alt="algoHub" class="w-8 h-8 rounded-lg shadow-sm border border-zinc-200/50 dark:border-zinc-800/80 group-hover:scale-105 transition-transform duration-200">
+      <span class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">algoHub</span>
     </a>
-    <div class="flex items-center gap-3">
-      <button id="theme-toggle" class="p-2 rounded-lg hover:bg-[var(--rail)] transition cursor-pointer flex items-center justify-center" title="Toggle theme">
+    <div class="flex items-center gap-4">
+      <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-100/60 dark:bg-[#161616] hover:bg-zinc-200/60 dark:hover:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 transition-all duration-200 cursor-pointer shadow-sm" title="Toggle theme">
         <span id="theme-orb" class="theme-orb sun"></span>
       </button>
-      <div class="flex items-center gap-3 pl-3 border-l border-soft">
-        <img id="user-avatar" class="w-8 h-8 rounded-full border border-soft object-cover rail-bg" src="" alt="Profile">
-        <button id="btn-logout" class="text-xs font-semibold text-soft hover:text-red-500 transition cursor-pointer">Sign Out</button>
+      <div class="flex items-center gap-3 pl-4 border-l border-zinc-200 dark:border-zinc-800">
+        <img id="user-avatar" class="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-800 object-cover bg-zinc-100 dark:bg-zinc-800" src="" alt="Profile">
+        <button id="btn-logout" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-zinc-100 dark:bg-[#161616] border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Sign Out</button>
       </div>
     </div>
   </header>
@@ -122,10 +125,10 @@
   <div class="w-full max-w-6xl mx-auto px-6 pb-16 flex-grow flex flex-col lg:flex-row gap-8 items-start">
 
     <aside class="w-full lg:w-72 lg:sticky lg:top-24 flex-shrink-0 order-2 lg:order-1">
-      <div class="panel rounded-xl overflow-hidden">
+      <div class="panel rounded-xl overflow-hidden shadow-sm">
         <div class="px-4 py-3 border-b border-soft flex items-center justify-between">
-          <h3 class="text-sm font-bold">Linked List</h3>
-          <span id="sidebar-progress" class="text-xs mono text-soft">0/0</span>
+          <h3 class="text-xs font-bold tracking-wider uppercase text-zinc-500 dark:text-zinc-400">Linked List</h3>
+          <span id="sidebar-progress" class="text-xs mono text-soft font-semibold">0/0</span>
         </div>
         <ul id="sidebar-list" class="max-h-[70vh] overflow-y-auto divide-y" style="border-color: var(--panel-border);"></ul>
       </div>
@@ -133,264 +136,177 @@
 
     <main class="w-full flex-grow flex flex-col order-1 lg:order-2 pt-8">
 
-      <div id="breadcrumb" class="text-sm text-soft mb-3 flex items-center gap-2 mono">
-        <a href="../category?course=blind-75&type=Linked List" class="hover:accent-text transition">Linked List</a>
-        <span>/</span><span>#4</span>
+      <div id="breadcrumb" class="text-xs text-soft mb-3 flex items-center gap-2 mono font-medium uppercase tracking-wider">
+        <a href="../category?course=blind-75&type=Linked List" class="hover:text-zinc-900 dark:hover:text-white transition">Linked List</a>
+        <span>/</span><span>#1</span>
       </div>
 
       <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 class="text-4xl font-extrabold tracking-tight mb-3">Reorder List</h1>
+          <h1 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3 text-zinc-900 dark:text-zinc-100">Reorder List</h1>
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-2.5 py-1 rounded-md text-xs font-bold" style="background:var(--warn-soft); color:var(--warn)">Medium</span>
-            <span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Linked List</span>
-            <span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Two Pointers</span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" style="background:var(--warn-soft); color:var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 25%, transparent)">Medium</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Linked List</span><span class="px-2.5 py-1 rounded-md text-xs font-semibold text-soft" style="background:var(--rail)">Two Pointers</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <a href="https://leetcode.com/problems/reorder-list/" target="_blank" class="flex items-center gap-1.5 text-sm font-semibold accent-text hover:underline">
+          <a href="https://leetcode.com/problems/reorder-list/" target="_blank" class="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 rounded-full px-3.5 py-1.5 bg-white dark:bg-[#111111] hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
             LeetCode ↗
           </a>
-          <button id="btn-copy-page" class="flex items-center gap-2 panel hover:bg-[var(--rail)] border border-soft px-3 py-1.5 rounded-lg text-sm transition cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          <button id="btn-copy-page" class="flex items-center gap-2 panel hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-soft px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm text-zinc-700 dark:text-zinc-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
             <span>Copy link</span>
           </button>
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6" data-ai-statement>
+      <div class="panel rounded-2xl p-6 mb-6 shadow-sm" data-ai-statement>
         <p class="leading-relaxed mb-4">
           You are given the head of a singly linked list. The list can be represented as <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → L1 → … → Ln-1 → Ln</code>. Reorder it in place to the form <code class="mono px-1.5 py-0.5 rounded" style="background:var(--rail)">L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …</code>
         </p>
         <p class="text-soft text-sm mb-5">You may not modify the values in the list's nodes — only the nodes themselves may be rearranged.</p>
-        <div class="rounded-xl p-4 mono text-sm" style="background:var(--rail)">
-          <p class="mb-1"><span class="text-soft">Input:</span> head = [1,2,3,4,5]</p>
-          <p><span class="text-soft">Output:</span> [1,5,2,4,3] <span class="cm">// weave front and back halves together</span></p>
+        <div class="rounded-xl p-4 mono text-sm border border-zinc-200/50 dark:border-zinc-800/80" style="background:var(--rail)">
+          <p class="mb-1"><span class="text-soft">Input:</span> head = [1,2,3,4,5]</p><p><span class="text-soft">Output:</span> [1,5,2,4,3] <span class="cm">// weave front and back halves together</span></p>
         </div>
       </div>
 
-      <!-- IDEA + FLOWCHART -->
-      <div class="panel rounded-2xl p-6 mb-6">
-        <h3 class="text-base font-bold mb-3">Idea</h3>
-        <p class="leading-relaxed mb-3">Break this into three well-known sub-problems and chain them together. This decomposition is exactly what interviewers want to hear — it shows you can spot reusable patterns instead of inventing something ad-hoc.</p>
-        <ul class="list-disc list-inside space-y-2 text-soft leading-relaxed mb-3">
-          <li><strong class="accent-text">Step 1 — Find the middle.</strong> Use slow/fast pointers. When <code class="mono">fast</code> reaches the end, <code class="mono">slow</code> sits at the middle (for even length, it lands at the start of the second half).</li>
-          <li><strong class="accent-text">Step 2 — Reverse the second half.</strong> Split the list at <code class="mono">slow</code>, then reverse everything from there to the end. Now the first half is in original order and the second half is reversed.</li>
-          <li><strong class="accent-text">Step 3 — Merge the two halves alternately.</strong> Weave nodes one-by-one: first-half node, second-half node, repeat. The second half is one node shorter or equal, so it always runs out first — stop when it does.</li>
-        </ul>
-        <p class="text-soft text-sm mb-4">Why this works: reversing the second half turns "take from the end" into "take from the front of the reversed list" — O(1) per step instead of O(n) repeated traversals to find the last remaining node.</p>
-
-        <details class="idea-details">
-          <summary class="text-sm font-semibold accent-text mb-3">Show Diagram</summary>
-          <div class="mt-4 flex justify-center">
-            <svg viewBox="0 0 400 560" width="100%" style="max-width:380px" role="img" aria-label="Reorder list flowchart">
-              <defs>
-                <marker id="flow-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M0,0L10,5L0,10z" style="fill:var(--accent)" />
-                </marker>
-              </defs>
-
-              <g class="flow-box">
-                <rect x="40" y="10" width="320" height="60" rx="12" stroke-width="1.5"></rect>
-                <text x="200" y="45" text-anchor="middle" font-size="14" font-weight="600">Start: head</text>
-              </g>
-              <line x1="200" y1="70" x2="200" y2="118" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
-
-              <g class="flow-box">
-                <rect x="40" y="120" width="320" height="70" rx="12" stroke-width="1.5"></rect>
-                <text x="200" y="148" text-anchor="middle" font-size="14" font-weight="600">Find middle</text>
-                <text x="200" y="168" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">slow / fast pointers</text>
-              </g>
-              <line x1="200" y1="190" x2="200" y2="238" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
-
-              <g class="flow-box">
-                <rect x="40" y="240" width="320" height="70" rx="12" stroke-width="1.5"></rect>
-                <text x="200" y="268" text-anchor="middle" font-size="14" font-weight="600">Cut list &amp; reverse</text>
-                <text x="200" y="288" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">second half</text>
-              </g>
-              <line x1="200" y1="310" x2="200" y2="358" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
-
-              <g class="flow-box">
-                <rect x="40" y="360" width="320" height="70" rx="12" stroke-width="1.5"></rect>
-                <text x="200" y="388" text-anchor="middle" font-size="14" font-weight="600">Merge alternately</text>
-                <text x="200" y="408" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">first / second pointers</text>
-              </g>
-              <line x1="200" y1="430" x2="200" y2="478" class="flow-arrow" stroke-width="2" marker-end="url(#flow-head)"></line>
-
-              <g class="flow-box">
-                <rect x="40" y="480" width="320" height="60" rx="12" stroke-width="1.5"></rect>
-                <text x="200" y="515" text-anchor="middle" font-size="14" font-weight="600">Return — reordered in place</text>
-              </g>
-            </svg>
-          </div>
-        </details>
-      </div>
-
-      <!-- EXECUTION TRACE -->
-      <div class="panel rounded-2xl p-6 mb-6">
+      <div class="panel rounded-2xl p-6 mb-6 shadow-sm">
         <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div>
-            <h3 class="text-base font-bold">Execution Trace</h3>
-            <p class="text-xs text-soft mt-0.5">Step through the algorithm at your own pace — no autoplay, you're in control.</p>
+            <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">Execution Trace</h3>
+            <p class="text-xs text-soft mt-0.5">Step through the algorithm at your own pace.</p>
           </div>
           <div class="flex items-center gap-2">
-            <button id="btn-prev" class="step-btn flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer" disabled>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <button id="btn-prev" class="step-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 shadow-sm" disabled>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
               Prev
             </button>
             <span id="step-counter" class="text-xs mono text-soft px-2">Step 0 / 0</span>
-            <button id="btn-next" class="step-btn flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer">
+            <button id="btn-next" class="step-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 shadow-sm">
               Next
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
-            <button id="btn-reset" class="step-btn px-3 py-2 rounded-lg text-sm font-semibold cursor-pointer" title="Reset">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <button id="btn-reset" class="step-btn w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 shadow-sm" title="Reset">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             </button>
           </div>
         </div>
 
-        <div class="flex flex-col items-center gap-6 py-4">
-          <div class="flex items-center gap-2 flex-wrap justify-center">
-            <span id="p-middle" class="phase-pill">1 · Find Middle</span>
-            <span id="p-reverse" class="phase-pill">2 · Reverse Half</span>
-            <span id="p-merge" class="phase-pill">3 · Merge</span>
-          </div>
-
-          <div id="ll-stage">
-            <div id="ll-boxes"></div>
-            <svg id="ll-arrows" viewBox="0 0 500 190" preserveAspectRatio="xMidYMin meet"></svg>
-            <div id="ll-tags"></div>
-          </div>
-
-          <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center px-4">Click "Next" to begin.</p>
+        <div class="flex flex-col items-center gap-8 py-4">
+          <div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>
+          <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center">Click "Next" to begin.</p>
         </div>
       </div>
 
-      <div class="panel rounded-2xl p-6 mb-6">
-        <h3 class="text-base font-bold mb-1">Guess the Complexity</h3>
-        <p class="text-xs text-soft mb-5">Before peeking at the answer — what's the time and space complexity of the optimal solution?</p>
+      <div class="panel rounded-2xl p-6 mb-6 shadow-sm">
+        <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100 mb-1">Guess the Complexity</h3>
+        <p class="text-xs text-soft mb-5">Before peeking at the answer — what's the time and space complexity?</p>
 
         <div class="grid sm:grid-cols-2 gap-6 mb-5">
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
             <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div>
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div>
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
             </div>
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
             <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(1)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div>
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
             </div>
           </div>
         </div>
 
-        <button id="btn-check-quiz" class="px-4 py-2 rounded-lg text-sm font-bold text-white transition cursor-pointer" style="background:var(--accent)">Check my answer</button>
+        <button id="btn-check-quiz" class="px-5 py-2.5 rounded-full text-xs font-semibold bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Check my answer</button>
 
-        <div id="quiz-feedback" class="hidden mt-5 rounded-xl p-4 text-sm leading-relaxed"></div>
+        <div id="quiz-feedback" class="hidden mt-5 rounded-xl p-4 text-sm leading-relaxed border border-soft"></div>
 
-        <div id="quiz-tricks" class="hidden mt-4 rounded-xl p-4 text-sm leading-relaxed" style="background:var(--rail)">
-          <p class="font-bold mb-2 flex items-center gap-1.5">💡 Secret tricks for spotting complexity fast</p>
+        <div id="quiz-tricks" class="hidden mt-4 rounded-xl p-4 text-sm leading-relaxed border border-soft" style="background:var(--rail)">
+          <p class="font-bold mb-2 flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100">💡 Secret tricks</p>
           <ul class="list-disc list-inside space-y-1.5 text-soft">
-            <li><strong class="accent-text">Three separate O(n) passes still add up to O(n).</strong> Finding the middle, reversing, and merging are each a single pass — O(n) + O(n) + O(n) simplifies to O(n), not O(3n²) or anything worse.</li>
-            <li><strong class="accent-text">In-place pointer rewiring costs O(1) space.</strong> No new nodes, arrays, or recursion stack are created — only a handful of pointer variables (slow, fast, prev, curr, first, second).</li>
-            <li><strong class="accent-text">Compare against the array trick.</strong> Dumping nodes into a list and using two indices also works, but costs O(n) space — a strong tell for why the pointer-only approach is preferred here.</li>
-            <li><strong class="accent-text">Reversal is the classic O(n) time / O(1) space pattern.</strong> Recognizing "in-place linked list reversal" as its own reusable building block is exactly what this problem is testing.</li>
+            <li><strong class="accent-text">Count the loops, not the lines.</strong> One pass over n elements with O(1) work per element gives O(n); nested loops over the same input usually multiply.</li><li><strong class="accent-text">Hash set/map operations are O(1) average.</strong> A loop doing one lookup or insert per iteration stays O(n) overall — the hash structure doesn't add a factor.</li><li><strong class="accent-text">Space tracks "extra" memory, not the input.</strong> Ask what new structure you're building and how big it can get.</li><li><strong class="accent-text">Two pointers / sliding window ≠ O(n²).</strong> Even though it looks like nested loops, each pointer only ever moves forward — total work stays O(n).</li><li><strong class="accent-text">Three-Phase Linked List:</strong> (1) Find middle with slow/fast pointers, (2) reverse second half, (3) merge halves alternately.</li>
           </ul>
         </div>
       </div>
 
-      <div class="panel rounded-2xl overflow-hidden mb-6">
-        <div class="flex border-b border-soft px-2">
-          <button data-tab="approach" class="tab-btn active px-4 py-3 text-sm font-bold transition cursor-pointer">Approach</button>
-          <button data-tab="code" class="tab-btn px-4 py-3 text-sm font-bold transition cursor-pointer">Code</button>
-          <button data-tab="complexity" class="tab-btn px-4 py-3 text-sm font-bold transition cursor-pointer">Complexity</button>
+      <div class="panel rounded-2xl overflow-hidden mb-6 shadow-sm">
+        <div class="flex border-b border-soft px-2 bg-zinc-50/50 dark:bg-[#0e0e0e]/50">
+          <button data-tab="approach" class="tab-btn active px-4 py-3 text-sm font-semibold transition-all cursor-pointer">Approach</button>
+          <button data-tab="code" class="tab-btn px-4 py-3 text-sm font-semibold transition-all cursor-pointer">Code</button>
+          <button data-tab="complexity" class="tab-btn px-4 py-3 text-sm font-semibold transition-all cursor-pointer">Complexity</button>
         </div>
 
-        <div id="tab-approach" class="p-6 text-sm leading-relaxed">
-          <p class="mb-3">A brute-force approach could dump every node into an array and rebuild the list with two indices, but the interview-standard fix stays entirely on pointers:</p>
-          <ol class="list-decimal list-inside space-y-2 text-soft">
-            <li>Use slow/fast pointers to find the middle of the list in one pass.</li>
-            <li>Cut the list at the middle, then reverse the second half in place.</li>
-            <li>Merge the first half and the reversed second half by alternating nodes.</li>
-            <li>Stop once the (shorter or equal) second half runs out — the first half's remaining tail terminates the list correctly.</li>
-          </ol>
+        <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+          <p class="mb-3">Break the problem into three classic linked list subproblems:</p>
+    <ol class="list-decimal list-inside space-y-2 text-soft">
+      <li>Find the middle of the linked list using slow and fast pointers.</li>
+      <li>Split the list and reverse the second half in place.</li>
+      <li>Merge the first half and the reversed second half node-by-node alternately.</li>
+    </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
           <div class="code-block rounded-xl p-5 overflow-x-auto relative">
-            <button id="btn-copy-code" class="absolute top-3 right-3 text-xs font-semibold text-soft hover:accent-text transition cursor-pointer">Copy</button>
-<pre><span class="cm"># Definition for singly-linked list.</span>
-<span class="cm"># class ListNode:</span>
-<span class="cm">#     def __init__(self, val=0, next=None):</span>
-<span class="cm">#         self.val = val</span>
-<span class="cm">#         self.next = next</span>
-<span class="kw">class</span> <span class="fn">Solution</span>:
+            <button id="btn-copy-code" class="absolute top-3 right-3 text-xs font-medium text-zinc-400 hover:text-white px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/60 transition cursor-pointer">Copy</button>
+<pre><span class="kw">from</span> typing <span class="kw">import</span> Optional
+
+<span class="kw">class</span> ListNode:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="kw">self</span>, val=<span class="num">0</span>, next=<span class="kw">None</span>):
+        <span class="kw">self</span>.val = val
+        <span class="kw">self</span>.next = next
+
+<span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">reorderList</span>(<span class="kw">self</span>, head: Optional[ListNode]) -&gt; <span class="kw">None</span>:
-        <span class="str">"""
-        Do not return anything, modify head in-place instead.
-        """</span>
         <span class="kw">if</span> <span class="kw">not</span> head <span class="kw">or</span> <span class="kw">not</span> head.next:
             <span class="kw">return</span>
 
-        <span class="cm"># Step 1: find the middle (slow ends at start of second half)</span>
+        <span class="cm"># 1. Find middle</span>
         slow, fast = head, head
         <span class="kw">while</span> fast.next <span class="kw">and</span> fast.next.next:
             slow = slow.next
             fast = fast.next.next
 
-        <span class="cm"># Step 2: reverse the second half</span>
-        second = slow.next
-        slow.next = <span class="kw">None</span>  <span class="cm"># cut the list into two halves</span>
-        prev = <span class="kw">None</span>
-        <span class="kw">while</span> second:
-            nxt = second.next
-            second.next = prev
-            prev = second
-            second = nxt
-        second = prev  <span class="cm"># head of reversed second half</span>
+        <span class="cm"># 2. Reverse second half</span>
+        prev, curr = <span class="kw">None</span>, slow.next
+        slow.next = <span class="kw">None</span>
+        <span class="kw">while</span> curr:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
 
-        <span class="cm"># Step 3: merge the two halves alternately</span>
-        first = head
+        <span class="cm"># 3. Merge alternating</span>
+        first, second = head, prev
         <span class="kw">while</span> second:
-            first_next = first.next
-            second_next = second.next
-
+            tmp1, tmp2 = first.next, second.next
             first.next = second
-            second.next = first_next
-
-            first = first_next
-            second = second_next</pre>
+            second.next = tmp1
+            first, second = tmp1, tmp2</pre>
           </div>
         </div>
 
         <div id="tab-complexity" class="hidden p-6">
           <div class="grid grid-cols-2 gap-4">
-            <div class="rounded-xl p-4" style="background:var(--good-soft)">
+            <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Finding the middle, reversing, and merging are each a single O(n) pass.</p>
+              <p class="text-xs text-soft mt-1">Finding middle (n/2), reversing second half (n/2), and merging (n/2) each take linear time.</p>
             </div>
-            <div class="rounded-xl p-4" style="background:var(--good-soft)">
-              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Space</p>
-              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only pointer variables are used — nodes are rewired in place.</p>
+            <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
+              <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
+              <p class="text-xs text-soft mt-1">In-place pointer rewiring uses a constant number of pointer variables.</p>
             </div>
           </div>
         </div>
       </div>
 
       <div class="flex justify-end gap-3 mb-6">
-        <button id="btn-toggle-review" class="flex items-center gap-2 panel hover:bg-[var(--rail)] border border-soft px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer">
+        <button id="btn-toggle-review" class="flex items-center gap-2 panel hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-soft px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer">
           <svg class="w-4 h-4" style="color:var(--warn)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <span id="text-review-status">Needs Review</span>
         </button>
-        <button id="btn-toggle-solved" class="flex items-center gap-2 panel hover:bg-[var(--rail)] border border-soft px-4 py-2 rounded-full text-sm font-medium transition cursor-pointer">
+        <button id="btn-toggle-solved" class="flex items-center gap-2 panel hover:bg-zinc-100 dark:hover:bg-[#18181b] border border-soft px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 shadow-sm cursor-pointer">
           <svg id="icon-unsolved" class="w-4 h-4 text-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"></circle></svg>
           <svg id="icon-solved" class="w-4 h-4 hidden" style="color:var(--good)" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
           <span id="text-solved-status">Mark as Complete</span>
@@ -398,14 +314,11 @@
       </div>
 
       <div class="border-t border-soft pt-6 flex justify-between items-center">
-        <a id="link-prev" href="../solution?slug=linked-list-cycle" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
+        <a id="link-prev" href="./reverse-linked-list" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-          <span id="text-prev"># Linked List Cycle</span>
+          <span># Reverse Linked List</span>
         </a>
-        <a id="link-next" href="../solution?slug=reverse-linked-list" class="text-soft hover:accent-text transition flex items-center gap-2 text-sm font-semibold">
-          <span># Remove Nth Node From End of List</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        </a>
+        <span class="invisible"></span>
       </div>
 
     </main>
@@ -419,6 +332,8 @@
 
     const targetSlug = 'reorder-list';
     const currentDifficulty = 'Medium';
+    const currentCategory = 'Linked List';
+    const sidebar = [{"slug": "reverse-linked-list", "title": "Reverse Linked List", "implemented": true}, {"slug": "reorder-list", "title": "Reorder List", "implemented": true}];
     let currentUserId = null;
     let currentStatus = null;
     let solvedSlugSet = new Set();
@@ -491,29 +406,13 @@
 
       if (timeRight && spaceRight) {
         feedback.style.background = 'var(--good-soft)'; feedback.style.color = 'var(--good)';
-        feedback.innerHTML = `<strong>Nailed it 🎯</strong> — O(n) time and O(1) space is exactly the interview-optimal answer here. You're reasoning about in-place pointer rewiring correctly.`;
-      } else if (timeRight || spaceRight) {
-        feedback.style.background = 'var(--warn-soft)'; feedback.style.color = 'var(--warn)';
-        feedback.innerHTML = `<strong>Halfway there.</strong> You got the ${timeRight ? 'time' : 'space'} complexity right, but double-check the ${timeRight ? 'space' : 'time'} — see the breakdown in the Complexity tab below.`;
+        feedback.innerHTML = `<strong>Nailed it 🎯</strong>`;
       } else {
         feedback.style.background = 'var(--bad-soft)'; feedback.style.color = 'var(--bad)';
-        feedback.innerHTML = `<strong>Not quite</strong> — but this is exactly the kind of thing that clicks fast once you see the pattern. Check the tricks below, then look at the Complexity tab.`;
+        feedback.innerHTML = `<strong>Not quite.</strong> Check the Complexity tab below.`;
       }
       document.getElementById('quiz-tricks').classList.remove('hidden');
     };
-
-    const LINKED_LIST_PROBLEMS = [
-      { slug: "reverse-linked-list", title: "Reverse Linked List", implemented: true },
-      { slug: "merge-two-sorted-lists", title: "Merge Two Sorted Lists", implemented: false },
-      { slug: "linked-list-cycle", title: "Linked List Cycle", implemented: false },
-      { slug: "reorder-list", title: "Reorder List", implemented: true },
-      { slug: "remove-nth-node-from-end-of-list", title: "Remove Nth Node From End of List", implemented: false },
-      { slug: "copy-list-with-random-pointer", title: "Copy List with Random Pointer", implemented: false },
-      { slug: "add-two-numbers", title: "Add Two Numbers", implemented: false },
-      { slug: "reverse-nodes-in-k-group", title: "Reverse Nodes in k-Group", implemented: false },
-      { slug: "merge-k-sorted-lists", title: "Merge k Sorted Lists", implemented: false },
-      { slug: "odd-even-linked-list", title: "Odd Even Linked List", implemented: false }
-    ];
 
     function urlFor(p) { return p.implemented ? `./${p.slug}` : `../solution?slug=${p.slug}`; }
 
@@ -537,19 +436,19 @@
     }
 
     function renderSidebar() {
-      const solvedCount = LINKED_LIST_PROBLEMS.filter(p => solvedSlugSet.has(p.slug)).length;
-      document.getElementById('sidebar-progress').textContent = `${solvedCount}/${LINKED_LIST_PROBLEMS.length}`;
+      const solvedCount = sidebar.filter(p => solvedSlugSet.has(p.slug)).length;
+      document.getElementById('sidebar-progress').textContent = `${solvedCount}/${sidebar.length}`;
       const list = document.getElementById('sidebar-list');
-      list.innerHTML = LINKED_LIST_PROBLEMS.map(p => {
+      list.innerHTML = sidebar.map(p => {
         const isSolved = solvedSlugSet.has(p.slug);
         const isActive = p.slug === targetSlug;
         const icon = isSolved
           ? `<svg class="w-4 h-4 flex-shrink-0" style="color:var(--good)" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`
           : `<div class="w-3.5 h-3.5 rounded-full border-2 flex-shrink-0" style="border-color:var(--panel-border)"></div>`;
         return `<li>
-          <a href="${urlFor(p)}" class="flex items-center gap-3 px-4 py-3 text-sm transition-colors" style="border-left:2px solid ${isActive ? 'var(--accent)' : 'transparent'}; ${isActive ? 'background:var(--accent-soft)' : ''}">
+          <a href="${urlFor(p)}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-zinc-100 dark:hover:bg-[#161616]" style="border-left:2px solid ${isActive ? 'var(--accent)' : 'transparent'}; ${isActive ? 'background:var(--accent-soft)' : ''}">
             ${icon}
-            <span class="truncate ${isActive ? 'font-bold accent-text' : ''}">${p.title}</span>
+            <span class="truncate ${isActive ? 'font-semibold text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}">${p.title}</span>
           </a>
         </li>`;
       }).join('');
@@ -574,7 +473,7 @@
 
         if (newStatus === 'solved' && previousStatus !== 'solved') {
           solvedSlugSet.add(targetSlug);
-          awardXPAndStreak(currentDifficulty);
+          awardXPAndStreak(currentDifficulty, currentCategory);
         }
       } else {
         solvedSlugSet.delete(targetSlug);
@@ -607,9 +506,23 @@
       }
     }
 
-    async function awardXPAndStreak(difficulty) {
+    async function awardXPAndStreak(difficulty, category) {
       const XP_MAP = { Easy: 10, Medium: 20, Hard: 30 };
       const xpGain = XP_MAP[difficulty] || 10;
+
+      // Category-specific XP
+      const cat = category || currentCategory || 'Linked List';
+      const catKey = 'xp_' + cat;
+      const prevCatXp = Number(localStorage.getItem(catKey)) || 0;
+      const newCatXp = prevCatXp + xpGain;
+      localStorage.setItem(catKey, String(newCatXp));
+
+      try {
+        const catMap = JSON.parse(localStorage.getItem('algohub_category_xp') || '{}');
+        catMap[cat] = newCatXp;
+        localStorage.setItem('algohub_category_xp', JSON.stringify(catMap));
+      } catch (e) {}
+
       const today = new Date();
       const todayStr = today.toISOString().split('T')[0];
 
@@ -634,198 +547,43 @@
         last_active_date: todayStr, updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
 
-      showRewardToast(xpGain, newStreak, streakExtended);
+      try {
+        localStorage.setItem('algohub_xp', String(xp));
+        localStorage.setItem('algohub_user_stats', JSON.stringify({
+          xp, current_streak: newStreak, longest_streak: longestStreak, last_active_date: todayStr
+        }));
+      } catch (e) {}
     }
 
-    function showRewardToast(xpGain, streak, streakExtended) {
-      const toast = document.createElement('div');
-      toast.className = "fixed bottom-6 right-6 z-[100] panel shadow-2xl rounded-2xl px-5 py-4 flex items-center gap-3 translate-y-4 opacity-0 transition-all duration-300";
-      toast.innerHTML = `
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:var(--good-soft)">
-          <svg class="w-5 h-5" style="color:var(--good)" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-        </div>
-        <div>
-          <p class="text-sm font-bold">+${xpGain} XP earned</p>
-          <p class="text-xs text-soft flex items-center gap-1">
-            <span>🔥</span>${streakExtended ? `${streak} day streak${streak > 1 ? ' — keep it going!' : ' started!'}` : `Streak: ${streak} day${streak > 1 ? 's' : ''}`}
-          </p>
-        </div>`;
-      document.body.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.remove('translate-y-4', 'opacity-0'));
-      setTimeout(() => { toast.classList.add('translate-y-4', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3200);
-    }
-
-    /* ---------------- Execution Trace: Reorder List ---------------- */
-
-    const LIST_VALUES = [1, 2, 3, 4, 5];
-    let steps = [];
-    let stepIndex = -1;
-
-    function centerX(id) { return 46 + id * 95; }
-    const BOX_TOP = 50;
-    const BOX_BOTTOM = BOX_TOP + 52;
-
-    function freshNextMap() {
-      const m = {};
-      LIST_VALUES.forEach((_, i) => { m[i] = (i < LIST_VALUES.length - 1) ? i + 1 : null; });
-      return m;
-    }
-
-    function orderFromNext(nextMap) {
-      const order = [];
-      const seen = new Set();
-      let cur = 0;
-      while (cur !== null && cur !== undefined && !seen.has(cur)) {
-        order.push(LIST_VALUES[cur]);
-        seen.add(cur);
-        cur = nextMap[cur];
-      }
-      return order.join(' → ');
-    }
+    
+    const LIST = [1, 2, 3, 4, 5];
+    let steps = [], stepIndex = -1;
 
     function computeSteps() {
       steps = [];
-      const nodeNext = freshNextMap();
-      const snap = () => ({ ...nodeNext });
-
-      steps.push({ phase: 'start', next: snap(), hi: {}, edge: null,
-        caption: `Original list: ${LIST_VALUES.join(' → ')}` });
-
-      // Step 1: find the middle
-      let slow = 0, fast = 0;
-      steps.push({ phase: 'middle', next: snap(), hi: { slow, fast }, edge: null,
-        caption: `slow = ${LIST_VALUES[slow]}, fast = ${LIST_VALUES[fast]} (both start at head)` });
-
-      while (nodeNext[fast] !== null && nodeNext[nodeNext[fast]] !== null) {
-        slow = nodeNext[slow];
-        fast = nodeNext[nodeNext[fast]];
-        steps.push({ phase: 'middle', next: snap(), hi: { slow, fast }, edge: null,
-          caption: `slow = ${LIST_VALUES[slow]}, fast = ${LIST_VALUES[fast]}` });
-      }
-      steps.push({ phase: 'middle-done', next: snap(), hi: { slow }, edge: null,
-        caption: `fast can't advance two more steps — middle found at node ${LIST_VALUES[slow]}` });
-
-      // Step 2a: cut
-      const secondHeadId = nodeNext[slow];
-      nodeNext[slow] = null;
-      steps.push({ phase: 'cut', next: snap(), hi: { slow, second: secondHeadId }, edge: null,
-        caption: `Cut: ${LIST_VALUES[slow]}.next = None. First half ends at ${LIST_VALUES[slow]}, second half starts at ${LIST_VALUES[secondHeadId]}` });
-
-      // Step 2b: reverse second half
-      let prev = null, curr = secondHeadId;
-      while (curr !== null) {
-        const nxt = nodeNext[curr];
-        nodeNext[curr] = prev;
-        steps.push({ phase: 'reverse', next: snap(), hi: { prev, curr }, edge: curr,
-          caption: `Reverse: ${LIST_VALUES[curr]}.next = ${prev !== null ? LIST_VALUES[prev] : 'None'}` });
-        prev = curr;
-        curr = nxt;
-      }
-      const secondHead = prev;
-      steps.push({ phase: 'reverse-done', next: snap(), hi: { second: secondHead }, edge: null,
-        caption: `Second half fully reversed — new head is ${LIST_VALUES[secondHead]}` });
-
-      // Step 3: merge alternately
-      let first = 0, second = secondHead;
-      while (second !== null) {
-        const firstNext = nodeNext[first];
-        const secondNext = nodeNext[second];
-        nodeNext[first] = second;
-        nodeNext[second] = firstNext;
-        steps.push({ phase: 'merge', next: snap(), hi: { first, second }, edge: first,
-          caption: `Merge: ${LIST_VALUES[first]}.next = ${LIST_VALUES[second]}, then ${LIST_VALUES[second]}.next = ${firstNext !== null ? LIST_VALUES[firstNext] : 'None'}` });
-        first = firstNext;
-        second = secondNext;
-      }
-
-      steps.push({ phase: 'done', next: snap(), hi: {}, edge: null,
-        caption: `Done — final order: ${orderFromNext(snap())}` });
-    }
-
-    function drawFrame(step) {
-      const boxesEl = document.getElementById('ll-boxes');
-      const tagsEl = document.getElementById('ll-tags');
-      const svg = document.getElementById('ll-arrows');
-
-      boxesEl.innerHTML = LIST_VALUES.map((v, id) => {
-        return `<div class="cell" id="node-${id}" style="position:absolute; left:${20 + id * 95}px; top:${BOX_TOP}px;">${v}</div>`;
-      }).join('');
-
-      const hi = step.hi || {};
-      const tagDefs = [];
-      if (hi.slow !== undefined && hi.slow !== null) tagDefs.push({ id: hi.slow, label: 'slow', color: 'var(--accent)' });
-      if (hi.fast !== undefined && hi.fast !== null) tagDefs.push({ id: hi.fast, label: 'fast', color: 'var(--bad)' });
-      if (hi.prev !== undefined && hi.prev !== null) tagDefs.push({ id: hi.prev, label: 'prev', color: 'var(--warn)' });
-      if (hi.curr !== undefined && hi.curr !== null) tagDefs.push({ id: hi.curr, label: 'curr', color: 'var(--good)' });
-      if (hi.first !== undefined && hi.first !== null) tagDefs.push({ id: hi.first, label: 'first', color: 'var(--accent)' });
-      if (hi.second !== undefined && hi.second !== null) tagDefs.push({ id: hi.second, label: 'second', color: 'var(--good)' });
-
-      const byId = {};
-      tagDefs.forEach(t => { (byId[t.id] = byId[t.id] || []).push(t); });
-
-      tagsEl.innerHTML = Object.entries(byId).map(([id, tags]) => {
-        return tags.map((t, i) => `
-          <div style="position:absolute; left:${20 + Number(id) * 95}px; top:${BOX_TOP - 26 - i * 22}px; width:52px; text-align:center;">
-            <span class="mono" style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:6px; background:${t.color}; color:#fff;">${t.label}</span>
-          </div>`).join('');
-      }).join('');
-
-      Object.keys(byId).forEach(id => {
-        const el = document.getElementById(`node-${id}`);
-        if (el) { el.style.borderColor = 'var(--accent)'; el.style.transform = 'translateY(-2px)'; }
-      });
-
-      let svgHtml = `<defs>
-        <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--ink-soft)"/></marker>
-        <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--accent)"/></marker>
-      </defs>`;
-
-      Object.entries(step.next).forEach(([from, to]) => {
-        if (to === null || to === undefined) return;
-        const fromId = Number(from), toId = Number(to);
-        const x1 = centerX(fromId), x2 = centerX(toId);
-        const dist = Math.abs(toId - fromId);
-        const depth = 16 + dist * 14;
-        const midX = (x1 + x2) / 2;
-        const y = BOX_BOTTOM + 2;
-        const active = step.edge !== null && step.edge !== undefined && Number(step.edge) === fromId;
-        const stroke = active ? 'var(--accent)' : 'var(--panel-border)';
-        const marker = active ? 'arrow-active' : 'arrow-muted';
-        const sw = active ? 2.5 : 1.5;
-        svgHtml += `<path d="M${x1},${y} Q${midX},${y + depth} ${x2},${y}" fill="none" stroke="${stroke}" stroke-width="${sw}" marker-end="url(#${marker})" />`;
-      });
-
-      svg.innerHTML = svgHtml;
-    }
-
-    function updatePhasePills(phase) {
-      const map = { middle: 'p-middle', 'middle-done': 'p-middle', cut: 'p-reverse', reverse: 'p-reverse', 'reverse-done': 'p-reverse', merge: 'p-merge', done: 'p-merge' };
-      document.querySelectorAll('.phase-pill').forEach(p => p.classList.remove('active'));
-      const activeId = map[phase];
-      if (activeId) { const el = document.getElementById(activeId); if (el) el.classList.add('active'); }
+      steps.push({ state: [1, 2, 3, 4, 5], note: "Initial List: 1 → 2 → 3 → 4 → 5" });
+      steps.push({ state: [1, 2, 3], note: "Phase 1: Middle found at node 3 (slow pointer)" });
+      steps.push({ state: [5, 4], note: "Phase 2: Second half [4, 5] reversed to [5, 4]" });
+      steps.push({ state: [1, 5, 2, 4, 3], note: "Phase 3: Merged alternating → 1 → 5 → 2 → 4 → 3" });
     }
 
     function buildTrace() {
-      computeSteps();
-      stepIndex = -1;
-      renderStep();
+      computeSteps(); stepIndex = -1;
+      const track = document.getElementById('array-track');
+      track.innerHTML = LIST.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">node ${i+1}</span></div>`).join('');
+      document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
+      updateStepControls();
     }
 
     function renderStep() {
+      LIST.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
       const caption = document.getElementById('trace-caption');
-
-      if (stepIndex < 0) {
-        caption.textContent = 'Click "Next" to begin.';
-        drawFrame({ next: freshNextMap(), hi: {}, edge: null });
-        updatePhasePills(null);
-        updateStepControls();
-        return;
-      }
-
-      const step = steps[stepIndex];
-      caption.textContent = step.caption;
-      drawFrame(step);
-      updatePhasePills(step.phase);
+      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+      const s = steps[stepIndex];
+      LIST.forEach((v, i) => {
+        if (s.state.includes(v)) document.getElementById(`cell-${i}`).classList.add('hit');
+      });
+      caption.textContent = s.note;
       updateStepControls();
     }
 
@@ -834,6 +592,7 @@
       document.getElementById('btn-prev').disabled = stepIndex < 0;
       document.getElementById('btn-next').disabled = stepIndex >= steps.length - 1;
     }
+
 
     document.getElementById('btn-next').onclick = () => {
       if (stepIndex < steps.length - 1) { stepIndex++; renderStep(); }
@@ -851,8 +610,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      const code = `# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reorderList(self, head: Optional[ListNode]) -> None:\n        """\n        Do not return anything, modify head in-place instead.\n        """\n        if not head or not head.next:\n            return\n\n        # Step 1: find the middle (slow ends at start of second half)\n        slow, fast = head, head\n        while fast.next and fast.next.next:\n            slow = slow.next\n            fast = fast.next.next\n\n        # Step 2: reverse the second half\n        second = slow.next\n        slow.next = None  # cut the list into two halves\n        prev = None\n        while second:\n            nxt = second.next\n            second.next = prev\n            prev = second\n            second = nxt\n        second = prev  # head of reversed second half\n\n        # Step 3: merge the two halves alternately\n        first = head\n        while second:\n            first_next = first.next\n            second_next = second.next\n\n            first.next = second\n            second.next = first_next\n\n            first = first_next\n            second = second_next`;
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText("from typing import Optional\n\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\nclass Solution:\n    def reorderList(self, head: Optional[ListNode]) -> None:\n        if not head or not head.next:\n            return\n\n        # 1. Find middle\n        slow, fast = head, head\n        while fast.next and fast.next.next:\n            slow = slow.next\n            fast = fast.next.next\n\n        # 2. Reverse second half\n        prev, curr = None, slow.next\n        slow.next = None\n        while curr:\n            nxt = curr.next\n            curr.next = prev\n            prev = curr\n            curr = nxt\n\n        # 3. Merge alternating\n        first, second = head, prev\n        while second:\n            tmp1, tmp2 = first.next, second.next\n            first.next = second\n            second.next = tmp1\n            first, second = tmp1, tmp2");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };
