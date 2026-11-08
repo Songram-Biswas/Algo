@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Use a stack to match brackets in last-in, first-out order:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Map each closing bracket to its matching open bracket in a dictionary.</li>
-      <li>Iterate through characters: if opening bracket, push to stack.</li>
-      <li>If closing bracket, verify that stack is non-empty and top matches; pop it.</li>
-      <li>Return true if the stack is completely empty at the end.</li>
-    </ol>
+          <p class="mb-3">Use a stack to ensure brackets close in reverse order of opening:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Create a map of closing brackets to matching opening brackets: <code class="mono accent-text">{')': '(', '}': '{', ']': '['}</code>.</li>
+          <li>When an opening bracket is read, push it onto the stack.</li>
+          <li>When a closing bracket is read, pop from stack and verify match. If empty or mismatch, return <code class="mono accent-text">False</code>.</li>
+          <li>Return <code class="mono accent-text">len(stack) == 0</code> after reading all characters.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -269,12 +270,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Single pass through s with O(1) push and pop stack operations.</p>
+              <p class="text-xs text-soft mt-1">Iterates through the string of length n once with O(1) stack operations.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">In the worst case (all open brackets), stack holds n characters.</p>
+              <p class="text-xs text-soft mt-1">In the worst case (all opening brackets), the stack holds n elements.</p>
             </div>
           </div>
         </div>

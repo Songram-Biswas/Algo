@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -234,12 +235,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Unlike maximum <em>sum</em> subarray, products are tricky because a negative number can turn a very small (negative) product into the largest one. So track both a running max and a running min at every index — either could become the new max once multiplied by a negative number.</p>
+          <p class="mb-3">Maintain both running min and max products to account for negative flips:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Initialize <code class="mono accent-text">cur_max</code> and <code class="mono accent-text">cur_min</code> to the first element.</li>
-          <li>At each new number, compute candidates: the number itself, <code class="mono accent-text">cur_max * num</code>, and <code class="mono accent-text">cur_min * num</code>.</li>
-          <li>The new <code class="mono accent-text">cur_max</code>/<code class="mono accent-text">cur_min</code> are the max/min of those three candidates.</li>
-          <li>Update the global result with <code class="mono accent-text">cur_max</code> at every step.</li>
+          <li>Track <code class="mono accent-text">cur_max</code> and <code class="mono accent-text">cur_min</code> at each position.</li>
+          <li>If encountering 0, reset products to 1.</li>
+          <li>At each number, new max is <code class="mono accent-text">max(num * cur_max, num * cur_min, num)</code>.</li>
+          <li>New min is <code class="mono accent-text">min(num * cur_max, num * cur_min, num)</code>. Update global max.</li>
         </ol>
         </div>
 
@@ -250,15 +251,21 @@
 
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">maxProduct</span>(<span class="kw">self</span>, nums: List[int]) -&gt; int:
-        result = nums[<span class="num">0</span>]
-        cur_max, cur_min = nums[<span class="num">0</span>], nums[<span class="num">0</span>]
+        res = <span class="fn">max</span>(nums)
+        cur_min, cur_max = <span class="num">1</span>, <span class="num">1</span>
 
-        <span class="kw">for</span> num <span class="kw">in</span> nums[<span class="num">1</span>:]:
-            candidates = (num, cur_max * num, cur_min * num)
-            cur_max, cur_min = <span class="fn">max</span>(candidates), <span class="fn">min</span>(candidates)
-            result = <span class="fn">max</span>(result, cur_max)
+        <span class="kw">for</span> num <span class="kw">in</span> nums:
+            <span class="kw">if</span> num == <span class="num">0</span>:
+                cur_min, cur_max = <span class="num">1</span>, <span class="num">1</span>
+                <span class="kw">continue</span>
 
-        <span class="kw">return</span> result</pre>
+            tmp = cur_max * num
+            cur_max = <span class="fn">max</span>(num * cur_max, num * cur_min, num)
+            cur_min = <span class="fn">min</span>(tmp, num * cur_min, num)
+
+            res = <span class="fn">max</span>(res, cur_max)
+
+        <span class="kw">return</span> res</pre>
           </div>
         </div>
 
@@ -267,12 +274,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">A single pass, tracking running max and min in constant time per step.</p>
+              <p class="text-xs text-soft mt-1">Single pass through the numbers array with constant time updates.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only a few running variables are kept — no array or map.</p>
+              <p class="text-xs text-soft mt-1">Only stores running minimum and maximum products.</p>
             </div>
           </div>
         </div>
@@ -595,7 +602,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        result = nums[0]\n        cur_max, cur_min = nums[0], nums[0]\n\n        for num in nums[1:]:\n            candidates = (num, cur_max * num, cur_min * num)\n            cur_max, cur_min = max(candidates), min(candidates)\n            result = max(result, cur_max)\n\n        return result");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def maxProduct(self, nums: List[int]) -> int:\n        res = max(nums)\n        cur_min, cur_max = 1, 1\n\n        for num in nums:\n            if num == 0:\n                cur_min, cur_max = 1, 1\n                continue\n\n            tmp = cur_max * num\n            cur_max = max(num * cur_max, num * cur_min, num)\n            cur_min = min(tmp, num * cur_min, num)\n\n            res = max(res, cur_max)\n\n        return res");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

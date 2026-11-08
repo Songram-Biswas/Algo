@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -236,13 +237,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">We cannot use division, so we split each answer into two components: the prefix product (elements before index i) and the postfix product (elements after index i):</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Initialize the output array with 1s.</li>
-      <li>Pass left-to-right: each cell gets the cumulative product of elements to its left.</li>
-      <li>Pass right-to-left: multiply each cell by the cumulative product of elements to its right.</li>
-      <li>Return the resulting output array in O(n) time and O(1) extra space.</li>
-    </ol>
+          <p class="mb-3">Compute the product of all elements to the left and right without division:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Initialize output array <code class="mono accent-text">res = [1] * n</code>.</li>
+          <li>First pass (left to right): store cumulative prefix product up to index <code class="mono accent-text">i - 1</code> in <code class="mono accent-text">res[i]</code>.</li>
+          <li>Second pass (right to left): maintain a running postfix product and multiply into <code class="mono accent-text">res[i]</code>.</li>
+          <li>Return <code class="mono accent-text">res</code> with O(1) auxiliary memory.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -274,12 +275,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Two linear passes over the array of size n (prefix pass then postfix pass).</p>
+              <p class="text-xs text-soft mt-1">Two linear passes: one computing prefix products, one computing suffix products.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Output array does not count toward extra space complexity per problem constraints.</p>
+              <p class="text-xs text-soft mt-1">Output array does not count toward extra auxiliary space as specified in problem constraints.</p>
             </div>
           </div>
         </div>

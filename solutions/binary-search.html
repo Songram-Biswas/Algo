@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,14 +236,14 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Standard binary search on a sorted array:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Initialize <code class="mono accent-text">low = 0</code> and <code class="mono accent-text">high = len(nums) - 1</code>.</li>
-      <li>Compute midpoint <code class="mono accent-text">mid = (low + high) // 2</code>.</li>
-      <li>If <code class="mono accent-text">nums[mid] == target</code>, return <code class="mono accent-text">mid</code>.</li>
-      <li>If <code class="mono accent-text">nums[mid] < target</code>, eliminate left half: <code class="mono accent-text">low = mid + 1</code>.</li>
-      <li>Else eliminate right half: <code class="mono accent-text">high = mid - 1</code>.</li>
-    </ol>
+          <p class="mb-3">Classic iterative binary search on sorted array:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Set <code class="mono accent-text">low = 0</code> and <code class="mono accent-text">high = len(nums) - 1</code>.</li>
+          <li>While <code class="mono accent-text">low <= high</code>, calculate <code class="mono accent-text">mid = (low + high) // 2</code>.</li>
+          <li>If <code class="mono accent-text">nums[mid] == target</code>, return <code class="mono accent-text">mid</code>.</li>
+          <li>If <code class="mono accent-text">nums[mid] < target</code>, search right: <code class="mono accent-text">low = mid + 1</code>.</li>
+          <li>Otherwise, search left: <code class="mono accent-text">high = mid - 1</code>. Return <code class="mono accent-text">-1</code> if not found.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -272,12 +273,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(log n)</p>
-              <p class="text-xs text-soft mt-1">Search space is cut strictly in half on every step.</p>
+              <p class="text-xs text-soft mt-1">Halves the active search space at each iteration.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only low, mid, and high pointers are maintained iteratively.</p>
+              <p class="text-xs text-soft mt-1">Operates iteratively with two boundary pointers low and high.</p>
             </div>
           </div>
         </div>

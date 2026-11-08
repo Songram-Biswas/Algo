@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -208,8 +209,8 @@
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
-            <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(min(m, n))">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(min(m, n))">O(min(m, n))</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
+            <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(min(n, m))">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(min(n, m))">O(min(n, m))</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
             </div>
           </div>
         </div>
@@ -234,13 +235,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Use a sliding window <code class="mono accent-text">[left...right]</code> backed by a hash set to detect duplicate characters:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Iterate <code class="mono accent-text">right</code> pointer across the string.</li>
-      <li>While <code class="mono accent-text">s[right]</code> already exists in the set, remove <code class="mono accent-text">s[left]</code> and advance <code class="mono accent-text">left</code>.</li>
-      <li>Insert <code class="mono accent-text">s[right]</code> into the set.</li>
-      <li>Update max length as <code class="mono accent-text">max_len = max(max_len, right - left + 1)</code>.</li>
-    </ol>
+          <p class="mb-3">Maintain a variable-size sliding window with a character index map:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Initialize a dictionary <code class="mono accent-text">char_index</code> to store each character's last seen index.</li>
+          <li>Expand the window by advancing <code class="mono accent-text">right</code>.</li>
+          <li>If <code class="mono accent-text">char</code> is already inside current window (<code class="mono accent-text">char_index[char] >= left</code>), jump <code class="mono accent-text">left = char_index[char] + 1</code>.</li>
+          <li>Record window length <code class="mono accent-text">right - left + 1</code> and update maximum.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -248,15 +249,15 @@
             <button id="btn-copy-code" class="absolute top-3 right-3 text-xs font-medium text-zinc-400 hover:text-white px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/60 transition cursor-pointer">Copy</button>
 <pre><span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">lengthOfLongestSubstring</span>(<span class="kw">self</span>, s: str) -&gt; int:
-        char_set = <span class="fn">set</span>()
+        char_index = {}
         left = <span class="num">0</span>
         max_len = <span class="num">0</span>
 
-        <span class="kw">for</span> right <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
-            <span class="kw">while</span> s[right] <span class="kw">in</span> char_set:
-                char_set.remove(s[left])
-                left += <span class="num">1</span>
-            char_set.add(s[right])
+        <span class="kw">for</span> right, char <span class="kw">in</span> <span class="fn">enumerate</span>(s):
+            <span class="kw">if</span> char <span class="kw">in</span> char_index <span class="kw">and</span> char_index[char] &gt;= left:
+                left = char_index[char] + <span class="num">1</span>
+
+            char_index[char] = right
             max_len = <span class="fn">max</span>(max_len, right - left + <span class="num">1</span>)
 
         <span class="kw">return</span> max_len</pre>
@@ -268,12 +269,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Each character is visited at most twice by left and right sliding window pointers.</p>
+              <p class="text-xs text-soft mt-1">Each character is visited at most twice (once by right pointer, once by left pointer).</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
-              <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(min(m, n))</p>
-              <p class="text-xs text-soft mt-1">Hash set size bounded by the character alphabet size m or string length n.</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(min(n, m))</p>
+              <p class="text-xs text-soft mt-1">Hash map stores at most min(n, charset_size) distinct characters.</p>
             </div>
           </div>
         </div>
@@ -608,7 +609,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        char_set = set()\n        left = 0\n        max_len = 0\n\n        for right in range(len(s)):\n            while s[right] in char_set:\n                char_set.remove(s[left])\n                left += 1\n            char_set.add(s[right])\n            max_len = max(max_len, right - left + 1)\n\n        return max_len");
+      await navigator.clipboard.writeText("class Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        char_index = {}\n        left = 0\n        max_len = 0\n\n        for right, char in enumerate(s):\n            if char in char_index and char_index[char] >= left:\n                left = char_index[char] + 1\n\n            char_index[char] = right\n            max_len = max(max_len, right - left + 1)\n\n        return max_len");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

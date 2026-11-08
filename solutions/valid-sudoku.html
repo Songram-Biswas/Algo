@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -239,13 +240,14 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Traverse the board cell by cell with 3 sets of hash collections:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Maintain hash sets for each row <code class="mono accent-text">rows[r]</code>.</li>
-      <li>Maintain hash sets for each column <code class="mono accent-text">cols[c]</code>.</li>
-      <li>Maintain hash sets for each sub-box <code class="mono accent-text">boxes[(r // 3, c // 3)]</code>.</li>
-      <li>If any non-empty digit is already in its row, column, or box set, return false immediately.</li>
-    </ol>
+          <p class="mb-3">Track seen digits across rows, columns, and 3x3 boxes in a single pass:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Iterate through every cell <code class="mono accent-text">(r, c)</code> on the 9x9 board.</li>
+          <li>Skip empty cells denoted by <code class="mono accent-text">'.'</code>.</li>
+          <li>Map each cell to its 3x3 box key using <code class="mono accent-text">(r // 3, c // 3)</code>.</li>
+          <li>If digit exists in row set, col set, or box set, return <code class="mono accent-text">False</code>.</li>
+          <li>Otherwise add digit to respective sets and return <code class="mono accent-text">True</code> if scan completes.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -283,12 +285,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(1)</p>
-              <p class="text-xs text-soft mt-1">The board size is fixed at 9 x 9 (81 iterations of constant-time hash set checks).</p>
+              <p class="text-xs text-soft mt-1">The board is always fixed at 9x9 = 81 cells, requiring a constant number of operations.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Fixed hash sets for 9 rows, 9 columns, and 9 sub-boxes.</p>
+              <p class="text-xs text-soft mt-1">Fixed-size hash sets store at most 81 character entries.</p>
             </div>
           </div>
         </div>

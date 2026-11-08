@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -210,7 +211,7 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
             <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(1)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
             </div>
           </div>
         </div>
@@ -235,12 +236,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">A rotated sorted array still has one useful property: <strong>at least one half of any window is always fully sorted.</strong> Standard binary search, but at each step you first figure out which half is sorted, then decide whether the target could live there.</p>
+          <p class="mb-3">Modified binary search exploiting the sorted half:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Compute <code class="mono accent-text">mid</code>. If <code class="mono accent-text">nums[mid] === target</code>, return <code class="mono accent-text">mid</code>.</li>
-          <li>If <code class="mono accent-text">nums[low] &lt;= nums[mid]</code>, the left half is sorted.</li>
-          <li>Check whether <code class="mono accent-text">target</code> falls inside that sorted half's range — if so, search there; otherwise search the other half.</li>
-          <li>Repeat until the window closes or the target is found.</li>
+          <li>Calculate <code class="mono accent-text">mid = (low + high) // 2</code>. If <code class="mono accent-text">nums[mid] == target</code>, return <code class="mono accent-text">mid</code>.</li>
+          <li>Determine whether left half <code class="mono accent-text">[low..mid]</code> is normally sorted (<code class="mono accent-text">nums[low] <= nums[mid]</code>).</li>
+          <li>If left is sorted: check if target falls inside; if so, search left, else search right.</li>
+          <li>If right is sorted: check if target falls inside; if so, search right, else search left.</li>
         </ol>
         </div>
 
@@ -251,24 +252,24 @@
 
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">search</span>(<span class="kw">self</span>, nums: List[int], target: int) -&gt; int:
-        left, right = <span class="num">0</span>, <span class="fn">len</span>(nums) - <span class="num">1</span>
+        low, high = <span class="num">0</span>, <span class="fn">len</span>(nums) - <span class="num">1</span>
 
-        <span class="kw">while</span> left &lt;= right:
-            mid = (left + right) // <span class="num">2</span>
+        <span class="kw">while</span> low &lt;= high:
+            mid = (low + high) // <span class="num">2</span>
 
             <span class="kw">if</span> nums[mid] == target:
                 <span class="kw">return</span> mid
 
-            <span class="kw">if</span> nums[left] &lt;= nums[mid]:
-                <span class="kw">if</span> nums[left] &lt;= target &lt; nums[mid]:
-                    right = mid - <span class="num">1</span>
+            <span class="kw">if</span> nums[low] &lt;= nums[mid]:
+                <span class="kw">if</span> nums[low] &lt;= target &lt; nums[mid]:
+                    high = mid - <span class="num">1</span>
                 <span class="kw">else</span>:
-                    left = mid + <span class="num">1</span>
+                    low = mid + <span class="num">1</span>
             <span class="kw">else</span>:
-                <span class="kw">if</span> nums[mid] &lt; target &lt;= nums[right]:
-                    left = mid + <span class="num">1</span>
+                <span class="kw">if</span> nums[mid] &lt; target &lt;= nums[high]:
+                    low = mid + <span class="num">1</span>
                 <span class="kw">else</span>:
-                    right = mid - <span class="num">1</span>
+                    high = mid - <span class="num">1</span>
 
         <span class="kw">return</span> -<span class="num">1</span></pre>
           </div>
@@ -279,12 +280,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(log n)</p>
-              <p class="text-xs text-soft mt-1">The search window halves every iteration, even with the rotation.</p>
+              <p class="text-xs text-soft mt-1">Modified binary search halves the search space at each iteration.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only three index pointers are tracked.</p>
+              <p class="text-xs text-soft mt-1">Iterative pointer updates use constant memory.</p>
             </div>
           </div>
         </div>
@@ -632,7 +633,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        left, right = 0, len(nums) - 1\n\n        while left <= right:\n            mid = (left + right) // 2\n\n            if nums[mid] == target:\n                return mid\n\n            if nums[left] <= nums[mid]:\n                if nums[left] <= target < nums[mid]:\n                    right = mid - 1\n                else:\n                    left = mid + 1\n            else:\n                if nums[mid] < target <= nums[right]:\n                    left = mid + 1\n                else:\n                    right = mid - 1\n\n        return -1");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def search(self, nums: List[int], target: int) -> int:\n        low, high = 0, len(nums) - 1\n\n        while low <= high:\n            mid = (low + high) // 2\n\n            if nums[mid] == target:\n                return mid\n\n            if nums[low] <= nums[mid]:\n                if nums[low] <= target < nums[mid]:\n                    high = mid - 1\n                else:\n                    low = mid + 1\n            else:\n                if nums[mid] < target <= nums[high]:\n                    low = mid + 1\n                else:\n                    high = mid - 1\n\n        return -1");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -190,9 +191,13 @@
         </div>
 
         <div class="flex flex-col items-center gap-8 py-4">
-          <div id="array-track" class="flex gap-3 pb-5"></div>
-          <div class="w-full"><p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">hash set &nbsp;(seen so far)</p>
-          <div id="map-track" class="flex gap-2 flex-wrap min-h-[42px]"></div></div>
+          <div class="flex flex-col items-center gap-6">
+          <div id="array-track" class="flex gap-3 pb-7 pt-7 justify-center flex-wrap"></div>
+          <div class="w-full max-w-md">
+            <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2 text-center">hash set &nbsp;(seen elements)</p>
+            <div id="map-track" class="flex gap-2 flex-wrap justify-center min-h-[46px]"></div>
+          </div>
+        </div>
           <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center">Click "Next" to begin.</p>
         </div>
       </div>
@@ -543,35 +548,93 @@
     function computeSteps() {
       steps = [];
       const seen = new Set();
+      const firstSeen = new Map();
+
       for (let i = 0; i < NUMS.length; i++) {
-        const isDup = seen.has(NUMS[i]);
-        steps.push({ i, isDup, snapshot: new Set(seen) });
+        const val = NUMS[i];
+        const isDup = seen.has(val);
+
+        steps.push({
+          type: isDup ? 'hit' : 'scan',
+          i,
+          val,
+          origIdx: firstSeen.get(val),
+          snapshot: new Set(seen),
+          caption: isDup
+            ? `nums[${i}] = ${val} already exists in hash set (first seen at index ${firstSeen.get(val)}) → Duplicate found! Return True.`
+            : `Scanning nums[${i}] = ${val}. Checking if ${val} is in seen set… Not found.`
+        });
+
         if (isDup) break;
-        seen.add(NUMS[i]);
+
+        seen.add(val);
+        firstSeen.set(val, i);
+
+        steps.push({
+          type: 'store',
+          i,
+          val,
+          snapshot: new Set(seen),
+          caption: `Added ${val} to seen set: { ${Array.from(seen).join(', ')} }.`
+        });
       }
     }
 
     function buildTrace() {
-      computeSteps(); stepIndex = -1;
+      computeSteps();
+      stepIndex = -1;
       const track = document.getElementById('array-track');
-      track.innerHTML = NUMS.map((n, i) => `<div class="cell" id="cell-${i}">${n}<span class="idx">i=${i}</span></div>`).join('');
-      document.getElementById('map-track').innerHTML = '';
+      track.innerHTML = NUMS.map((n, i) => `
+        <div class="cell" id="cell-${i}">${n}<span class="idx">i=${i}</span></div>
+      `).join('');
+      document.getElementById('map-track').innerHTML = '<span class="text-xs text-soft mono">empty</span>';
       document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
       updateStepControls();
     }
 
     function renderStep() {
-      NUMS.forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit', 'done'));
+      NUMS.forEach((_, i) => {
+        const cell = document.getElementById(`cell-${i}`);
+        cell.classList.remove('scan', 'hit', 'done');
+      });
+
       const mapTrack = document.getElementById('map-track');
       const caption = document.getElementById('trace-caption');
-      if (stepIndex < 0) { mapTrack.innerHTML = ''; caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+
+      if (stepIndex < 0) {
+        mapTrack.innerHTML = '<span class="text-xs text-soft mono">empty</span>';
+        caption.textContent = 'Click "Next" to begin.';
+        updateStepControls();
+        return;
+      }
+
       const s = steps[stepIndex];
-      mapTrack.innerHTML = Array.from(s.snapshot).map(v => `<div class="map-slot filled">${v}</div>`).join('') || '<span class="text-xs text-soft mono">empty</span>';
-      for (let i = 0; i < s.i; i++) document.getElementById(`cell-${i}`).classList.add('done');
-      document.getElementById(`cell-${s.i}`).classList.add(s.isDup ? 'hit' : 'scan');
-      caption.textContent = s.isDup
-        ? `nums[${s.i}]=${NUMS[s.i]} was already seen → return True`
-        : `nums[${s.i}]=${NUMS[s.i]} is new → add to set`;
+
+      if (s.snapshot.size === 0) {
+        mapTrack.innerHTML = '<span class="text-xs text-soft mono">empty</span>';
+      } else {
+        mapTrack.innerHTML = Array.from(s.snapshot)
+          .map(v => `<div class="map-slot filled">${v}</div>`)
+          .join('');
+      }
+
+      for (let i = 0; i < s.i; i++) {
+        document.getElementById(`cell-${i}`).classList.add('done');
+      }
+
+      if (s.type === 'hit') {
+        document.getElementById(`cell-${s.i}`).classList.remove('done');
+        document.getElementById(`cell-${s.i}`).classList.add('hit');
+        if (s.origIdx !== undefined) {
+          const origCell = document.getElementById(`cell-${s.origIdx}`);
+          origCell.classList.remove('done');
+          origCell.classList.add('hit');
+        }
+      } else {
+        document.getElementById(`cell-${s.i}`).classList.add('scan');
+      }
+
+      caption.textContent = s.caption;
       updateStepControls();
     }
 

@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -191,7 +192,10 @@
         </div>
 
         <div class="flex flex-col items-center gap-8 py-4">
-          <div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>
+          <div class="flex flex-col items-center gap-6">
+      <div id="array-track" class="flex gap-3 pb-7 pt-7 justify-center flex-wrap"></div>
+      <div id="sum-display" class="flex items-center gap-3 text-sm mono py-2 px-5 rounded-xl border border-soft bg-zinc-50 dark:bg-[#141414] min-h-[42px]"></div>
+    </div>
           <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center">Click "Next" to begin.</p>
         </div>
       </div>
@@ -239,7 +243,7 @@
     <ol class="list-decimal list-inside space-y-2 text-soft">
       <li>Set <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(numbers) - 1</code>.</li>
       <li>Compute <code class="mono accent-text">sum = numbers[left] + numbers[right]</code>.</li>
-      <li>If <code class="mono accent-text">sum == target</code>, return <code class="mono accent-text">[left + 1, right + 1]</code>.</li>
+      <li>If <code class="mono accent-text">sum == target</code>, return <code class="mono accent-text">[left + 1, right + 1]</code> (1-indexed).</li>
       <li>If <code class="mono accent-text">sum > target</code>, decrease <code class="mono accent-text">right</code>; else increase <code class="mono accent-text">left</code>.</li>
     </ol>
         </div>
@@ -256,7 +260,9 @@
 
         <span class="kw">while</span> left &lt; right:
             current_sum = numbers[left] + numbers[right]
+
             <span class="kw">if</span> current_sum == target:
+                <span class="cm"># 1-indexed array result</span>
                 <span class="kw">return</span> [left + <span class="num">1</span>, right + <span class="num">1</span>]
             <span class="kw">elif</span> current_sum &lt; target:
                 left += <span class="num">1</span>
@@ -547,37 +553,97 @@
 
     function computeSteps() {
       steps = [];
-      let l = 0, r = NUMS.length - 1;
+      let l = 0;
+      let r = NUMS.length - 1;
+
       while (l < r) {
         const sum = NUMS[l] + NUMS[r];
-        steps.push({ l, r, sum, match: sum === TARGET });
-        if (sum === TARGET) break;
-        if (sum > TARGET) r--; else l++;
+        const match = sum === TARGET;
+        const tooBig = sum > TARGET;
+
+        steps.push({
+          l,
+          r,
+          valL: NUMS[l],
+          valR: NUMS[r],
+          sum,
+          target: TARGET,
+          match,
+          tooBig,
+          caption: match
+            ? `🎯 Target sum reached: numbers[${l + 1}] (${NUMS[l]}) + numbers[${r + 1}] (${NUMS[r]}) = ${TARGET}. Return 1-based indices [${l + 1}, ${r + 1}].`
+            : (tooBig
+                ? `Sum ${sum} > target ${TARGET}. Value at index #${r + 1} (${NUMS[r]}) is too large → decrement right pointer (R moves left).`
+                : `Sum ${sum} < target ${TARGET}. Value at index #${l + 1} (${NUMS[l]}) is too small → increment left pointer (L moves right).`)
+        });
+
+        if (match) break;
+        if (tooBig) {
+          r--;
+        } else {
+          l++;
+        }
       }
     }
 
     function buildTrace() {
-      computeSteps(); stepIndex = -1;
+      computeSteps();
+      stepIndex = -1;
       const track = document.getElementById('array-track');
-      track.innerHTML = NUMS.map((v, i) => `<div class="cell" id="cell-${i}">${v}<span class="idx">#${i+1}</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      track.innerHTML = NUMS.map((v, i) => `
+        <div class="cell" id="cell-${i}">
+          ${v}
+          <span class="idx">#${i + 1}</span>
+          <span class="ptr" id="ptr-${i}"></span>
+        </div>
+      `).join('');
+      document.getElementById('sum-display').innerHTML = '<span class="text-soft">Target = ' + TARGET + '</span>';
       document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
       updateStepControls();
     }
 
     function renderStep() {
       NUMS.forEach((_, i) => {
-        document.getElementById(`cell-${i}`).classList.remove('scan', 'hit');
+        const cell = document.getElementById(`cell-${i}`);
+        cell.classList.remove('scan', 'hit', 'discarded');
         const ptr = document.getElementById(`ptr-${i}`);
         if (ptr) ptr.textContent = '';
       });
+
+      const sumDisplay = document.getElementById('sum-display');
       const caption = document.getElementById('trace-caption');
-      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+
+      if (stepIndex < 0) {
+        sumDisplay.innerHTML = '<span class="text-soft">Target = ' + TARGET + '</span>';
+        caption.textContent = 'Click "Next" to begin.';
+        updateStepControls();
+        return;
+      }
+
       const s = steps[stepIndex];
+
+      NUMS.forEach((_, i) => {
+        if (i < s.l || i > s.r) {
+          document.getElementById(`cell-${i}`).classList.add('discarded');
+        }
+      });
+
+      document.getElementById(`ptr-${s.l}`).textContent = 'L';
+      document.getElementById(`ptr-${s.r}`).textContent = (s.l === s.r) ? 'L/R' : 'R';
+
       document.getElementById(`cell-${s.l}`).classList.add(s.match ? 'hit' : 'scan');
       document.getElementById(`cell-${s.r}`).classList.add(s.match ? 'hit' : 'scan');
-      document.getElementById(`ptr-${s.l}`).textContent = 'L';
-      document.getElementById(`ptr-${s.r}`).textContent = 'R';
-      caption.textContent = `L=${s.l+1} (${NUMS[s.l]}) + R=${s.r+1} (${NUMS[s.r]}) = ${s.sum} ${s.match ? '== TARGET! Return [' + (s.l+1) + ', ' + (s.r+1) + ']' : (s.sum > TARGET ? '> target → move R left' : '< target → move L right')}`;
+
+      sumDisplay.innerHTML = `
+        <span class="text-accent font-bold">L:</span> #${s.l + 1} (${s.valL})
+        <span class="text-soft">+</span>
+        <span class="text-accent font-bold">R:</span> #${s.r + 1} (${s.valR})
+        <span class="text-soft">=</span>
+        <span class="font-bold ${s.match ? 'text-emerald-400' : (s.tooBig ? 'text-amber-400' : 'text-cyan-400')}">${s.sum}</span>
+        <span class="text-soft text-xs">(${s.match ? '== ' + TARGET : (s.tooBig ? '> ' + TARGET : '< ' + TARGET)})</span>
+      `;
+
+      caption.textContent = s.caption;
       updateStepControls();
     }
 
@@ -604,7 +670,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        left = 0\n        right = len(numbers) - 1\n\n        while left < right:\n            current_sum = numbers[left] + numbers[right]\n            if current_sum == target:\n                return [left + 1, right + 1]\n            elif current_sum < target:\n                left += 1\n            else:\n                right -= 1\n\n        return []");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def twoSum(self, numbers: List[int], target: int) -> List[int]:\n        left = 0\n        right = len(numbers) - 1\n\n        while left < right:\n            current_sum = numbers[left] + numbers[right]\n\n            if current_sum == target:\n                # 1-indexed array result\n                return [left + 1, right + 1]\n            elif current_sum < target:\n                left += 1\n            else:\n                right -= 1\n\n        return []");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

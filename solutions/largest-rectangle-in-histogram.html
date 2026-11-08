@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -203,7 +204,7 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
             <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(2^n)">O(2^n)</div>
             </div>
           </div>
           <div>
@@ -234,13 +235,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Monotonic stack computes maximum area in linear time:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Maintain a monotonic increasing stack of pairs <code class="mono accent-text">(index, height)</code>.</li>
-      <li>When encountering a bar shorter than stack top, pop from stack.</li>
-      <li>Compute area with popped height across width <code class="mono accent-text">current_i - popped_index</code>.</li>
-      <li>Push the new bar with the leftmost index of any popped bars.</li>
-    </ol>
+          <p class="mb-3">Monotonic increasing stack calculates maximal rectangle boundaries:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Maintain a stack of pairs <code class="mono accent-text">(start_index, height)</code> in strictly increasing height order.</li>
+          <li>When current height <code class="mono accent-text">h</code> is shorter than stack top, pop and calculate area: <code class="mono accent-text">height * (current_i - start_index)</code>.</li>
+          <li>Set the current bar's effective start index to the popped bar's start index.</li>
+          <li>After the loop, flush remaining bars in stack against the total histogram width.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -251,7 +252,7 @@
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">largestRectangleArea</span>(<span class="kw">self</span>, heights: List[int]) -&gt; int:
         max_area = <span class="num">0</span>
-        stack = []  <span class="cm"># (index, height)</span>
+        stack = []
 
         <span class="kw">for</span> i, h <span class="kw">in</span> <span class="fn">enumerate</span>(heights):
             start = i
@@ -273,12 +274,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Each bar is pushed and popped from the monotonic increasing stack at most once.</p>
+              <p class="text-xs text-soft mt-1">Each bar is pushed and popped from the stack exactly once.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Monotonic stack stores at most n index-height pairs.</p>
+              <p class="text-xs text-soft mt-1">Monotonic increasing stack stores at most n (index, height) pairs.</p>
             </div>
           </div>
         </div>
@@ -593,7 +594,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        max_area = 0\n        stack = []  # (index, height)\n\n        for i, h in enumerate(heights):\n            start = i\n            while stack and stack[-1][1] > h:\n                idx, height = stack.pop()\n                max_area = max(max_area, height * (i - idx))\n                start = idx\n            stack.append((start, h))\n\n        for idx, height in stack:\n            max_area = max(max_area, height * (len(heights) - idx))\n\n        return max_area");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def largestRectangleArea(self, heights: List[int]) -> int:\n        max_area = 0\n        stack = []\n\n        for i, h in enumerate(heights):\n            start = i\n            while stack and stack[-1][1] > h:\n                idx, height = stack.pop()\n                max_area = max(max_area, height * (i - idx))\n                start = idx\n            stack.append((start, h))\n\n        for idx, height in stack:\n            max_area = max(max_area, height * (len(heights) - idx))\n\n        return max_area");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

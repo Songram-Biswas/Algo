@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Binary search for the valid partition on the smaller array:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Ensure <code class="mono accent-text">A</code> is the shorter array.</li>
-      <li>Binary search partition index <code class="mono accent-text">i</code> in <code class="mono accent-text">A</code>; partition index <code class="mono accent-text">j = (total // 2) - i</code> in <code class="mono accent-text">B</code>.</li>
-      <li>Check if <code class="mono accent-text">A[i-1] <= B[j]</code> and <code class="mono accent-text">B[j-1] <= A[i]</code>.</li>
-      <li>If valid partition is found, calculate median based on odd or even total length.</li>
-    </ol>
+          <p class="mb-3">Binary search for the partition boundary on the smaller array:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Always binary search on the shorter array <code class="mono accent-text">A</code> to ensure O(log(min(m, n))).</li>
+          <li>Partition both arrays such that total elements in left halves equal right halves.</li>
+          <li>Check partition validity: <code class="mono accent-text">Aleft <= Bright</code> and <code class="mono accent-text">Bleft <= Aright</code>.</li>
+          <li>If valid, median is max of left elements (odd total) or average of partition medians (even total).</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -257,25 +258,25 @@
 
         total = <span class="fn">len</span>(A) + <span class="fn">len</span>(B)
         half = total // <span class="num">2</span>
-        l, r = <span class="num">0</span>, <span class="fn">len</span>(A) - <span class="num">1</span>
+        low, high = <span class="num">0</span>, <span class="fn">len</span>(A) - <span class="num">1</span>
 
         <span class="kw">while</span> <span class="kw">True</span>:
-            i = (l + r) // <span class="num">2</span>
+            i = (low + high) // <span class="num">2</span>
             j = half - i - <span class="num">2</span>
 
-            Aleft = A[i] <span class="kw">if</span> i &gt;= <span class="num">0</span> <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"-infinity"</span>)
-            Aright = A[i + <span class="num">1</span>] <span class="kw">if</span> (i + <span class="num">1</span>) &lt; <span class="fn">len</span>(A) <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"infinity"</span>)
-            Bleft = B[j] <span class="kw">if</span> j &gt;= <span class="num">0</span> <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"-infinity"</span>)
-            Bright = B[j + <span class="num">1</span>] <span class="kw">if</span> (j + <span class="num">1</span>) &lt; <span class="fn">len</span>(B) <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"infinity"</span>)
+            Aleft = A[i] <span class="kw">if</span> i &gt;= <span class="num">0</span> <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"-inf"</span>)
+            Aright = A[i + <span class="num">1</span>] <span class="kw">if</span> (i + <span class="num">1</span>) &lt; <span class="fn">len</span>(A) <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"inf"</span>)
+            Bleft = B[j] <span class="kw">if</span> j &gt;= <span class="num">0</span> <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"-inf"</span>)
+            Bright = B[j + <span class="num">1</span>] <span class="kw">if</span> (j + <span class="num">1</span>) &lt; <span class="fn">len</span>(B) <span class="kw">else</span> <span class="fn">float</span>(<span class="str">"inf"</span>)
 
             <span class="kw">if</span> Aleft &lt;= Bright <span class="kw">and</span> Bleft &lt;= Aright:
                 <span class="kw">if</span> total % <span class="num">2</span>:
                     <span class="kw">return</span> <span class="fn">min</span>(Aright, Bright)
                 <span class="kw">return</span> (<span class="fn">max</span>(Aleft, Bleft) + <span class="fn">min</span>(Aright, Bright)) / <span class="num">2</span>
             <span class="kw">elif</span> Aleft &gt; Bright:
-                r = i - <span class="num">1</span>
+                high = i - <span class="num">1</span>
             <span class="kw">else</span>:
-                l = i + <span class="num">1</span></pre>
+                low = i + <span class="num">1</span></pre>
           </div>
         </div>
 
@@ -284,12 +285,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(log(min(m, n)))</p>
-              <p class="text-xs text-soft mt-1">Binary search partition on the smaller array of size min(m, n).</p>
+              <p class="text-xs text-soft mt-1">Binary search partition on the smaller array of length min(m, n).</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only a constant number of partition boundary pointers.</p>
+              <p class="text-xs text-soft mt-1">Only partition indices and scalar boundary elements are stored.</p>
             </div>
           </div>
         </div>
@@ -600,7 +601,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:\n        A, B = nums1, nums2\n        if len(B) < len(A):\n            A, B = B, A\n\n        total = len(A) + len(B)\n        half = total // 2\n        l, r = 0, len(A) - 1\n\n        while True:\n            i = (l + r) // 2\n            j = half - i - 2\n\n            Aleft = A[i] if i >= 0 else float(\"-infinity\")\n            Aright = A[i + 1] if (i + 1) < len(A) else float(\"infinity\")\n            Bleft = B[j] if j >= 0 else float(\"-infinity\")\n            Bright = B[j + 1] if (j + 1) < len(B) else float(\"infinity\")\n\n            if Aleft <= Bright and Bleft <= Aright:\n                if total % 2:\n                    return min(Aright, Bright)\n                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2\n            elif Aleft > Bright:\n                r = i - 1\n            else:\n                l = i + 1");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:\n        A, B = nums1, nums2\n        if len(B) < len(A):\n            A, B = B, A\n\n        total = len(A) + len(B)\n        half = total // 2\n        low, high = 0, len(A) - 1\n\n        while True:\n            i = (low + high) // 2\n            j = half - i - 2\n\n            Aleft = A[i] if i >= 0 else float(\"-inf\")\n            Aright = A[i + 1] if (i + 1) < len(A) else float(\"inf\")\n            Bleft = B[j] if j >= 0 else float(\"-inf\")\n            Bright = B[j + 1] if (j + 1) < len(B) else float(\"inf\")\n\n            if Aleft <= Bright and Bleft <= Aright:\n                if total % 2:\n                    return min(Aright, Bright)\n                return (max(Aleft, Bleft) + min(Aright, Bright)) / 2\n            elif Aleft > Bright:\n                high = i - 1\n            else:\n                low = i + 1");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

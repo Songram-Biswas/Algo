@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,14 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Position two pointers at the ends of string <code class="mono accent-text">s</code> and move toward the center:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Set <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(s) - 1</code>.</li>
-      <li>Advance <code class="mono accent-text">left</code> past any non-alphanumeric character.</li>
-      <li>Retreat <code class="mono accent-text">right</code> past any non-alphanumeric character.</li>
-      <li>Compare <code class="mono accent-text">s[left].lower() == s[right].lower()</code>. If mismatched, return false.</li>
-    </ol>
+          <p class="mb-3">Two pointers converge inward while ignoring non-alphanumeric characters:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Initialize pointers <code class="mono accent-text">left = 0</code> and <code class="mono accent-text">right = len(s) - 1</code>.</li>
+          <li>Advance <code class="mono accent-text">left</code> while <code class="mono accent-text">not s[left].isalnum()</code>.</li>
+          <li>Retract <code class="mono accent-text">right</code> while <code class="mono accent-text">not s[right].isalnum()</code>.</li>
+          <li>Compare lowercase characters; if mismatch, return <code class="mono accent-text">False</code>.</li>
+          <li>Advance both pointers until they cross and return <code class="mono accent-text">True</code>.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -272,12 +274,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Two pointers traverse inwards; each character inspected at most once.</p>
+              <p class="text-xs text-soft mt-1">Two pointers traverse the string inward, examining each character at most once.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only two index pointers in-place without copying filtered strings.</p>
+              <p class="text-xs text-soft mt-1">Comparisons are performed in-place with two integer pointer indices.</p>
             </div>
           </div>
         </div>

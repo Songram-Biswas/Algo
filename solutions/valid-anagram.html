@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -191,7 +192,22 @@
         </div>
 
         <div class="flex flex-col items-center gap-8 py-4">
-          <div id="array-track" class="flex gap-2 pb-7 pt-7 flex-wrap justify-center"></div>
+          <div class="w-full flex flex-col items-center gap-6">
+      <div class="flex flex-col md:flex-row items-center gap-8 justify-center">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2 text-center">String s ("anagram")</p>
+          <div id="s-track" class="flex gap-2 justify-center flex-wrap"></div>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2 text-center">String t ("nagaram")</p>
+          <div id="t-track" class="flex gap-2 justify-center flex-wrap"></div>
+        </div>
+      </div>
+      <div class="w-full max-w-lg">
+        <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2 text-center">Character Frequency Map &nbsp;(char → count)</p>
+        <div id="map-track" class="flex gap-2 flex-wrap justify-center min-h-[46px]"></div>
+      </div>
+    </div>
           <p id="trace-caption" class="text-sm mono text-soft min-h-[20px] text-center">Click "Next" to begin.</p>
         </div>
       </div>
@@ -240,20 +256,31 @@
       <li>If <code class="mono accent-text">len(s) != len(t)</code>, return false immediately.</li>
       <li>Tally character counts of <code class="mono accent-text">s</code> in a frequency table.</li>
       <li>Decrement counts using characters of <code class="mono accent-text">t</code>.</li>
-      <li>If any count drops below 0, return false; otherwise return true.</li>
+      <li>If any count drops below 0 or a character is missing, return false; otherwise return true.</li>
     </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
           <div class="code-block rounded-xl p-5 overflow-x-auto relative">
             <button id="btn-copy-code" class="absolute top-3 right-3 text-xs font-medium text-zinc-400 hover:text-white px-3 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/60 transition cursor-pointer">Copy</button>
-<pre><span class="kw">from</span> collections <span class="kw">import</span> Counter
-
-<span class="kw">class</span> Solution:
+<pre><span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">isAnagram</span>(<span class="kw">self</span>, s: str, t: str) -&gt; bool:
         <span class="kw">if</span> <span class="fn">len</span>(s) != <span class="fn">len</span>(t):
             <span class="kw">return</span> <span class="kw">False</span>
-        <span class="kw">return</span> <span class="fn">Counter</span>(s) == <span class="fn">Counter</span>(t)</pre>
+
+        char_count = {}
+
+        <span class="cm"># Count frequencies in string s</span>
+        <span class="kw">for</span> char <span class="kw">in</span> s:
+            char_count[char] = char_count.get(char, <span class="num">0</span>) + <span class="num">1</span>
+
+        <span class="cm"># Decrement frequencies using string t</span>
+        <span class="kw">for</span> char <span class="kw">in</span> t:
+            <span class="kw">if</span> char <span class="kw">not</span> <span class="kw">in</span> char_count <span class="kw">or</span> char_count[char] == <span class="num">0</span>:
+                <span class="kw">return</span> <span class="kw">False</span>
+            char_count[char] -= <span class="num">1</span>
+
+        <span class="kw">return</span> <span class="kw">True</span></pre>
           </div>
         </div>
 
@@ -528,39 +555,110 @@
     }
 
     
-    const S = "anagram", T = "nagaram";
-    let steps = [], stepIndex = -1;
+    const S = "anagram";
+    const T = "nagaram";
+    let steps = [];
+    let stepIndex = -1;
 
     function computeSteps() {
       steps = [];
       const counts = {};
+
       for (let i = 0; i < S.length; i++) {
-        counts[S[i]] = (counts[S[i]] || 0) + 1;
-        steps.push({ phase: 'count_s', i, char: S[i], counts: { ...counts } });
+        const char = S[i];
+        counts[char] = (counts[char] || 0) + 1;
+        steps.push({
+          phase: 'tally_s',
+          i,
+          char,
+          counts: { ...counts },
+          caption: `[Pass 1: Tally s] Reading s[${i}] = '${char}'. Frequency of '${char}' is now ${counts[char]}.`
+        });
       }
+
       for (let i = 0; i < T.length; i++) {
-        counts[T[i]] = (counts[T[i]] || 0) - 1;
-        steps.push({ phase: 'check_t', i, char: T[i], counts: { ...counts } });
+        const char = T[i];
+        counts[char] = (counts[char] || 0) - 1;
+        steps.push({
+          phase: 'match_t',
+          i,
+          char,
+          counts: { ...counts },
+          caption: `[Pass 2: Match t] Matching t[${i}] = '${char}'. Remaining needed frequency of '${char}' is now ${counts[char]}.`
+        });
       }
+
+      steps.push({
+        phase: 'complete',
+        counts: { ...counts },
+        caption: `🎉 All characters matched with net zero frequencies. Strings are valid anagrams! Return True.`
+      });
     }
 
     function buildTrace() {
-      computeSteps(); stepIndex = -1;
-      const track = document.getElementById('array-track');
-      track.innerHTML = S.split('').map((c, i) => `<div class="cell" id="cell-${i}">${c}<span class="idx">s[${i}]</span><span class="ptr" id="ptr-${i}"></span></div>`).join('');
+      computeSteps();
+      stepIndex = -1;
+
+      const sTrack = document.getElementById('s-track');
+      sTrack.innerHTML = S.split('').map((c, i) => `
+        <div class="cell" id="s-cell-${i}">${c}<span class="idx">s[${i}]</span></div>
+      `).join('');
+
+      const tTrack = document.getElementById('t-track');
+      tTrack.innerHTML = T.split('').map((c, i) => `
+        <div class="cell" id="t-cell-${i}">${c}<span class="idx">t[${i}]</span></div>
+      `).join('');
+
+      document.getElementById('map-track').innerHTML = '<span class="text-xs text-soft mono">empty</span>';
       document.getElementById('trace-caption').textContent = 'Click "Next" to begin.';
       updateStepControls();
     }
 
     function renderStep() {
-      S.split('').forEach((_, i) => document.getElementById(`cell-${i}`).classList.remove('scan', 'hit'));
+      S.split('').forEach((_, i) => {
+        const el = document.getElementById(`s-cell-${i}`);
+        el.classList.remove('scan', 'hit', 'done');
+      });
+      T.split('').forEach((_, i) => {
+        const el = document.getElementById(`t-cell-${i}`);
+        el.classList.remove('scan', 'hit', 'done');
+      });
+
+      const mapTrack = document.getElementById('map-track');
       const caption = document.getElementById('trace-caption');
-      if (stepIndex < 0) { caption.textContent = 'Click "Next" to begin.'; updateStepControls(); return; }
+
+      if (stepIndex < 0) {
+        mapTrack.innerHTML = '<span class="text-xs text-soft mono">empty</span>';
+        caption.textContent = 'Click "Next" to begin.';
+        updateStepControls();
+        return;
+      }
+
       const s = steps[stepIndex];
-      document.getElementById(`cell-${s.i % S.length}`).classList.add(s.phase === 'check_t' ? 'hit' : 'scan');
-      caption.textContent = s.phase === 'count_s'
-        ? `[TALLY S] Scanning s[${s.i}]='${s.char}' → count=${s.counts[s.char]}`
-        : `[MATCH T] Matching t[${s.i}]='${s.char}' → remaining needed count=${s.counts[s.char]}`;
+
+      const entries = Object.entries(s.counts);
+      if (entries.length === 0) {
+        mapTrack.innerHTML = '<span class="text-xs text-soft mono">empty</span>';
+      } else {
+        mapTrack.innerHTML = entries.map(([char, count]) => {
+          const isZero = count === 0;
+          return `<div class="map-slot filled ${isZero ? 'opacity-40' : ''}"><span class="font-bold text-accent">${char}</span>: ${count}</div>`;
+        }).join('');
+      }
+
+      if (s.phase === 'tally_s') {
+        for (let j = 0; j < s.i; j++) document.getElementById(`s-cell-${j}`).classList.add('done');
+        document.getElementById(`s-cell-${s.i}`).classList.add('scan');
+      } else if (s.phase === 'match_t') {
+        S.split('').forEach((_, j) => document.getElementById(`s-cell-${j}`).classList.add('done'));
+        for (let j = 0; j < s.i; j++) document.getElementById(`t-cell-${j}`).classList.add('done');
+        document.getElementById(`t-cell-${s.i}`).classList.add('hit');
+      } else if (s.phase === 'complete') {
+        S.split('').forEach((_, j) => document.getElementById(`s-cell-${j}`).classList.add('hit'));
+        T.split('').forEach((_, j) => document.getElementById(`t-cell-${j}`).classList.add('hit'));
+      }
+
+      caption.textContent = s.caption;
       updateStepControls();
     }
 
@@ -587,7 +685,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from collections import Counter\n\nclass Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        if len(s) != len(t):\n            return False\n        return Counter(s) == Counter(t)");
+      await navigator.clipboard.writeText("class Solution:\n    def isAnagram(self, s: str, t: str) -> bool:\n        if len(s) != len(t):\n            return False\n\n        char_count = {}\n\n        # Count frequencies in string s\n        for char in s:\n            char_count[char] = char_count.get(char, 0) + 1\n\n        # Decrement frequencies using string t\n        for char in t:\n            if char not in char_count or char_count[char] == 0:\n                return False\n            char_count[char] -= 1\n\n        return True");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

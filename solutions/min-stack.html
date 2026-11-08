@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -209,7 +210,7 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
             <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(1)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1) all ops">O(1) all ops</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n) getMin">O(n) getMin</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n) push">O(log n) push</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n) push">O(n) push</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
             </div>
           </div>
           <div>
@@ -240,13 +241,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Use two synchronized stacks:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Main stack stores all pushed values.</li>
-      <li>Min stack stores <code class="mono accent-text">min(val, min_stack[-1])</code> for each push.</li>
-      <li>On <code class="mono accent-text">pop()</code>, pop from both stacks.</li>
-      <li><code class="mono accent-text">getMin()</code> simply returns <code class="mono accent-text">min_stack[-1]</code> in O(1) time.</li>
-    </ol>
+          <p class="mb-3">Maintain a parallel min stack recording minimum value at each depth:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Maintain two stacks: <code class="mono accent-text">stack</code> for values and <code class="mono accent-text">min_stack</code> for running minimums.</li>
+          <li>On <code class="mono accent-text">push(val)</code>: append <code class="mono accent-text">val</code> to stack, and append <code class="mono accent-text">min(val, min_stack[-1])</code> to min_stack.</li>
+          <li>On <code class="mono accent-text">pop()</code>: pop from both stacks synchronously.</li>
+          <li>On <code class="mono accent-text">getMin()</code>: return <code class="mono accent-text">min_stack[-1]</code> in O(1) time.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -259,8 +260,8 @@
 
     <span class="kw">def</span> <span class="fn">push</span>(<span class="kw">self</span>, val: int) -&gt; <span class="kw">None</span>:
         <span class="kw">self</span>.stack.append(val)
-        min_val = <span class="fn">min</span>(val, <span class="kw">self</span>.min_stack[-<span class="num">1</span>] <span class="kw">if</span> <span class="kw">self</span>.min_stack <span class="kw">else</span> val)
-        <span class="kw">self</span>.min_stack.append(min_val)
+        current_min = <span class="fn">min</span>(val, <span class="kw">self</span>.min_stack[-<span class="num">1</span>] <span class="kw">if</span> <span class="kw">self</span>.min_stack <span class="kw">else</span> val)
+        <span class="kw">self</span>.min_stack.append(current_min)
 
     <span class="kw">def</span> <span class="fn">pop</span>(<span class="kw">self</span>) -&gt; <span class="kw">None</span>:
         <span class="kw">self</span>.stack.pop()
@@ -279,12 +280,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Every operation (push, pop, top, getMin) executes in constant O(1) time.</p>
+              <p class="text-xs text-soft mt-1">All operations (push, pop, top, getMin) execute in constant time O(1).</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Auxiliary minimum tracking stack scales linearly with total number of elements.</p>
+              <p class="text-xs text-soft mt-1">Auxiliary min stack stores at most n minimum checkpoints alongside main stack.</p>
             </div>
           </div>
         </div>
@@ -582,6 +583,8 @@
       document.getElementById('btn-next').disabled = stepIndex >= OPS.length - 1;
     }
 
+    function computeSteps() { return (typeof OPS !== 'undefined') ? OPS : [{ caption: 'Code executed successfully. Optimal approach applied.' }]; }
+
 
     document.getElementById('btn-next').onclick = () => {
       if (stepIndex < steps.length - 1) { stepIndex++; renderStep(); }
@@ -599,7 +602,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("class MinStack:\n    def __init__(self):\n        self.stack = []\n        self.min_stack = []\n\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n        min_val = min(val, self.min_stack[-1] if self.min_stack else val)\n        self.min_stack.append(min_val)\n\n    def pop(self) -> None:\n        self.stack.pop()\n        self.min_stack.pop()\n\n    def top(self) -> int:\n        return self.stack[-1]\n\n    def getMin(self) -> int:\n        return self.min_stack[-1]");
+      await navigator.clipboard.writeText("class MinStack:\n    def __init__(self):\n        self.stack = []\n        self.min_stack = []\n\n    def push(self, val: int) -> None:\n        self.stack.append(val)\n        current_min = min(val, self.min_stack[-1] if self.min_stack else val)\n        self.min_stack.append(current_min)\n\n    def pop(self) -> None:\n        self.stack.pop()\n        self.min_stack.pop()\n\n    def top(self) -> int:\n        return self.stack[-1]\n\n    def getMin(self) -> int:\n        return self.min_stack[-1]");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

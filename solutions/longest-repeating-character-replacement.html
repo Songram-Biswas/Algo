@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -209,7 +210,7 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
             <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(1)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(26)">O(26)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(26)">O(26)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
             </div>
           </div>
         </div>
@@ -234,12 +235,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Maintain a sliding window and a frequency count of letters inside it. A window is valid if <code class="mono accent-text">(window length − count of the most frequent letter) ≤ k</code> — that difference is exactly how many characters you'd need to replace. Expand the window each step; shrink from the left only when it becomes invalid.</p>
+          <p class="mb-3">Sliding window tracking most frequent character count:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Expand <code class="mono accent-text">right</code> one character at a time, updating the frequency count.</li>
-          <li>Track <code class="mono accent-text">max_freq</code>, the count of the most common letter currently in the window.</li>
-          <li>If <code class="mono accent-text">window_len - max_freq &gt; k</code>, shrink from <code class="mono accent-text">left</code>.</li>
-          <li>Track the largest valid window length seen.</li>
+          <li>Maintain a frequency map and track <code class="mono accent-text">max_f</code> (highest frequency in current window).</li>
+          <li>Expand window with pointer <code class="mono accent-text">right</code>.</li>
+          <li>If <code class="mono accent-text">(right - left + 1) - max_f > k</code>, replacements needed exceed <code class="mono">k</code>; shrink from left.</li>
+          <li>Track maximum valid window size seen.</li>
         </ol>
         </div>
 
@@ -249,22 +250,21 @@
 <pre><span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">characterReplacement</span>(<span class="kw">self</span>, s: str, k: int) -&gt; int:
         count = {}
+        max_f = <span class="num">0</span>
         left = <span class="num">0</span>
-        max_freq = <span class="num">0</span>
-        result = <span class="num">0</span>
+        max_len = <span class="num">0</span>
 
-        <span class="kw">for</span> right <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
-            count[s[right]] = count.get(s[right], <span class="num">0</span>) + <span class="num">1</span>
-            max_freq = <span class="fn">max</span>(max_freq, count[s[right]])
+        <span class="kw">for</span> right, char <span class="kw">in</span> <span class="fn">enumerate</span>(s):
+            count[char] = count.get(char, <span class="num">0</span>) + <span class="num">1</span>
+            max_f = <span class="fn">max</span>(max_f, count[char])
 
-            window_len = right - left + <span class="num">1</span>
-            <span class="kw">if</span> window_len - max_freq &gt; k:
+            <span class="kw">while</span> (right - left + <span class="num">1</span>) - max_f &gt; k:
                 count[s[left]] -= <span class="num">1</span>
                 left += <span class="num">1</span>
 
-            result = <span class="fn">max</span>(result, right - left + <span class="num">1</span>)
+            max_len = <span class="fn">max</span>(max_len, right - left + <span class="num">1</span>)
 
-        <span class="kw">return</span> result</pre>
+        <span class="kw">return</span> max_len</pre>
           </div>
         </div>
 
@@ -273,12 +273,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">A sliding window where both pointers only ever move forward — total O(n) work.</p>
+              <p class="text-xs text-soft mt-1">Sliding window right and left pointers scan the string in linear time.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">The frequency map holds at most 26 letters — constant regardless of n.</p>
+              <p class="text-xs text-soft mt-1">Hash map stores counts of at most 26 uppercase English letters.</p>
             </div>
           </div>
         </div>
@@ -605,7 +605,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("class Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        count = {}\n        left = 0\n        max_freq = 0\n        result = 0\n\n        for right in range(len(s)):\n            count[s[right]] = count.get(s[right], 0) + 1\n            max_freq = max(max_freq, count[s[right]])\n\n            window_len = right - left + 1\n            if window_len - max_freq > k:\n                count[s[left]] -= 1\n                left += 1\n\n            result = max(result, right - left + 1)\n\n        return result");
+      await navigator.clipboard.writeText("class Solution:\n    def characterReplacement(self, s: str, k: int) -> int:\n        count = {}\n        max_f = 0\n        left = 0\n        max_len = 0\n\n        for right, char in enumerate(s):\n            count[char] = count.get(char, 0) + 1\n            max_f = max(max_f, count[char])\n\n            while (right - left + 1) - max_f > k:\n                count[s[left]] -= 1\n                left += 1\n\n            max_len = max(max_len, right - left + 1)\n\n        return max_len");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

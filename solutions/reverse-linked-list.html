@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -234,13 +235,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Walk the list once, flipping each node's <code class="mono accent-text">next</code> pointer to point backward instead of forward. Three pointers do the work: <code class="mono accent-text">prev</code> (the reversed portion so far), <code class="mono accent-text">curr</code> (the node being flipped), and a temporary <code class="mono accent-text">next_node</code> to avoid losing the rest of the list.</p>
+          <p class="mb-3">Iterative in-place pointer reversal using three pointers:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Start with <code class="mono accent-text">prev = None</code>, <code class="mono accent-text">curr = head</code>.</li>
-          <li>Save <code class="mono accent-text">next_node = curr.next</code> before changing anything.</li>
-          <li>Flip the pointer: <code class="mono accent-text">curr.next = prev</code>.</li>
-          <li>Advance both: <code class="mono accent-text">prev = curr</code>, <code class="mono accent-text">curr = next_node</code>.</li>
-          <li>When <code class="mono accent-text">curr</code> is <code class="mono accent-text">None</code>, <code class="mono accent-text">prev</code> is the new head.</li>
+          <li>Initialize <code class="mono accent-text">prev = None</code> and <code class="mono accent-text">curr = head</code>.</li>
+          <li>Save next node: <code class="mono accent-text">next_temp = curr.next</code>.</li>
+          <li>Reverse pointer: <code class="mono accent-text">curr.next = prev</code>.</li>
+          <li>Advance <code class="mono accent-text">prev = curr</code> and <code class="mono accent-text">curr = next_temp</code>.</li>
+          <li>Return <code class="mono accent-text">prev</code> as the new head.</li>
         </ol>
         </div>
 
@@ -260,10 +261,10 @@
         curr = head
 
         <span class="kw">while</span> curr:
-            next_node = curr.next
+            next_temp = curr.next
             curr.next = prev
             prev = curr
-            curr = next_node
+            curr = next_temp
 
         <span class="kw">return</span> prev</pre>
           </div>
@@ -274,12 +275,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Every node is visited exactly once to flip its pointer.</p>
+              <p class="text-xs text-soft mt-1">Single pass traversing all n nodes in the linked list.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only two or three pointers are tracked — the list is reversed in place.</p>
+              <p class="text-xs text-soft mt-1">In-place pointer reversal without extra nodes.</p>
             </div>
           </div>
         </div>
@@ -623,7 +624,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import Optional\n\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\nclass Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        prev = None\n        curr = head\n\n        while curr:\n            next_node = curr.next\n            curr.next = prev\n            prev = curr\n            curr = next_node\n\n        return prev");
+      await navigator.clipboard.writeText("from typing import Optional\n\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\nclass Solution:\n    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        prev = None\n        curr = head\n\n        while curr:\n            next_temp = curr.next\n            curr.next = prev\n            prev = curr\n            curr = next_temp\n\n        return prev");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

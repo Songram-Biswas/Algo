@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -203,8 +204,8 @@
         <div class="grid sm:grid-cols-2 gap-6 mb-5">
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
-            <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(len(s2))">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(len(s2))">O(len(s2))</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(len(s1) * len(s2))">O(len(s1) * len(s2))</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(26!)">O(26!)</div>
+            <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(26^n)">O(26^n)</div>
             </div>
           </div>
           <div>
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Slide a fixed-size window across <code class="mono accent-text">s2</code>:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>If <code class="mono accent-text">len(s1) > len(s2)</code>, return false.</li>
-      <li>Initialize frequency counts for <code class="mono accent-text">s1</code> and the first <code class="mono accent-text">len(s1)</code> chars of <code class="mono accent-text">s2</code>.</li>
-      <li>Slide the window right: add new incoming char, decrement/remove old outgoing char.</li>
-      <li>If the window frequency matches <code class="mono accent-text">s1</code> frequency, return true.</li>
-    </ol>
+          <p class="mb-3">Slide a fixed-width window of size <code class="mono">len(s1)</code> across <code class="mono">s2</code>:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Count character frequencies in <code class="mono accent-text">s1</code> and initial window in <code class="mono accent-text">s2</code>.</li>
+          <li>If frequency tables match, return <code class="mono accent-text">True</code>.</li>
+          <li>Slide window right by one: increment incoming character count, decrement outgoing character count.</li>
+          <li>If any window matches <code class="mono accent-text">s1</code> frequency table, return <code class="mono accent-text">True</code>; else <code class="mono accent-text">False</code>.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -255,19 +256,21 @@
             <span class="kw">return</span> <span class="kw">False</span>
 
         s1_count = <span class="fn">Counter</span>(s1)
-        window = <span class="fn">Counter</span>(s2[:<span class="fn">len</span>(s1)])
+        window_count = <span class="fn">Counter</span>(s2[:<span class="fn">len</span>(s1)])
 
-        <span class="kw">if</span> s1_count == window:
+        <span class="kw">if</span> s1_count == window_count:
             <span class="kw">return</span> <span class="kw">True</span>
 
         <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s1), <span class="fn">len</span>(s2)):
-            window[s2[i]] += <span class="num">1</span>
-            old_char = s2[i - <span class="fn">len</span>(s1)]
-            window[old_char] -= <span class="num">1</span>
-            <span class="kw">if</span> window[old_char] == <span class="num">0</span>:
-                del window[old_char]
+            start_char = s2[i - <span class="fn">len</span>(s1)]
+            new_char = s2[i]
 
-            <span class="kw">if</span> window == s1_count:
+            window_count[new_char] += <span class="num">1</span>
+            window_count[start_char] -= <span class="num">1</span>
+            <span class="kw">if</span> window_count[start_char] == <span class="num">0</span>:
+                del window_count[start_char]
+
+            <span class="kw">if</span> s1_count == window_count:
                 <span class="kw">return</span> <span class="kw">True</span>
 
         <span class="kw">return</span> <span class="kw">False</span></pre>
@@ -278,13 +281,13 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
-              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(len(s2))</p>
-              <p class="text-xs text-soft mt-1">Fixed-size sliding window slides across s2 in a single linear pass.</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
+              <p class="text-xs text-soft mt-1">Sliding window of fixed length len(s1) scans s2 in one pass.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Two frequency arrays of fixed size 26 for lowercase English letters.</p>
+              <p class="text-xs text-soft mt-1">Frequency tables hold at most 26 lowercase English letters.</p>
             </div>
           </div>
         </div>
@@ -603,7 +606,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from collections import Counter\n\nclass Solution:\n    def checkInclusion(self, s1: str, s2: str) -> bool:\n        if len(s1) > len(s2):\n            return False\n\n        s1_count = Counter(s1)\n        window = Counter(s2[:len(s1)])\n\n        if s1_count == window:\n            return True\n\n        for i in range(len(s1), len(s2)):\n            window[s2[i]] += 1\n            old_char = s2[i - len(s1)]\n            window[old_char] -= 1\n            if window[old_char] == 0:\n                del window[old_char]\n\n            if window == s1_count:\n                return True\n\n        return False");
+      await navigator.clipboard.writeText("from collections import Counter\n\nclass Solution:\n    def checkInclusion(self, s1: str, s2: str) -> bool:\n        if len(s1) > len(s2):\n            return False\n\n        s1_count = Counter(s1)\n        window_count = Counter(s2[:len(s1)])\n\n        if s1_count == window_count:\n            return True\n\n        for i in range(len(s1), len(s2)):\n            start_char = s2[i - len(s1)]\n            new_char = s2[i]\n\n            window_count[new_char] += 1\n            window_count[start_char] -= 1\n            if window_count[start_char] == 0:\n                del window_count[start_char]\n\n            if s1_count == window_count:\n                return True\n\n        return False");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

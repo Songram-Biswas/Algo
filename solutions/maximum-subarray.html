@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -234,12 +235,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">This is the classic <strong>Kadane's algorithm</strong>. At each index, decide whether to extend the current running subarray or start a brand-new one from the current element — whichever gives a larger sum.</p>
+          <p class="mb-3">Kadane's algorithm resets running sum whenever it drops below zero:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Initialize <code class="mono accent-text">current_sum</code> and <code class="mono accent-text">max_sum</code> to the first element.</li>
-          <li>For each next number, set <code class="mono accent-text">current_sum = max(num, current_sum + num)</code>.</li>
-          <li>Update <code class="mono accent-text">max_sum = max(max_sum, current_sum)</code>.</li>
-          <li>Return <code class="mono accent-text">max_sum</code> after the pass.</li>
+          <li>Initialize <code class="mono accent-text">max_sum = nums[0]</code> and <code class="mono accent-text">cur_sum = 0</code>.</li>
+          <li>For each number, add to <code class="mono accent-text">cur_sum</code>.</li>
+          <li>Update <code class="mono accent-text">max_sum = max(max_sum, cur_sum)</code>.</li>
+          <li>If <code class="mono accent-text">cur_sum < 0</code>, reset <code class="mono accent-text">cur_sum = 0</code>.</li>
         </ol>
         </div>
 
@@ -251,11 +252,11 @@
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">maxSubArray</span>(<span class="kw">self</span>, nums: List[int]) -&gt; int:
         max_sum = nums[<span class="num">0</span>]
-        current_sum = nums[<span class="num">0</span>]
+        cur_sum = <span class="num">0</span>
 
-        <span class="kw">for</span> num <span class="kw">in</span> nums[<span class="num">1</span>:]:
-            current_sum = <span class="fn">max</span>(num, current_sum + num)
-            max_sum = <span class="fn">max</span>(max_sum, current_sum)
+        <span class="kw">for</span> num <span class="kw">in</span> nums:
+            cur_sum = <span class="fn">max</span>(num, cur_sum + num)
+            max_sum = <span class="fn">max</span>(max_sum, cur_sum)
 
         <span class="kw">return</span> max_sum</pre>
           </div>
@@ -266,12 +267,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Kadane's algorithm makes a single pass, doing constant work per element.</p>
+              <p class="text-xs text-soft mt-1">Kadane's algorithm visits each element once in linear time.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only two running variables are tracked: the current sum and the best sum.</p>
+              <p class="text-xs text-soft mt-1">Only tracks current running sum and global maximum sum.</p>
             </div>
           </div>
         </div>
@@ -593,7 +594,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        max_sum = nums[0]\n        current_sum = nums[0]\n\n        for num in nums[1:]:\n            current_sum = max(num, current_sum + num)\n            max_sum = max(max_sum, current_sum)\n\n        return max_sum");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def maxSubArray(self, nums: List[int]) -> int:\n        max_sum = nums[0]\n        cur_sum = 0\n\n        for num in nums:\n            cur_sum = max(num, cur_sum + num)\n            max_sum = max(max_sum, cur_sum)\n\n        return max_sum");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

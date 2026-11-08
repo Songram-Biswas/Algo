@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,14 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Evaluate postfix expression in a single pass using an operand stack:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Iterate through each token in the input list.</li>
-      <li>If token is a number, push it onto the stack.</li>
-      <li>If token is an operator, pop operand <code class="mono accent-text">b</code> then operand <code class="mono accent-text">a</code>.</li>
-      <li>Apply operator <code class="mono accent-text">a op b</code> and push the integer result back.</li>
-    </ol>
+          <p class="mb-3">Evaluate postfix expression using a stack of operands:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Initialize an empty operand stack.</li>
+          <li>Iterate through tokens: if numeric, convert to integer and push.</li>
+          <li>If operator, pop second operand <code class="mono accent-text">b</code> then first operand <code class="mono accent-text">a</code>.</li>
+          <li>Apply operation <code class="mono accent-text">a op b</code> (truncate division towards zero using <code class="mono accent-text">int(a / b)</code>) and push result.</li>
+          <li>Return the final value remaining on the stack.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -252,16 +254,22 @@
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">evalRPN</span>(<span class="kw">self</span>, tokens: List[str]) -&gt; int:
         stack = []
-        <span class="kw">for</span> t <span class="kw">in</span> tokens:
-            <span class="kw">if</span> t <span class="kw">in</span> <span class="str">"+-*/"</span>:
+
+        <span class="kw">for</span> token <span class="kw">in</span> tokens:
+            <span class="kw">if</span> token <span class="kw">in</span> {<span class="str">"+"</span>, <span class="str">"-"</span>, <span class="str">"*"</span>, <span class="str">"/"</span>}:
                 b = stack.pop()
                 a = stack.pop()
-                <span class="kw">if</span> t == <span class="str">'+'</span>: stack.append(a + b)
-                <span class="kw">elif</span> t == <span class="str">'-'</span>: stack.append(a - b)
-                <span class="kw">elif</span> t == <span class="str">'*'</span>: stack.append(a * b)
-                <span class="kw">elif</span> t == <span class="str">'/'</span>: stack.append(<span class="fn">int</span>(a / b))
+                <span class="kw">if</span> token == <span class="str">"+"</span>:
+                    stack.append(a + b)
+                <span class="kw">elif</span> token == <span class="str">"-"</span>:
+                    stack.append(a - b)
+                <span class="kw">elif</span> token == <span class="str">"*"</span>:
+                    stack.append(a * b)
+                <span class="kw">elif</span> token == <span class="str">"/"</span>:
+                    stack.append(<span class="fn">int</span>(a / b))
             <span class="kw">else</span>:
-                stack.append(<span class="fn">int</span>(t))
+                stack.append(<span class="fn">int</span>(token))
+
         <span class="kw">return</span> stack[<span class="num">0</span>]</pre>
           </div>
         </div>
@@ -271,12 +279,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Single pass through tokens with constant-time stack operations per token.</p>
+              <p class="text-xs text-soft mt-1">Linear scan through tokens list; each push and pop is O(1).</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Stack holds operands and intermediate evaluation results.</p>
+              <p class="text-xs text-soft mt-1">Stack holds up to n // 2 numbers during evaluation.</p>
             </div>
           </div>
         </div>
@@ -593,7 +601,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def evalRPN(self, tokens: List[str]) -> int:\n        stack = []\n        for t in tokens:\n            if t in \"+-*/\":\n                b = stack.pop()\n                a = stack.pop()\n                if t == '+': stack.append(a + b)\n                elif t == '-': stack.append(a - b)\n                elif t == '*': stack.append(a * b)\n                elif t == '/': stack.append(int(a / b))\n            else:\n                stack.append(int(t))\n        return stack[0]");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def evalRPN(self, tokens: List[str]) -> int:\n        stack = []\n\n        for token in tokens:\n            if token in {\"+\", \"-\", \"*\", \"/\"}:\n                b = stack.pop()\n                a = stack.pop()\n                if token == \"+\":\n                    stack.append(a + b)\n                elif token == \"-\":\n                    stack.append(a - b)\n                elif token == \"*\":\n                    stack.append(a * b)\n                elif token == \"/\":\n                    stack.append(int(a / b))\n            else:\n                stack.append(int(token))\n\n        return stack[0]");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

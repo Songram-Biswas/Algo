@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,14 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Use a monotonic decreasing stack:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Initialize result array with zeros of size <code class="mono accent-text">len(temperatures)</code>.</li>
-      <li>Iterate through each day with temperature <code class="mono accent-text">t</code> and index <code class="mono accent-text">i</code>.</li>
-      <li>While stack is not empty and <code class="mono accent-text">t > stack[-1][0]</code>, pop <code class="mono accent-text">(prev_t, prev_i)</code> and set <code class="mono accent-text">res[prev_i] = i - prev_i</code>.</li>
-      <li>Push current <code class="mono accent-text">(t, i)</code> to stack.</li>
-    </ol>
+          <p class="mb-3">Monotonic decreasing stack resolves warmer day waiting times in linear time:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Initialize output array <code class="mono accent-text">res = [0] * n</code> and empty stack of indices.</li>
+          <li>For each index <code class="mono accent-text">i</code> and temperature <code class="mono accent-text">temp</code>:</li>
+          <li>While stack is not empty and <code class="mono accent-text">temperatures[stack[-1]] < temp</code>:</li>
+          <li>Pop <code class="mono accent-text">prev_idx = stack.pop()</code> and set <code class="mono accent-text">res[prev_idx] = i - prev_idx</code>.</li>
+          <li>Push current index <code class="mono accent-text">i</code> onto stack.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -251,14 +253,15 @@
 
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">dailyTemperatures</span>(<span class="kw">self</span>, temperatures: List[int]) -&gt; List[int]:
-        res = [<span class="num">0</span>] * <span class="fn">len</span>(temperatures)
-        stack = []  <span class="cm"># pairs: (temp, index)</span>
+        n = <span class="fn">len</span>(temperatures)
+        res = [<span class="num">0</span>] * n
+        stack = []
 
-        <span class="kw">for</span> i, t <span class="kw">in</span> <span class="fn">enumerate</span>(temperatures):
-            <span class="kw">while</span> stack <span class="kw">and</span> t &gt; stack[-<span class="num">1</span>][<span class="num">0</span>]:
-                stack_t, stack_i = stack.pop()
-                res[stack_i] = i - stack_i
-            stack.append((t, i))
+        <span class="kw">for</span> i, temp <span class="kw">in</span> <span class="fn">enumerate</span>(temperatures):
+            <span class="kw">while</span> stack <span class="kw">and</span> temperatures[stack[-<span class="num">1</span>]] &lt; temp:
+                prev_index = stack.pop()
+                res[prev_index] = i - prev_index
+            stack.append(i)
 
         <span class="kw">return</span> res</pre>
           </div>
@@ -269,12 +272,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Every day is pushed onto the monotonic stack and popped at most once.</p>
+              <p class="text-xs text-soft mt-1">Each day index is pushed and popped from the monotonic stack at most once.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Monotonic stack stores pairs of (temperature, index) up to length n.</p>
+              <p class="text-xs text-soft mt-1">Stack holds at most n indices in strictly non-increasing order.</p>
             </div>
           </div>
         </div>
@@ -598,7 +601,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:\n        res = [0] * len(temperatures)\n        stack = []  # pairs: (temp, index)\n\n        for i, t in enumerate(temperatures):\n            while stack and t > stack[-1][0]:\n                stack_t, stack_i = stack.pop()\n                res[stack_i] = i - stack_i\n            stack.append((t, i))\n\n        return res");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:\n        n = len(temperatures)\n        res = [0] * n\n        stack = []\n\n        for i, temp in enumerate(temperatures):\n            while stack and temperatures[stack[-1]] < temp:\n                prev_index = stack.pop()\n                res[prev_index] = i - prev_index\n            stack.append(i)\n\n        return res");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

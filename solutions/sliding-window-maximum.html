@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Monotonic Deque tracks candidates in O(n) total time:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Maintain a double-ended queue storing indices in decreasing value order.</li>
-      <li>Before adding <code class="mono accent-text">nums[i]</code>, pop smaller elements from the back.</li>
-      <li>Evict indices from the front that have fallen out of the <code class="mono accent-text">k</code>-length window.</li>
-      <li>The front index of the deque is always the maximum for the current window.</li>
-    </ol>
+          <p class="mb-3">Monotonic decreasing deque stores candidate maximum indices:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Maintain a deque <code class="mono accent-text">q</code> storing indices of elements in decreasing order of value.</li>
+          <li>Remove indices from front of deque if they have fallen outside window (<code class="mono accent-text">q[0] < i - k + 1</code>).</li>
+          <li>Pop indices from back of deque while their value is less than current element <code class="mono accent-text">nums[i]</code>.</li>
+          <li>Append current index; when <code class="mono accent-text">i >= k - 1</code>, record <code class="mono accent-text">nums[q[0]]</code> as the window maximum.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -252,16 +253,17 @@
 
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">maxSlidingWindow</span>(<span class="kw">self</span>, nums: List[int], k: int) -&gt; List[int]:
-        q = <span class="fn">deque</span>()  <span class="cm"># stores indices</span>
+        q = <span class="fn">deque</span>()
         res = []
 
-        <span class="kw">for</span> i, n <span class="kw">in</span> <span class="fn">enumerate</span>(nums):
-            <span class="kw">while</span> q <span class="kw">and</span> nums[q[-<span class="num">1</span>]] &lt; n:
-                q.pop()
-            q.append(i)
-
-            <span class="kw">if</span> q[<span class="num">0</span>] &lt;= i - k:
+        <span class="kw">for</span> i, num <span class="kw">in</span> <span class="fn">enumerate</span>(nums):
+            <span class="kw">while</span> q <span class="kw">and</span> q[<span class="num">0</span>] &lt; i - k + <span class="num">1</span>:
                 q.popleft()
+
+            <span class="kw">while</span> q <span class="kw">and</span> nums[q[-<span class="num">1</span>]] &lt; num:
+                q.pop()
+
+            q.append(i)
 
             <span class="kw">if</span> i &gt;= k - <span class="num">1</span>:
                 res.append(nums[q[<span class="num">0</span>]])
@@ -275,12 +277,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Each array element is pushed and popped from the monotonic deque at most once.</p>
+              <p class="text-xs text-soft mt-1">Each array index is pushed and popped from the deque at most once across the entire iteration.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(k)</p>
-              <p class="text-xs text-soft mt-1">The monotonic deque stores at most k indices corresponding to the active window.</p>
+              <p class="text-xs text-soft mt-1">The monotonic deque stores at most k element indices at any time.</p>
             </div>
           </div>
         </div>
@@ -600,7 +602,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\nfrom collections import deque\n\nclass Solution:\n    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:\n        q = deque()  # stores indices\n        res = []\n\n        for i, n in enumerate(nums):\n            while q and nums[q[-1]] < n:\n                q.pop()\n            q.append(i)\n\n            if q[0] <= i - k:\n                q.popleft()\n\n            if i >= k - 1:\n                res.append(nums[q[0]])\n\n        return res");
+      await navigator.clipboard.writeText("from typing import List\nfrom collections import deque\n\nclass Solution:\n    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:\n        q = deque()\n        res = []\n\n        for i, num in enumerate(nums):\n            while q and q[0] < i - k + 1:\n                q.popleft()\n\n            while q and nums[q[-1]] < num:\n                q.pop()\n\n            q.append(i)\n\n            if i >= k - 1:\n                res.append(nums[q[0]])\n\n        return res");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

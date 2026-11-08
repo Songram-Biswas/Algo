@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -204,14 +205,14 @@
         <div class="grid sm:grid-cols-2 gap-6 mb-5">
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
-            <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n·k log k)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n·k log k)">O(n·k log k)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div>
+            <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n * k log k)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n * k log k)">O(n * k log k)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n * k²)">O(n * k²)</div>
             </div>
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
-            <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(n·k)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n·k)">O(n·k)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
+            <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(n * k)">
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(k)">O(k)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n * k)">O(n * k)</div>
             </div>
           </div>
         </div>
@@ -236,11 +237,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Anagrams share the same letters, just in different orders — so sorting each string's letters gives a canonical key that's identical for every anagram in a group. Use that sorted string as a hash map key.</p>
+          <p class="mb-3">Group strings by sorted character tuple key:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>For each word, compute <code class="mono accent-text">key = sorted(word)</code>.</li>
-          <li>Append the original word to <code class="mono accent-text">groups[key]</code>.</li>
-          <li>After processing every word, return all the map's values as the grouped lists.</li>
+          <li>Initialize a hash map <code class="mono accent-text">groups = defaultdict(list)</code>.</li>
+          <li>For each string, sort characters to form a canonical key: <code class="mono accent-text">tuple(sorted(s))</code>.</li>
+          <li>Append the original string to <code class="mono accent-text">groups[key]</code>.</li>
+          <li>Return all values in the hash map.</li>
         </ol>
         </div>
 
@@ -255,7 +257,7 @@
         groups = <span class="fn">defaultdict</span>(list)
 
         <span class="kw">for</span> s <span class="kw">in</span> strs:
-            key = <span class="str">''</span>.join(<span class="fn">sorted</span>(s))
+            key = <span class="fn">tuple</span>(<span class="fn">sorted</span>(s))
             groups[key].append(s)
 
         <span class="kw">return</span> <span class="fn">list</span>(groups.values())</pre>
@@ -266,13 +268,13 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
-              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n·k log k)</p>
-              <p class="text-xs text-soft mt-1">n strings, each sorted in O(k log k) where k is the max string length.</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n * k log k)</p>
+              <p class="text-xs text-soft mt-1">Sorting each of the n strings of length at most k takes O(n * k log k).</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
-              <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n·k)</p>
-              <p class="text-xs text-soft mt-1">The map stores every input string across all groups.</p>
+              <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n * k)</p>
+              <p class="text-xs text-soft mt-1">Hash map stores all characters of all strings.</p>
             </div>
           </div>
         </div>
@@ -595,7 +597,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        groups = defaultdict(list)\n\n        for s in strs:\n            key = ''.join(sorted(s))\n            groups[key].append(s)\n\n        return list(groups.values())");
+      await navigator.clipboard.writeText("from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:\n        groups = defaultdict(list)\n\n        for s in strs:\n            key = tuple(sorted(s))\n            groups[key].append(s)\n\n        return list(groups.values())");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

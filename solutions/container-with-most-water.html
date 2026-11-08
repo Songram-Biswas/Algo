@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,12 +236,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Start with the widest possible container — both ends of the array — and shrink inward. At each step, the area is capped by the <em>shorter</em> of the two lines, so moving the taller pointer can never increase the area. Always move the shorter one.</p>
+          <p class="mb-3">Two pointers maximize the container area greedily:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Place <code class="mono accent-text">left</code> at index 0 and <code class="mono accent-text">right</code> at the last index.</li>
-          <li>Compute <code class="mono accent-text">area = (right - left) * min(height[left], height[right])</code> and track the max.</li>
-          <li>Move whichever pointer points to the shorter line inward.</li>
-          <li>Repeat until the pointers meet.</li>
+          <li>Initialize <code class="mono accent-text">left = 0</code>, <code class="mono accent-text">right = len(height) - 1</code>.</li>
+          <li>Compute area: <code class="mono accent-text">(right - left) * min(height[left], height[right])</code> and update maximum.</li>
+          <li>Advance the pointer with the smaller height, since area is bottlenecked by the shorter wall.</li>
+          <li>Continue until pointers meet.</li>
         </ol>
         </div>
 
@@ -251,15 +252,13 @@
 
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">maxArea</span>(<span class="kw">self</span>, height: List[int]) -&gt; int:
-        left = <span class="num">0</span>
-        right = <span class="fn">len</span>(height) - <span class="num">1</span>
+        left, right = <span class="num">0</span>, <span class="fn">len</span>(height) - <span class="num">1</span>
         max_area = <span class="num">0</span>
 
         <span class="kw">while</span> left &lt; right:
             width = right - left
             h = <span class="fn">min</span>(height[left], height[right])
-            area = width * h
-            max_area = <span class="fn">max</span>(max_area, area)
+            max_area = <span class="fn">max</span>(max_area, width * h)
 
             <span class="kw">if</span> height[left] &lt; height[right]:
                 left += <span class="num">1</span>
@@ -275,12 +274,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Two pointers move inward; each index is visited at most once.</p>
+              <p class="text-xs text-soft mt-1">Two pointers move inward from opposite ends in at most n steps.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only two pointers and a running max are tracked — no extra structure.</p>
+              <p class="text-xs text-soft mt-1">Only stores two pointer indices and scalar area maximum.</p>
             </div>
           </div>
         </div>
@@ -603,7 +602,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def maxArea(self, height: List[int]) -> int:\n        left = 0\n        right = len(height) - 1\n        max_area = 0\n\n        while left < right:\n            width = right - left\n            h = min(height[left], height[right])\n            area = width * h\n            max_area = max(max_area, area)\n\n            if height[left] < height[right]:\n                left += 1\n            else:\n                right -= 1\n\n        return max_area");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def maxArea(self, height: List[int]) -> int:\n        left, right = 0, len(height) - 1\n        max_area = 0\n\n        while left < right:\n            width = right - left\n            h = min(height[left], height[right])\n            max_area = max(max_area, width * h)\n\n            if height[left] < height[right]:\n                left += 1\n            else:\n                right -= 1\n\n        return max_area");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

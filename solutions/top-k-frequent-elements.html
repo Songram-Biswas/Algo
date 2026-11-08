@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -204,13 +205,13 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
             <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log k)">O(n log k)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
             </div>
           </div>
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Space Complexity</p>
             <div id="quiz-space" class="flex flex-col gap-2" data-correct="O(n)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(log n)">O(log n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(k)">O(k)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div>
             </div>
           </div>
         </div>
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">To beat O(n log n) heap/sorting time, use Bucket Sort:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Count frequencies of each number with a hash map in O(n).</li>
-      <li>Create an array of buckets of size <code class="mono accent-text">len(nums) + 1</code>.</li>
-      <li>Place each number into the bucket corresponding to its frequency count.</li>
-      <li>Scan buckets backwards from <code class="mono accent-text">n</code> down to 1, collecting the first <code class="mono accent-text">k</code> items.</li>
-    </ol>
+          <p class="mb-3">Use bucket sort to group elements by their occurrence count in linear time:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Count frequencies of all numbers using a hash map.</li>
+          <li>Create a list of buckets where index represents frequency (0 to n).</li>
+          <li>Populate buckets with numbers corresponding to their frequency.</li>
+          <li>Iterate backwards from highest frequency bucket and collect <code class="mono accent-text">k</code> elements.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -273,12 +274,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Bucket sort indexes elements by frequency in range 0..n, avoiding sorting.</p>
+              <p class="text-xs text-soft mt-1">Counting frequencies takes O(n), and bucket sort grouping takes O(n) without comparison sorting.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Hash map and bucket array together scale linearly with n.</p>
+              <p class="text-xs text-soft mt-1">Buckets array of size n + 1 stores all elements grouped by frequency.</p>
             </div>
           </div>
         </div>

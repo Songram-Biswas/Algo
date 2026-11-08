@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -204,7 +205,7 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
             <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(n)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(1)">O(1)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n)">O(n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
             </div>
           </div>
           <div>
@@ -235,12 +236,12 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Put every number in a hash set for O(1) lookups. For each number, only start counting a sequence if it's a true "chain start" — meaning <code class="mono accent-text">num - 1</code> is NOT in the set. From there, count forward as long as consecutive numbers exist.</p>
+          <p class="mb-3">Find sequence starting numbers using a hash set:</p>
         <ol class="list-decimal list-inside space-y-2 text-soft">
-          <li>Build a set of all numbers for O(1) membership checks.</li>
-          <li>For each number, skip it unless it's a chain start (<code class="mono accent-text">num - 1</code> not in set).</li>
-          <li>From a chain start, keep extending forward (<code class="mono accent-text">num + 1</code>, <code class="mono accent-text">num + 2</code>, …) while present in the set.</li>
-          <li>Track the longest chain length seen.</li>
+          <li>Insert all numbers into a hash set for O(1) membership lookups.</li>
+          <li>Iterate through numbers; only start counting if <code class="mono accent-text">(num - 1) not in num_set</code> (streak beginning).</li>
+          <li>Count forward <code class="mono accent-text">num + 1, num + 2, ...</code> while present in set.</li>
+          <li>Update maximum streak length found.</li>
         </ol>
         </div>
 
@@ -255,9 +256,9 @@
         longest = <span class="num">0</span>
 
         <span class="kw">for</span> num <span class="kw">in</span> num_set:
-            <span class="kw">if</span> num - <span class="num">1</span> <span class="kw">not</span> <span class="kw">in</span> num_set:
+            <span class="kw">if</span> (num - <span class="num">1</span>) <span class="kw">not</span> <span class="kw">in</span> num_set:
                 length = <span class="num">1</span>
-                <span class="kw">while</span> num + length <span class="kw">in</span> num_set:
+                <span class="kw">while</span> (num + length) <span class="kw">in</span> num_set:
                     length += <span class="num">1</span>
                 longest = <span class="fn">max</span>(longest, length)
 
@@ -270,12 +271,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n)</p>
-              <p class="text-xs text-soft mt-1">Each number is only ever extended into a chain once, despite the nested-looking loop.</p>
+              <p class="text-xs text-soft mt-1">Each number is visited at most twice: once during set lookup and once when extending a streak.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(n)</p>
-              <p class="text-xs text-soft mt-1">The hash set stores every distinct number.</p>
+              <p class="text-xs text-soft mt-1">Hash set holds all n unique numbers.</p>
             </div>
           </div>
         </div>
@@ -604,7 +605,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        num_set = set(nums)\n        longest = 0\n\n        for num in num_set:\n            if num - 1 not in num_set:\n                length = 1\n                while num + length in num_set:\n                    length += 1\n                longest = max(longest, length)\n\n        return longest");
+      await navigator.clipboard.writeText("from typing import List\n\nclass Solution:\n    def longestConsecutive(self, nums: List[int]) -> int:\n        num_set = set(nums)\n        longest = 0\n\n        for num in num_set:\n            if (num - 1) not in num_set:\n                length = 1\n                while (num + length) in num_set:\n                    length += 1\n                longest = max(longest, length)\n\n        return longest");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

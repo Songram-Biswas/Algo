@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -204,7 +205,7 @@
           <div>
             <p class="text-xs font-bold uppercase tracking-wider text-soft mb-2">Time Complexity</p>
             <div id="quiz-time" class="flex flex-col gap-2" data-correct="O(m + n)">
-              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(m + n)">O(m + n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(m * n)">O(m * n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(m log n)">O(m log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(2^n)">O(2^n)</div>
+              <div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(m + n)">O(m + n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(m * n)">O(m * n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n log n)">O(n log n)</div><div class="quiz-opt rounded-lg px-3 py-2 text-sm mono" data-val="O(n²)">O(n²)</div>
             </div>
           </div>
           <div>
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Sliding window with dynamic contraction:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Map target character frequencies with <code class="mono accent-text">target_counts</code> and track <code class="mono accent-text">need = len(target_counts)</code>.</li>
-      <li>Expand <code class="mono accent-text">right</code> pointer and update <code class="mono accent-text">have</code> when a character frequency is met.</li>
-      <li>While <code class="mono accent-text">have == need</code>, record minimum window, then contract from <code class="mono accent-text">left</code>.</li>
-      <li>Return shortest valid slice or empty string.</li>
-    </ol>
+          <p class="mb-3">Sliding window dynamic contraction with count matching:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Build character frequency map of <code class="mono accent-text">t</code> and track <code class="mono accent-text">need = len(target_map)</code>.</li>
+          <li>Expand <code class="mono accent-text">right</code> pointer to include characters until all criteria are satisfied (<code class="mono accent-text">have == need</code>).</li>
+          <li>Contract <code class="mono accent-text">left</code> pointer to find minimal valid length while maintaining validity.</li>
+          <li>Update smallest window coordinates whenever a shorter valid window is found.</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -256,26 +257,26 @@
 
         target_counts = <span class="fn">Counter</span>(t)
         window_counts = {}
+
         have, need = <span class="num">0</span>, <span class="fn">len</span>(target_counts)
         res, res_len = [-<span class="num">1</span>, -<span class="num">1</span>], <span class="fn">float</span>(<span class="str">"inf"</span>)
-        l = <span class="num">0</span>
+        left = <span class="num">0</span>
 
-        <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(s)):
-            c = s[r]
-            window_counts[c] = window_counts.get(c, <span class="num">0</span>) + <span class="num">1</span>
+        <span class="kw">for</span> right, char <span class="kw">in</span> <span class="fn">enumerate</span>(s):
+            window_counts[char] = window_counts.get(char, <span class="num">0</span>) + <span class="num">1</span>
 
-            <span class="kw">if</span> c <span class="kw">in</span> target_counts <span class="kw">and</span> window_counts[c] == target_counts[c]:
+            <span class="kw">if</span> char <span class="kw">in</span> target_counts <span class="kw">and</span> window_counts[char] == target_counts[char]:
                 have += <span class="num">1</span>
 
             <span class="kw">while</span> have == need:
-                <span class="kw">if</span> (r - l + <span class="num">1</span>) &lt; res_len:
-                    res = [l, r]
-                    res_len = r - l + <span class="num">1</span>
+                <span class="kw">if</span> (right - left + <span class="num">1</span>) &lt; res_len:
+                    res = [left, right]
+                    res_len = right - left + <span class="num">1</span>
 
-                window_counts[s[l]] -= <span class="num">1</span>
-                <span class="kw">if</span> s[l] <span class="kw">in</span> target_counts <span class="kw">and</span> window_counts[s[l]] &lt; target_counts[s[l]]:
+                window_counts[s[left]] -= <span class="num">1</span>
+                <span class="kw">if</span> s[left] <span class="kw">in</span> target_counts <span class="kw">and</span> window_counts[s[left]] &lt; target_counts[s[left]]:
                     have -= <span class="num">1</span>
-                l += <span class="num">1</span>
+                left += <span class="num">1</span>
 
         l, r = res
         <span class="kw">return</span> s[l:r + <span class="num">1</span>] <span class="kw">if</span> res_len != <span class="fn">float</span>(<span class="str">"inf"</span>) <span class="kw">else</span> <span class="str">""</span></pre>
@@ -287,12 +288,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(m + n)</p>
-              <p class="text-xs text-soft mt-1">Right pointer visits each character once; left pointer advances at most m times.</p>
+              <p class="text-xs text-soft mt-1">Both pointers left and right scan string s at most once, and t is counted in O(n).</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(m + n)</p>
-              <p class="text-xs text-soft mt-1">Hash maps for character frequency requirements of t and active window characters of s.</p>
+              <p class="text-xs text-soft mt-1">Hash maps store frequency counts of unique characters in t and current window of s.</p>
             </div>
           </div>
         </div>
@@ -610,7 +611,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from collections import Counter\n\nclass Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        if not t or not s:\n            return \"\"\n\n        target_counts = Counter(t)\n        window_counts = {}\n        have, need = 0, len(target_counts)\n        res, res_len = [-1, -1], float(\"inf\")\n        l = 0\n\n        for r in range(len(s)):\n            c = s[r]\n            window_counts[c] = window_counts.get(c, 0) + 1\n\n            if c in target_counts and window_counts[c] == target_counts[c]:\n                have += 1\n\n            while have == need:\n                if (r - l + 1) < res_len:\n                    res = [l, r]\n                    res_len = r - l + 1\n\n                window_counts[s[l]] -= 1\n                if s[l] in target_counts and window_counts[s[l]] < target_counts[s[l]]:\n                    have -= 1\n                l += 1\n\n        l, r = res\n        return s[l:r + 1] if res_len != float(\"inf\") else \"\"");
+      await navigator.clipboard.writeText("from collections import Counter\n\nclass Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        if not t or not s:\n            return \"\"\n\n        target_counts = Counter(t)\n        window_counts = {}\n\n        have, need = 0, len(target_counts)\n        res, res_len = [-1, -1], float(\"inf\")\n        left = 0\n\n        for right, char in enumerate(s):\n            window_counts[char] = window_counts.get(char, 0) + 1\n\n            if char in target_counts and window_counts[char] == target_counts[char]:\n                have += 1\n\n            while have == need:\n                if (right - left + 1) < res_len:\n                    res = [left, right]\n                    res_len = right - left + 1\n\n                window_counts[s[left]] -= 1\n                if s[left] in target_counts and window_counts[s[left]] < target_counts[s[left]]:\n                    have -= 1\n                left += 1\n\n        l, r = res\n        return s[l:r + 1] if res_len != float(\"inf\") else \"\"");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };

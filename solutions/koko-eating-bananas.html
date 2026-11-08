@@ -56,6 +56,7 @@
     transition: all .2s cubic-bezier(.4,0,.2,1);
   }
   .cell .idx { position: absolute; bottom: -20px; font-size: 10px; color: var(--ink-soft); font-weight: 500; }
+  .cell .ptr { position: absolute; top: -20px; font-size: 11px; color: var(--accent); font-weight: 700; }
   .cell.scan { border-color: #ffffff; background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); box-shadow: 0 4px 14px -3px rgba(255, 255, 255, 0.25); }
   .cell.hit { border-color: var(--trace-hit); background: var(--good-soft); transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 18px -4px var(--trace-hit); }
   .cell.done { opacity: .4; }
@@ -235,13 +236,13 @@
         </div>
 
         <div id="tab-approach" class="p-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-          <p class="mb-3">Binary search the optimal eating speed <code class="mono accent-text">k</code>:</p>
-    <ol class="list-decimal list-inside space-y-2 text-soft">
-      <li>Set search boundaries <code class="mono accent-text">low = 1</code> and <code class="mono accent-text">high = max(piles)</code>.</li>
-      <li>At each midpoint speed <code class="mono accent-text">k</code>, calculate total hours: <code class="mono accent-text">sum(ceil(p / k))</code>.</li>
-      <li>If hours <code class="mono accent-text"><= h</code>, this speed works — record <code class="mono accent-text">k</code> and try a slower speed (<code class="mono accent-text">high = k - 1</code>).</li>
-      <li>Otherwise speed is too slow; increase speed (<code class="mono accent-text">low = k + 1</code>).</li>
-    </ol>
+          <p class="mb-3">Binary search the optimal speed <code class="mono">k</code> over monotonic answer space:</p>
+        <ol class="list-decimal list-inside space-y-2 text-soft">
+          <li>Set search range: <code class="mono accent-text">low = 1</code>, <code class="mono accent-text">high = max(piles)</code>.</li>
+          <li>At speed <code class="mono accent-text">k = (low + high) // 2</code>, compute total hours needed: <code class="mono accent-text">sum(ceil(p / k))</code>.</li>
+          <li>If hours <code class="mono accent-text"><= h</code>, speed works; try smaller speed (<code class="mono accent-text">high = k - 1</code>).</li>
+          <li>Otherwise speed is too slow; increase speed (<code class="mono accent-text">low = k + 1</code>).</li>
+        </ol>
         </div>
 
         <div id="tab-code" class="hidden p-6">
@@ -253,19 +254,19 @@
 <span class="kw">class</span> Solution:
     <span class="kw">def</span> <span class="fn">minEatingSpeed</span>(<span class="kw">self</span>, piles: List[int], h: int) -&gt; int:
         low, high = <span class="num">1</span>, <span class="fn">max</span>(piles)
-        res = high
+        ans = high
 
         <span class="kw">while</span> low &lt;= high:
             k = (low + high) // <span class="num">2</span>
             hours = <span class="fn">sum</span>(math.ceil(p / k) <span class="kw">for</span> p <span class="kw">in</span> piles)
 
             <span class="kw">if</span> hours &lt;= h:
-                res = k
+                ans = k
                 high = k - <span class="num">1</span>
             <span class="kw">else</span>:
                 low = k + <span class="num">1</span>
 
-        <span class="kw">return</span> res</pre>
+        <span class="kw">return</span> ans</pre>
           </div>
         </div>
 
@@ -274,12 +275,12 @@
             <div class="rounded-xl p-4 border border-emerald-500/20" style="background:var(--good-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--good)">Time</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--good)">O(n log(max(piles)))</p>
-              <p class="text-xs text-soft mt-1">Binary search on speed k takes log(max(piles)) steps, each testing n piles.</p>
+              <p class="text-xs text-soft mt-1">Binary search over speed range [1..max(piles)] takes log(max(piles)) steps, each testing n piles.</p>
             </div>
             <div class="rounded-xl p-4 border border-amber-500/20" style="background:var(--warn-soft)">
               <p class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--warn)">Space</p>
               <p class="text-2xl font-extrabold mono" style="color:var(--warn)">O(1)</p>
-              <p class="text-xs text-soft mt-1">Only tracking boundaries low, high, and candidate speed k.</p>
+              <p class="text-xs text-soft mt-1">Only tracks boundaries low, high, and candidate speed k.</p>
             </div>
           </div>
         </div>
@@ -602,7 +603,7 @@
     };
 
     document.getElementById('btn-copy-code').onclick = async (e) => {
-      await navigator.clipboard.writeText("from typing import List\nimport math\n\nclass Solution:\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\n        low, high = 1, max(piles)\n        res = high\n\n        while low <= high:\n            k = (low + high) // 2\n            hours = sum(math.ceil(p / k) for p in piles)\n\n            if hours <= h:\n                res = k\n                high = k - 1\n            else:\n                low = k + 1\n\n        return res");
+      await navigator.clipboard.writeText("from typing import List\nimport math\n\nclass Solution:\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\n        low, high = 1, max(piles)\n        ans = high\n\n        while low <= high:\n            k = (low + high) // 2\n            hours = sum(math.ceil(p / k) for p in piles)\n\n            if hours <= h:\n                ans = k\n                high = k - 1\n            else:\n                low = k + 1\n\n        return ans");
       const btn = e.currentTarget; const orig = btn.textContent;
       btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 2000);
     };
