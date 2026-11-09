@@ -545,13 +545,13 @@
 
       await supabaseClient.from('user_stats').upsert({
         user_id: currentUserId, xp, current_streak: newStreak, longest_streak: longestStreak,
-        last_active_date: todayStr, updated_at: new Date().toISOString()
+        last_active_date: todayStr, last_solved_date: todayStr, updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
 
       try {
         localStorage.setItem('algohub_xp', String(xp));
         localStorage.setItem('algohub_user_stats', JSON.stringify({
-          xp, current_streak: newStreak, longest_streak: longestStreak, last_active_date: todayStr
+          xp, current_streak: newStreak, longest_streak: longestStreak, last_active_date: todayStr, last_solved_date: todayStr
         }));
       } catch (e) {}
     }

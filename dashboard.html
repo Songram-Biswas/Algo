@@ -1133,10 +1133,47 @@
         const avatar = document.getElementById('user-avatar');
         if (avatar && session.user.user_metadata.avatar_url) avatar.src = session.user.user_metadata.avatar_url;
         
+        // Sync user timezone to Supabase profile for timezone-aware streak reminders
+        syncUserTimezone(session.user);
+
         // Initialize features
         await initializePOD();
         await fetchUserStats(session.user.id);
         await fetchCloudData(session.user.id);
+    }
+
+    async function syncUserTimezone(user) {
+        try {
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (!timeZone || !user) return;
+
+            const cachedTz = localStorage.getItem('algohub_user_timezone');
+            if (cachedTz === timeZone) return;
+
+            // 1. Update user metadata in Supabase Auth so it is present in listAllUsers()
+            if (user.user_metadata?.timezone !== timeZone) {
+                await supabaseClient.auth.updateUser({
+                    data: { timezone: timeZone }
+                }).catch(() => {});
+            }
+
+            // 2. Upsert/update user_stats and profiles tables so REST queries have it
+            await supabaseClient.from('user_stats').upsert({
+                user_id: user.id,
+                timezone: timeZone,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' }).catch(() => {});
+
+            await supabaseClient.from('profiles').upsert({
+                id: user.id,
+                timezone: timeZone,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'id' }).catch(() => {});
+
+            localStorage.setItem('algohub_user_timezone', timeZone);
+        } catch (err) {
+            console.warn('[timezone] Failed to sync timezone:', err);
+        }
     }
 
     async function fetchUserStats(userId) {
